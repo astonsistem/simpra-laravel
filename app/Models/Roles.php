@@ -6,5 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Roles extends Model
 {
-    //
+    protected $table = "roles";
+
+    protected $fillable = [
+        'id',
+        'role_nama',
+        'ket'
+    ];
 }

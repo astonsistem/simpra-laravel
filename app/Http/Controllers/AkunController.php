@@ -2,133 +2,303 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AkunRequest;
+use App\Http\Resources\AkunCollection;
+use App\Http\Resources\AkunResource;
 use App\Models\Akun;
+use App\Models\MasterRekeningView;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class AkunController extends Controller
 {
 
     public function index(Request $request)
     {
-        $perPage = $request->input('per_page', 1000);
-        return Akun::orderBy('akun_kode')->paginate($perPage);
+        try {
+            $request->validate([
+                'page' => 'nullable|integer|min:1',
+                'size' => 'nullable|integer|min:1',
+            ]);
+
+            $page = $request->input('page', 1);
+            $size = $request->input('size', 10);
+
+            $query = Akun::query();
+
+            $totalItems = $query->count();
+            $items = $query->skip(($page - 1) * $size)->take($size)->get();
+
+            $totalPages = ceil($totalItems / $size);
+
+            return response()->json(
+                new AkunCollection($items, $totalItems, $page, $size, $totalPages)
+            );
+        } catch (ValidationException $e) {
+            $errors = [];
+            foreach ($e->errors() as $field => $messages) {
+                foreach ($messages as $message) {
+                    $errors[] = [
+                        'loc' => ['query', $field],
+                        'msg' => $message,
+                        'type' => 'validation',
+                    ];
+                }
+            }
+            return response()->json([
+                'detail' => $errors
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan pada server.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function show(string $id)
     {
-        $akun = Akun::find($id);
+        try {
+            if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $id)) {
+                return response()->json([
+                    'detail' => [
+                        [
+                            'loc' => ['path', 'id'],
+                            'msg' => 'ID must be a valid UUID format.',
+                            'type' => 'validation'
+                        ]
+                    ]
+                ], 422);
+            }
 
+            $akun = Akun::where('id', $id)->first();
+
+            if (!$akun) {
+                return response()->json([
+                    'message' => 'Akun not found.'
+                ], 404);
+            }
+            return response()->json(
+                new AkunResource($akun)
+            );
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan pada server.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function store(AkunRequest $request)
+    {
+        $data = $request->validated();
+
+        $akun = Akun::create([
+            ...$data,
+        ]);
+        return response()->json([
+            'status' => 200,
+            'message' => 'Data berhasil ditambahkan',
+            'data' => $akun,
+        ], 200);
+    }
+
+    public function update(AkunRequest $request, $id)
+    {
+        try {
+            $data = $request->validated();
+
+            $akun = Akun::findOrFail($id);
+            $akun->update($data);
+
+            return response()->json([
+                new AkunResource($akun)
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => 500,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+                'data'    => null
+            ], 500);
+        }
+    }
+
+    public function destroy($id)
+    {
+        $akun = Akun::find($id);
         if (!$akun) {
             return response()->json([
-                'message' => 'Akun not found'
-            ], 404);
+                'detail' => [[
+                    'loc' => ['id', 0],
+                    'msg' => 'Akun tidak ditemukan',
+                    'type' => 'not_found'
+                ]]
+            ], 422);
         }
 
-        return response()->json([
-            'message' => 'success',
-            'data' => $akun
-        ]);
-    }
-
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'akun_id' => 'required|integer|unique:master_akun',
-            'akun_kode' => 'required|string|unique:master_akun',
-            'akun_nama' => 'required|string',
-            'rek_id' => 'nullable|string',
-            'rek_nama' => 'nullable|string',
-            'akun_kelompok' => 'nullable|string',
-        ]);
-
-        $akun = Akun::create($validated);
-        return response()->json($akun, 201);
-    }
-
-    public function update(Request $request, $id)
-    {
-        $akun = Akun::findOrFail($id);
-
-        $validated = $request->validate([
-            'akun_id' => 'integer|unique:master_akun,akun_id,' . $id . ',id',
-            'akun_kode' => 'string|unique:master_akun,akun_kode,' . $id . ',id',
-            'akun_nama' => 'string',
-            'rek_id' => 'nullable|string',
-            'rek_nama' => 'nullable|string',
-            'akun_kelompok' => 'nullable|string',
-        ]);
-
-        $akun->update($validated);
-        return response()->json($akun);
-    }
-
-    public function destroy(string $id)
-    {
-        $akun = Akun::findOrFail($id);
         $akun->delete();
 
-        return response()->json(['message' => 'Akun deleted successfully']);
+        return response()->json([
+            'status'  => 200,
+            'message' => 'Akun berhasil dihapus',
+            'data'    => $akun->id
+        ], 200);
     }
 
     public function list(Request $request)
     {
-        $akunKode = $request->input('akun_kode');
-        $akunKodePrefix = '4';
-        $limit = 1000;
+        try {
+            $request->validate([
+                'akun_kode' => 'nullable|string',
+            ]);
 
-        $query = Akun::select('akun_id', 'akun_nama')
-            ->where('rek_id', 'like', "$akunKodePrefix%")
-            ->orderBy('akun_id');
+            $akunKode = $request->input('akun_kode');
+            $prefix = "4";
 
-        if ($akunKode) {
-            $query->where('akun_kode', 'like', "%$akunKode%");
+            $query = Akun::query();
+
+            if (!empty($akunKode)) {
+                $query->where('akun_kode', 'ILIKE', "$akunKode%");
+            }
+            $akuns = $query->select('akun_id', 'akun_nama')
+                ->where('rek_id', 'LIKE', "$prefix%")
+                ->whereNotNull('rek_id')
+                ->orderBy('akun_id')
+                ->get();
+
+            $data = $akuns->map(function ($akun) {
+                return [
+                    'akun_id' => $akun->akun_id,
+                    'akun_nama' => $akun->akun_nama,
+                ];
+            })->toArray();
+
+            return response()->json([
+                'status' => "200",
+                'message' => "success",
+                'data' => $data
+            ], 200);
+        } catch (ValidationException $e) {
+            $errors = [];
+            foreach ($e->errors() as $field => $messages) {
+                foreach ($messages as $message) {
+                    $errors[] = [
+                        'loc' => ['query', $field],
+                        'msg' => $message,
+                        'type' => 'validation',
+                    ];
+                }
+            }
+            return response()->json([
+                'detail' => $errors
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan pada server.',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $data = $query->limit($limit)->get();
-
-        return response()->json([
-            'message' => 'success',
-            'data' => $data,
-        ]);
     }
 
     public function listAkunPotensiLain(Request $request)
     {
-        $akunKode = $request->input('akun_kode');
-        $akunKodePrefix = '';
-        $limit = 1000;
+        try {
+            $request->validate([
+                'akun_kode' => 'nullable|string',
+            ]);
 
-        $query = Akun::select('akun_id', 'akun_nama')
-            ->where('rek_id', 'like', "$akunKodePrefix%")
-            ->orderBy('id');
+            $akunKode = $request->input('akun_kode');
+            $prefix = "102";
+            $limit = 1000;
 
-        if ($akunKode) {
-            $query->where('akun_kode', 'like', "%$akunKode%");
+            $query = Akun::query();
+
+            if (!empty($akunKode)) {
+                $query->where('akun_kode', 'ILIKE', "$akunKode%");
+            }
+            $akuns = $query->select('akun_id', 'akun_nama')
+                ->where('akun_kode', 'LIKE', "$prefix%")
+                ->whereNotNull('rek_id')
+                ->orderBy('id')
+                ->limit($limit)
+                ->get();
+
+            $data = $akuns->map(function ($akun) {
+                return [
+                    'akun_id' => $akun->akun_id,
+                    'akun_nama' => $akun->akun_nama,
+                ];
+            })->toArray();
+
+            return response()->json([
+                'status' => "200",
+                'message' => "success",
+                'data' => $data
+            ], 200);
+        } catch (ValidationException $e) {
+            $errors = [];
+            foreach ($e->errors() as $field => $messages) {
+                foreach ($messages as $message) {
+                    $errors[] = [
+                        'loc' => ['query', $field],
+                        'msg' => $message,
+                        'type' => 'validation',
+                    ];
+                }
+            }
+            return response()->json([
+                'detail' => $errors
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan pada server.',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $data = $query->limit($limit)->get();
-
-        return response()->json([
-            'message' => 'success',
-            'data' => $data,
-        ]);
     }
 
     public function listPendapatan(Request $request)
     {
-        $akunKode = $request->input('akun_kode');
-        $akunKodePrefix = '102';
-        $limit = 1000;
+        try {
+            $request->validate([
+                'akun_kode' => 'nullable|string',
+            ]);
 
-        $query = Akun::select('akun_id', 'akun_nama')
-            ->where('rek_id', 'like', "$akunKodePrefix%")
-            ->orderBy('akun_id');
+            $akunKode = $request->input('akun_kode');
 
-        $data = $query->limit($limit)->get();
+            $akuns = MasterRekeningView::all();
 
-        return response()->json([
-            'message' => 'success',
-            'data' => $data,
-        ]);
+            $data = $akuns->map(function ($rek) {
+                return [
+                    'rek_id' => $rek->rek_id,
+                    'rek_nama' => $rek->rek_nama,
+                ];
+            })->toArray();
+
+            return response()->json([
+                'status' => "200",
+                'message' => "success",
+                'data' => $data
+            ], 200);
+        } catch (ValidationException $e) {
+            $errors = [];
+            foreach ($e->errors() as $field => $messages) {
+                foreach ($messages as $message) {
+                    $errors[] = [
+                        'loc' => ['query', $field],
+                        'msg' => $message,
+                        'type' => 'validation',
+                    ];
+                }
+            }
+            return response()->json([
+                'detail' => $errors
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan pada server.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

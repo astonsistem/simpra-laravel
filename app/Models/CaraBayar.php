@@ -7,10 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 class CaraBayar extends Model
 {
     protected $table = "master_carabayar";
+    protected $keyType = 'string';
+    public $incrementing = false;
 
     protected $fillable = [
         'id',
         'carabayar_id',
         'carabayar_nama'
+    ];
+
+    protected $casts = [
+        'id' => 'string',
     ];
 }

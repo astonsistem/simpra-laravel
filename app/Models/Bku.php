@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Bku extends Model
 {
     protected $table = "data_bku";
+    protected $primaryKey = "bku_id";
 
     protected $fillable = [
         'bku_id',

@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\DB;
 class SyncPendapatanPelayanan extends Model
 {
     protected $table = "data_pendapatan_pelayanan";
+    protected $keyType = 'string';
+    public $incrementing = false;
 
     protected $fillable = [
         'id',
@@ -48,6 +50,10 @@ class SyncPendapatanPelayanan extends Model
         'pasien_nama',
         'sync_at ',
         'is_web_change ',
+    ];
+
+    protected $casts = [
+        'id' => 'string',
     ];
 
     public static function getCountPasienThisYear(): int

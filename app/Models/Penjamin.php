@@ -7,11 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 class Penjamin extends Model
 {
     protected $table = "master_penjamin";
+    protected $keyType = 'string';
+    public $incrementing = false;
 
     protected $fillable = [
         'id',
         'penjamin_id',
         'penjamin_nama',
         'carabayar_id'
+    ];
+
+    protected $casts = [
+        'id' => 'string',
     ];
 }

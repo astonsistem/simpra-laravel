@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class Status extends Model
 {
     protected $table = "master_status";
+    protected $keyType = 'string';
+    public $incrementing = false;
 
     protected $fillable = [
         'id',
@@ -14,5 +16,9 @@ class Status extends Model
         'status_nama',
         'status_ket',
         'status_app',
+    ];
+
+    protected $casts = [
+        'id' => 'string',
     ];
 }
