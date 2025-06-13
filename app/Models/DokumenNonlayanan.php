@@ -4,11 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class PotensiLain extends Model
+class DokumenNonlayanan extends Model
 {
     protected $table = "dokumen_nonlayanan";
-    protected $keyType = 'string';
-    public $incrementing = false;
 
     protected $fillable = [
         'id',
@@ -32,9 +30,5 @@ class PotensiLain extends Model
         'pembayaran_piutang',
         'monev_id',
         'is_web_change',
-    ];
-
-    protected $casts = [
-        'id' => 'string',
     ];
 }

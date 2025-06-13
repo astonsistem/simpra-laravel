@@ -5,25 +5,27 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-class Akun extends Model
+class MasterSinkronisasi extends Model
 {
-    protected $table = "master_akun";
+    protected $table = "master_sinkronisasi";
     protected $keyType = 'string';
+    public $timestamps = false;
     public $incrementing = false;
 
     protected $fillable = [
         'id',
-        'akun_id',
-        'akun_kode',
-        'akun_nama',
-        'rek_id',
-        'rek_nama',
-        'akun_kelompok',
-        'created_at'
+        'sinkronisasi_id',
+        'sinkronisasi_nama',
+        'sinkronisasi_menu',
+        'sinkronisasi_api',
+        'sinkronisasi_groupuser',
+        'sinkronisasi_status',
+        'sinkronisasi_param'
     ];
 
     protected $casts = [
         'id' => 'string',
+        'sinkronisasi_param' => 'array',
     ];
 
     protected static function boot()

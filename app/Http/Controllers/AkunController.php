@@ -5,10 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AkunRequest;
 use App\Http\Resources\AkunCollection;
 use App\Http\Resources\AkunResource;
-use App\Models\Akun;
+use App\Models\MasterAkun;
 use App\Models\MasterRekeningView;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Str;
 
 class AkunController extends Controller
 {
@@ -24,7 +25,7 @@ class AkunController extends Controller
             $page = $request->input('page', 1);
             $size = $request->input('size', 10);
 
-            $query = Akun::query();
+            $query = MasterAkun::query();
 
             $totalItems = $query->count();
             $items = $query->skip(($page - 1) * $size)->take($size)->get();
@@ -71,11 +72,11 @@ class AkunController extends Controller
                 ], 422);
             }
 
-            $akun = Akun::where('id', $id)->first();
+            $akun = MasterAkun::where('id', $id)->first();
 
             if (!$akun) {
                 return response()->json([
-                    'message' => 'Akun not found.'
+                    'message' => 'Not found.'
                 ], 404);
             }
             return response()->json(
@@ -93,7 +94,8 @@ class AkunController extends Controller
     {
         $data = $request->validated();
 
-        $akun = Akun::create([
+        $akun = MasterAkun::create([
+            'id' => Str::uuid()->toString(),
             ...$data,
         ]);
         return response()->json([
@@ -108,12 +110,15 @@ class AkunController extends Controller
         try {
             $data = $request->validated();
 
-            $akun = Akun::findOrFail($id);
+            $akun = MasterAkun::findOrFail($id);
+            if (!$akun) {
+                return response()->json([
+                    'message' => 'Not found'
+                ], 404);
+            }
             $akun->update($data);
 
-            return response()->json([
-                new AkunResource($akun)
-            ], 200);
+            return response()->json(new AkunResource($akun), 200);
         } catch (\Exception $e) {
             return response()->json([
                 'status'  => 500,
@@ -125,24 +130,39 @@ class AkunController extends Controller
 
     public function destroy($id)
     {
-        $akun = Akun::find($id);
-        if (!$akun) {
+        try {
+            if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $id)) {
+                return response()->json([
+                    'detail' => [
+                        [
+                            'loc' => ['path', 'id'],
+                            'msg' => 'ID must be a valid UUID format.',
+                            'type' => 'validation'
+                        ]
+                    ]
+                ], 422);
+            }
+
+            $akun = MasterAkun::find($id);
+
+            if (!$akun) {
+                return response()->json([
+                    'message' => 'Not found'
+                ], 404);
+            }
+
+            $akun->delete();
+
             return response()->json([
-                'detail' => [[
-                    'loc' => ['id', 0],
-                    'msg' => 'Akun tidak ditemukan',
-                    'type' => 'not_found'
-                ]]
-            ], 422);
+                'status'  => 200,
+                'message' => 'Akun berhasil dihapus'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan pada server.',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $akun->delete();
-
-        return response()->json([
-            'status'  => 200,
-            'message' => 'Akun berhasil dihapus',
-            'data'    => $akun->id
-        ], 200);
     }
 
     public function list(Request $request)
@@ -155,7 +175,7 @@ class AkunController extends Controller
             $akunKode = $request->input('akun_kode');
             $prefix = "4";
 
-            $query = Akun::query();
+            $query = MasterAkun::query();
 
             if (!empty($akunKode)) {
                 $query->where('akun_kode', 'ILIKE', "$akunKode%");
@@ -211,7 +231,7 @@ class AkunController extends Controller
             $prefix = "102";
             $limit = 1000;
 
-            $query = Akun::query();
+            $query = MasterAkun::query();
 
             if (!empty($akunKode)) {
                 $query->where('akun_kode', 'ILIKE', "$akunKode%");

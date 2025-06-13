@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class DataClosing extends Model
 {
     protected $table = 'data_closing';
+    protected $primaryKey = "closing_id";
 
     protected $fillable = [
         'closing_id',

@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class AkunRequest extends FormRequest
+class LoginUserRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -16,25 +16,16 @@ class AkunRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'akun_id' => 'required|string',
-            'akun_kode' => 'required|string',
-            'akun_nama' => 'required|string',
-            'rek_id' => 'nullable|string',
-            'rek_nama' => 'nullable|string',
-            'akun_kelompok' => 'nullable|string',
-            'created_at' => 'nullable|date',
+            'username' => 'required|string',
+            'password' => 'required|string',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'akun_id.required'       => 'akun_id harus diisi.',
-            'akun_kode.required'     => 'akun_kode harus diisi.',
-            'akun_nama.required'     => 'akun_nama harus diisi.',
-            'rek_id.required'        => 'rek_id harus diisi.',
-            'rek_nama.required'      => 'rek_nama harus diisi.',
-            'akun_kelompok.required' => 'akun_kelompok harus diisi.',
+            'username.required' => 'Username is required.',
+            'password.required' => 'Password is required.',
         ];
     }
 

@@ -7,6 +7,7 @@ use App\Http\Controllers\AkunController;
 use App\Http\Controllers\BillingKasirController;
 use App\Http\Controllers\BillingSwaController;
 use App\Http\Controllers\BkuController;
+use App\Http\Controllers\BuktiSetorController;
 use App\Http\Controllers\CaraBayarController;
 use App\Http\Controllers\DataClosingController;
 use App\Http\Controllers\InstalasiController;
@@ -22,28 +23,35 @@ use App\Http\Controllers\RekapController;
 use App\Http\Controllers\RekeningKoranController;
 use App\Http\Controllers\SinkronisasiController;
 use App\Http\Controllers\StatistikController;
+use App\Http\Controllers\SyncApiController;
 use App\Http\Controllers\TempPenerimaanSwaController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::group([
+Route::post('auth/login_token', [AuthController::class, 'login']);
+Route::post('auth/logintoken', [AuthController::class, 'loginToken']);
+Route::middleware([
     'middleware' => 'api',
     'prefix' => 'auth'
-], function ($router) {
-    Route::post('/auth/register', [AuthController::class, 'register'])->name('register');
-    Route::post('/auth/login', [AuthController::class, 'login'])->name('login');
-    Route::post('/auth/logout', [AuthController::class, 'logout'])->middleware('auth:api')->name('logout');
-    Route::post('/auth/refresh', [AuthController::class, 'refresh'])->middleware('auth:api')->name('refresh');
-    Route::post('auth/me', [AuthController::class, 'me'])->middleware('auth:api')->name('me');
+])->group(function () {
+    Route::get('auth/user/me', [AuthController::class, 'me']);
+    Route::get('auth/users', [AuthController::class, 'list']);
+    Route::get('auth/adminonly', [AuthController::class, 'adminonly']);
+    Route::get('auth/users/{id}', [AuthController::class, 'show']);
+    Route::post('auth/user', [AuthController::class, 'register']);
+    Route::post('auth/logout', [AuthController::class, 'logout']);
+    Route::post('auth/refresh', [AuthController::class, 'refresh']);
+    Route::put('auth/user/{id}', [AuthController::class, 'update']);
+    Route::delete('auth/user/{id}', [AuthController::class, 'destroy']);
 });
 
 Route::get('akun', [AkunController::class, 'index']);
-Route::get('akun/{id}', [AkunController::class, 'show']);
 Route::get('akun/list', [AkunController::class, 'list']);
 Route::get('akun/list/akunpotensilain', [AkunController::class, 'listAkunPotensiLain']);
 Route::get('akun/list/pendapatan', [AkunController::class, 'listPendapatan']);
+Route::get('akun/{id}', [AkunController::class, 'show']);
 Route::post('akun', [AkunController::class, 'store']);
 Route::put('akun/{id}', [AkunController::class, 'update']);
 Route::delete('akun/{id}', [AkunController::class, 'destroy']);
@@ -67,12 +75,12 @@ Route::get('loket', [LoketController::class, 'index']);
 Route::get('loket/list', [LoketController::class, 'list']);
 Route::get('loket/sync', [LoketController::class, 'sync']);
 
-Route::get('syncapi', [RekapController::class, 'pasien_bpjs']);
-Route::get('syncapi/..', [RekapController::class, 'pasien_bpjs']);
-Route::get('syncapi/list/..', [RekapController::class, 'pasien_bpjs']);
-Route::get('syncapi/menu', [RekapController::class, 'pasien_bpjs']);
-Route::post('syncapi', [RekapController::class, 'pasien_bpjs']);
-Route::put('syncapi', [RekapController::class, 'pasien_bpjs']);
+Route::get('syncapi', [SyncApiController::class, 'index']);
+Route::get('syncapi/menu', [SyncApiController::class, 'menu']);
+Route::get('syncapi/list/{id}', [SyncApiController::class, 'list']);
+Route::get('syncapi/{id}', [SyncApiController::class, 'show']);
+Route::post('syncapi', [SyncApiController::class, 'store']);
+Route::put('syncapi/{id}', [SyncApiController::class, 'update']);
 
 Route::post('sinkronisasi/request', [SinkronisasiController::class, 'pasien_bpjs']);
 Route::post('sinkronisasi/request/kasir', [SinkronisasiController::class, 'pasien_bpjs']);
@@ -81,50 +89,68 @@ Route::post('sinkronisasi/request/rincianpendapatan', [SinkronisasiController::c
 Route::post('sinkronisasi/save', [SinkronisasiController::class, 'pasien_bpjs']);
 
 Route::get('pendapatan_pelayanan', [PendapatanPelayananController::class, 'index']);
-Route::get('pendapatan_pelayanan/{id}', [PendapatanPelayananController::class, 'show']);
-Route::get('pendapatan_pelayanan/statisik', [PendapatanPelayananController::class, 'statistik']);
+Route::get('pendapatan_pelayanan/statistik', [PendapatanPelayananController::class, 'statistik']);
+Route::get('pendapatan_pselayanan/{id}', [PendapatanPelayananController::class, 'show']);
 
 Route::get('billing_kasir', [BillingKasirController::class, 'index']);
-Route::get('billing_kasir', [BillingKasirController::class, 'index']);
-Route::get('billing_kasir', [BillingKasirController::class, 'index']);
-Route::get('billing_kasir', [BillingKasirController::class, 'index']);
-Route::get('billing_kasir', [BillingKasirController::class, 'index']);
-Route::get('billing_kasir', [BillingKasirController::class, 'index']);
-Route::get('billing_kasir', [BillingKasirController::class, 'index']);
-Route::get('billing_kasir', [BillingKasirController::class, 'index']);
-Route::get('billing_kasir', [BillingKasirController::class, 'index']);
-Route::get('billing_kasir', [BillingKasirController::class, 'index']);
+Route::get('billing_kasir/statistik', [BillingKasirController::class, 'statistik']);
+Route::get('billing_kasir/validasi/{id}', [BillingKasirController::class, 'index']);
+Route::get('billing_kasir/validasi/filter/{id}', [BillingKasirController::class, 'index']);
+Route::get('billing_kasir/validasi/filteruraian/{id}', [BillingKasirController::class, 'index']);
+Route::get('billing_kasir/validasi/filterjumlah/{id}', [BillingKasirController::class, 'index']);
+Route::get('billing_kasir/{id}', [BillingKasirController::class, 'show']);
+Route::put('billing_kasir/{id}', [BillingKasirController::class, 'index']);
+Route::put('billing_kasir/validasi/penerimaan_layanan', [BillingKasirController::class, 'index']);
+Route::put('billing_kasir/cancel_validasi/penerimaan_layanan', [BillingKasirController::class, 'index']);
+Route::delete('billing_kasir/{id}', [BillingKasirController::class, 'destroy']);
 
-Route::get('billing_swa', [BillingSwaController::class, 'pasien_bpjs']);
+Route::get('billing_swa', [BillingSwaController::class, 'index']);
+Route::get('billing_swa/statistik', [BillingSwaController::class, 'statistik']);
+Route::get('billing_swa/validasi/{id}', [BillingSwaController::class, 'statistik']);
+Route::get('billing_swa/validasi/filter/{id}', [BillingSwaController::class, 'statistik']);
+Route::get('billing_swa/validasi/filteruraian/{id}', [BillingSwaController::class, 'statistik']);
+Route::get('billing_swa/validasi/filterjumlah/{id}', [BillingSwaController::class, 'statistik']);
+Route::get('billing_swa/{id}', [BillingSwaController::class, 'show']);
+Route::put('billing_swa/{id}', [BillingSwaController::class, 'show']);
+Route::put('billing_swa/validasi/penerimaan_lain', [BillingSwaController::class, 'show']);
+Route::put('billing_swa/cancel_validasi/penerimaan_lain', [BillingSwaController::class, 'show']);
+Route::delete('billing_swa/{id}', [BillingSwaController::class, 'destroy']);
 
-Route::get('potensi_pelayanan', [PotensiPelayananController::class, 'pasien_bpjs']);
+Route::get('potensi_pelayanan', [PotensiPelayananController::class, 'index']);
 
-Route::get('penerimaan_lain', [PenerimaanLainController::class, 'pasien_bpjs']);
+Route::get('penerimaan_lain', [PenerimaanLainController::class, 'index']);
 
-Route::get('potensi_lain', [PotensiLainController::class, 'pasien_bpjs']);
+Route::get('potensi_lain', [PotensiLainController::class, 'index']);
 
-Route::get('data_closing', [DataClosingController::class, 'pasien_bpjs']);
+Route::get('data_closing', [DataClosingController::class, 'index']);
+Route::post('data_closing/list_closing', [DataClosingController::class, 'list']);
+Route::post('data_closing', [DataClosingController::class, 'store']);
+Route::put('data_closing/{id}', [DataClosingController::class, 'update']);
+Route::delete('data_closing/{id}', [DataClosingController::class, 'destroy']);
 
-Route::get('temp_penerimaan_swa', [TempPenerimaanSwaController::class, 'pasien_bpjs']);
+Route::get('temp_penerimaan_swa', [TempPenerimaanSwaController::class, 'index']);
+Route::get('temp_penerimaan_swa/{id}', [TempPenerimaanSwaController::class, 'show']);
 
-Route::get('rekening_koran', [RekeningKoranController::class, 'pasien_bpjs']);
+Route::get('rekening_koran', [RekeningKoranController::class, 'index']);
 
-Route::get('bukti_setor', [BkuController::class, 'pasien_bpjs']);
-Route::get('bukti_setor/statistik', [BkuController::class, 'pasien_bpjs']);
+Route::get('bukti_setor', [BuktiSetorController::class, 'index']);
+Route::get('bukti_setor/statistik', [BuktiSetorController::class, 'statistik']);
 
-Route::get('bku', [BkuController::class, 'pasien_bpjs']);
-Route::get('bku/listbku', [BkuController::class, 'pasien_bpjs']);
-Route::get('bku/bku', [BkuController::class, 'pasien_bpjs']);
-Route::get('bku/statistik', [BkuController::class, 'pasien_bpjs']);
-Route::get('bku/bku_post', [BkuController::class, 'pasien_bpjs']);
-Route::get('bku/bku_put', [BkuController::class, 'pasien_bpjs']);
-Route::get('bku/all_bku', [BkuController::class, 'pasien_bpjs']);
+Route::get('bku', [BkuController::class, 'index']);
+Route::get('bku/listbku', [BkuController::class, 'index']);
+Route::get('bku/bku', [BkuController::class, 'index']);
+Route::get('bku/statistik', [BkuController::class, 'index']);
+Route::get('bku/bku_post', [BkuController::class, 'index']);
+Route::get('bku/bku_put', [BkuController::class, 'index']);
+Route::get('bku/all_bku', [BkuController::class, 'index']);
+Route::delete('bku/{id}', [BkuController::class, 'destroy']);
+Route::delete('bku/rincian/{id}', [BkuController::class, 'destroyRincian']);
 
-Route::get('statistik/dashboard', [StatistikController::class, 'dashboard']);
+Route::get('statistik/dashboard', [StatistikController::class, 'index']);
 
-Route::get('rekap/pasien_rawat_jalan_bpjs', [RekapController::class, 'pasien_rajal_bpjs']);
-Route::get('rekap/pasien_rawat_inap_bpjs', [RekapController::class, 'pasien_ranap_bpjs']);
+Route::get('rekap/pasien_rawat_jalan_bpjs', [RekapController::class, 'pasienRajalBpjs']);
+Route::get('rekap/pasien_rawat_inap_bpjs', [RekapController::class, 'pasienRanapBpjs']);
 
 Route::get('pasienbpjs', [PasienBpjsController::class, 'index']);
-Route::get('pasienbpjs/tarik', [PasienBpjsController::class, 'pasien_ranap_bpjs']);
-Route::get('pasienbpjs/tarik/tarik', [PasienBpjsController::class, 'pasien_ranap_bpjs']);
+Route::get('pasienbpjs/tarik', [PasienBpjsController::class, 'tarik']);
+Route::get('pasienbpjs/tarik/tarik', [PasienBpjsController::class, 'tarik']);

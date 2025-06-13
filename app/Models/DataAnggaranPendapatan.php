@@ -4,18 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Status extends Model
+class DataAnggaranPendapatan extends Model
 {
-    protected $table = "master_status";
+    protected $table = "data_anggaran_pendapatan";
     protected $keyType = 'string';
     public $incrementing = false;
 
     protected $fillable = [
         'id',
-        'status_id',
-        'status_nama',
-        'status_ket',
-        'status_app',
+        'tgl',
+        'tahun',
+        'kategori_utama',
+        'kategori_id',
+        'rek_nama',
+        'rek_id',
+        'jumlah'
     ];
 
     protected $casts = [

@@ -119,6 +119,20 @@ class PendapatanPelayananController extends Controller
 
     public function statistik()
     {
-        // Keri
+        // sum_pendapatan = get_sum_pendapatan(db)
+        // jumlah_pasien = get_count_pasien(db)
+        // klaim = get_sum_pendapatan_by_status_id(db,2)
+        // verif = get_sum_pendapatan_by_status_id(db,3)
+        // terima = get_sum_pendapatan_by_status_id(db,4)
+        // setor = get_sum_pendapatan_by_status_id(db,5)
+
+        return response()->json([
+            'pendapatan' => "sum_pendapatan.total",
+            'jumlah_pasien' => "jumlah_pasien.total",
+            'pendapatan_klaim' => "klaim.total",
+            'pendapatan_verif' => "verif.total",
+            'pendapatan_terima' => "terima.total",
+            'pendapatan_setor' => "setor.total"
+        ], 200);
     }
 }

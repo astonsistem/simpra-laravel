@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class TempPenerimaanSwa extends Model
 {
     protected $table = "temp_penerimaan_swa";
+    protected $primaryKey = "transaksi_id";
 
     protected $fillable = [
         'transaksi_id',

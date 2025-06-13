@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class AkunRequest extends FormRequest
+class SyncApiRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -16,25 +16,22 @@ class AkunRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'akun_id' => 'required|string',
-            'akun_kode' => 'required|string',
-            'akun_nama' => 'required|string',
-            'rek_id' => 'nullable|string',
-            'rek_nama' => 'nullable|string',
-            'akun_kelompok' => 'nullable|string',
-            'created_at' => 'nullable|date',
+            'sinkronisasi_id' => 'required|string',
+            'sinkronisasi_nama' => 'required|string',
+            'sinkronisasi_menu' => 'required|string',
+            'sinkronisasi_status' => 'required|string',
+            'sinkronisasi_param' => 'nullable|array',
+            'sinkronisasi_api' => 'nullable|string',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'akun_id.required'       => 'akun_id harus diisi.',
-            'akun_kode.required'     => 'akun_kode harus diisi.',
-            'akun_nama.required'     => 'akun_nama harus diisi.',
-            'rek_id.required'        => 'rek_id harus diisi.',
-            'rek_nama.required'      => 'rek_nama harus diisi.',
-            'akun_kelompok.required' => 'akun_kelompok harus diisi.',
+            'sinkronisasi_id.required'      => 'sinkronisasi_id is required',
+            'sinkronisasi_nama.required'    => 'sinkronisasi_nama is required',
+            'sinkronisasi_menu.required'    => 'sinkronisasi_menu is required',
+            'sinkronisasi_status.required'  => 'sinkronisasi_status is required',
         ];
     }
 

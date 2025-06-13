@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class StatusPasienBpjs extends Model
 {
     protected $table = "infostatuspasienbpjs_v";
+    protected $primaryKey = "pendaftaran_id";
 
     protected $fillable = [
         'pendaftaran_id',

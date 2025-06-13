@@ -3,95 +3,69 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CreateUserRequest;
+use App\Http\Requests\LoginUserRequest;
+use App\Http\Resources\UserCollection;
+use App\Http\Resources\UserResource;
 use App\Models\User;
-use Validator;
-
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Hash;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
-
-    /**
-     * Register a User.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function register()
+    public function register(CreateUserRequest $request)
     {
-        $validator = Validator::make(request()->all(), [
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|confirmed|min:8',
-        ]);
+        $data = $request->validated();
+        $data['hashed_password'] = Hash::make($data['password']);
+        $data['is_active'] = 't';
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors()->toJson(), 400);
-        }
+        User::query()->create($data);
 
-        $user = new User;
-        $user->name = request()->name;
-        $user->email = request()->email;
-        $user->password = bcrypt(request()->password);
-        $user->save();
-
-        return response()->json($user, 201);
+        return response()->json(['message' => 'Berhasil menambah data user'], 201);
     }
 
-
-    /**
-     * Get a JWT via given credentials.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function login()
+    public function login(LoginUserRequest $request)
     {
-        $credentials = request(['email', 'password']);
+        $credentials = $request->validated();
 
-        if (!$token = auth()->attempt($credentials)) {
+        if (!$token = JWTAuth::attempt($credentials)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        return $this->respondWithToken($token);
+        return response()->json([
+            'token' => $token,
+            "token_type" => "bearer",
+        ], 200);
     }
 
-    /**
-     * Get the authenticated User.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function me()
+    public function loginToken(LoginUserRequest $request)
     {
-        return response()->json(auth()->user());
+        $credentials = $request->validated();
+        if (!$token = JWTAuth::attempt($credentials)) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        return response()->json([
+            'token' => $token,
+            'token_type' => "bearer"
+        ], 200);
     }
 
-    /**
-     * Log the user out (Invalidate the token).
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function logout()
     {
         auth()->logout();
 
-        return response()->json(['message' => 'Successfully logged out']);
+        return response()->json(['message' => 'Logged out successfully']);
     }
 
-    /**
-     * Refresh a token.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function refresh()
     {
         return $this->respondWithToken(auth()->refresh());
     }
 
-    /**
-     * Get the token array structure.
-     *
-     * @param  string $token
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
     protected function respondWithToken($token)
     {
         return response()->json([
@@ -99,5 +73,150 @@ class AuthController extends Controller
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 60
         ]);
+    }
+
+    public function me()
+    {
+        return response()->json([
+            'user' => auth()->user()
+        ]);
+    }
+
+    public function update(CreateUserRequest $request, $id)
+    {
+        try {
+            $data = $request->validated();
+
+            $user = User::findOrFail($id);
+            if (!$user) {
+                return response()->json([
+                    'message' => 'Not found'
+                ], 404);
+            }
+            $user->update($data);
+
+            return response()->json(new UserResource($user), 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => 500,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+                'data'    => null
+            ], 500);
+        }
+    }
+
+    public function destroy($id)
+    {
+        try {
+            if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $id)) {
+                return response()->json([
+                    'detail' => [
+                        [
+                            'loc' => ['path', 'id'],
+                            'msg' => 'ID must be a valid UUID format.',
+                            'type' => 'validation'
+                        ]
+                    ]
+                ], 422);
+            }
+
+            $user = User::find($id);
+
+            if (!$user) {
+                return response()->json([
+                    'message' => 'Not found'
+                ], 404);
+            }
+
+            $user->delete();
+
+            return response()->json([
+                'status'  => 200,
+                'message' => 'Berhasil menghapus data user'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan pada server.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function list(Request $request)
+    {
+        try {
+            $request->validate([
+                'page' => 'nullable|integer|min:1',
+                'size' => 'nullable|integer|min:1',
+            ]);
+
+            $page = $request->input('page', 1);
+            $size = $request->input('size', 10);
+
+            $query = User::query();
+
+            $totalItems = $query->count();
+            $items = $query->skip(($page - 1) * $size)->take($size)->orderBy('nama')->get();
+
+            $totalPages = ceil($totalItems / $size);
+
+            return response()->json(
+                new UserCollection($items, $totalItems, $page, $size, $totalPages)
+            );
+        } catch (ValidationException $e) {
+            $errors = [];
+            foreach ($e->errors() as $field => $messages) {
+                foreach ($messages as $message) {
+                    $errors[] = [
+                        'loc' => ['query', $field],
+                        'msg' => $message,
+                        'type' => 'validation',
+                    ];
+                }
+            }
+            return response()->json([
+                'detail' => $errors
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan pada server.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function show(string $id): JsonResponse
+    {
+        try {
+            if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $id)) {
+                return response()->json([
+                    'detail' => [
+                        [
+                            'loc' => ['path', 'id'],
+                            'msg' => 'ID must be a valid UUID format.',
+                            'type' => 'validation'
+                        ]
+                    ]
+                ], 422);
+            }
+
+            $user = User::where('id', $id)->first();
+
+            if (!$user) {
+                return response()->json([
+                    'message' => 'User not found.'
+                ], 404);
+            }
+            return response()->json(new UserResource($user), 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan pada server.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function adminonly()
+    {
     }
 }

@@ -2,47 +2,48 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\RekapStatusrawatinapbpjsView;
+use App\Models\RekapStatusrawatjalanbpjsView;
 use Illuminate\Http\Request;
 
 class RekapController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+
+    public function pasienRajalBpjs()
     {
-        //
+        try {
+            $rekap = RekapStatusrawatjalanbpjsView::all();
+
+            if (!$rekap) {
+                return response()->json([
+                    'message' => 'Not found.'
+                ], 404);
+            }
+            return response()->json($rekap, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan pada server.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function pasienRanapBpjs()
     {
-        //
-    }
+        try {
+            $rekap = RekapStatusrawatinapbpjsView::all();
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+            if (!$rekap) {
+                return response()->json([
+                    'message' => 'Not found.'
+                ], 404);
+            }
+            return response()->json($rekap, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan pada server.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

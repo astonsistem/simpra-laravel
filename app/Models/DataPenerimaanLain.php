@@ -4,9 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class SyncPenerimaanLain extends Model
+class DataPenerimaanLain extends Model
 {
     protected $table = "data_penerimaan_lain";
+    protected $keyType = 'string';
+    public $incrementing = false;
 
     protected $fillable = [
         'id',
@@ -45,5 +47,8 @@ class SyncPenerimaanLain extends Model
         'is_web_change',
     ];
 
+    protected $casts = [
+        'id' => 'string',
+    ];
     // akun_data = relationship("AkunModel", foreign_keys=[akun_id])
 }
