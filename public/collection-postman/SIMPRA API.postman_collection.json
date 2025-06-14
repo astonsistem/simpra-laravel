@@ -1,0 +1,4606 @@
+{
+	"info": {
+		"_postman_id": "5cc4f3a3-409e-40f8-a2bb-7442ac44eae8",
+		"name": "SIMPRA API",
+		"description": "# 🚀 Get started here\n\nThis template guides you through CRUD operations (GET, POST, PUT, DELETE), variables, and tests.\n\n## 🔖 **How to use this template**\n\n#### **Step 1: Send requests**\n\nRESTful APIs allow you to perform CRUD operations using the POST, GET, PUT, and DELETE HTTP methods.\n\nThis collection contains each of these [request](https://learning.postman.com/docs/sending-requests/requests/) types. Open each request and click \"Send\" to see what happens.\n\n#### **Step 2: View responses**\n\nObserve the response tab for status code (200 OK), response time, and size.\n\n#### **Step 3: Send new Body data**\n\nUpdate or add new data in \"Body\" in the POST request. Typically, Body data is also used in PUT request.\n\n```\n{\n    \"name\": \"Add your name in the body\"\n}\n\n ```\n\n#### **Step 4: Update the variable**\n\nVariables enable you to store and reuse values in Postman. We have created a [variable](https://learning.postman.com/docs/sending-requests/variables/) called `base_url` with the sample request [https://postman-api-learner.glitch.me](https://postman-api-learner.glitch.me). Replace it with your API endpoint to customize this collection.\n\n#### **Step 5: Add tests in the \"Scripts\" tab**\n\nAdding tests to your requests can help you confirm that your API is working as expected. You can write test scripts in JavaScript and view the output in the \"Test Results\" tab.\n\n<img src=\"https://content.pstmn.io/fa30ea0a-373d-4545-a668-e7b283cca343/aW1hZ2UucG5n\" alt=\"\" height=\"1530\" width=\"2162\">\n\n## 💪 Pro tips\n\n- Use folders to group related requests and organize the collection.\n    \n- Add more [scripts](https://learning.postman.com/docs/writing-scripts/intro-to-scripts/) to verify if the API works as expected and execute workflows.\n    \n\n## 💡Related templates\n\n[API testing basics](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9a37a28-055b-49cd-8c7e-97494a21eb54&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[API documentation](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9c28f47-1253-44af-a2f3-20dce4da1f18&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[Authorization methods](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=31a9a6ed-4cdf-4ced-984c-d12c9aec1c27&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29133984"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Get Current User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/auth/user/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"user",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/auth/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/auth/users/:user_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"users",
+								":user_id"
+							],
+							"variable": [
+								{
+									"key": "user_id",
+									"value": "735db127-b8bb-446e-933a-3b5998c7d3bf",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User detail Admin Only",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/auth/adminsonly",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"adminsonly"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nip\": \"123456\",\r\n    \"nama\": \"Mio Honda\",\r\n    \"no_telp\": \"081122334455\",\r\n    \"jabatan\": \"Admin\",\r\n    \"email\": \"user@example.com\",\r\n    \"username\": \"mio\",\r\n    \"role\": \"admin\",\r\n    \"password\": \"12345\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/user",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nip\": \"123456\",\r\n    \"nama\": \"Mio Honda\",\r\n    \"no_telp\": \"081122334455\",\r\n    \"jabatan\": \"Admin\",\r\n    \"email\": \"mio@gmail.com\",\r\n    \"username\": \"mio\",\r\n    \"role\": \"admin\",\r\n    \"password\": \"123456\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/user/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"user",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "2547d600-52d2-43e5-a4fa-4afd49b72443",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/auth/user/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"user",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "2547d600-52d2-43e5-a4fa-4afd49b72443",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login User with bearer token 1",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "grant_type",
+									"value": "",
+									"description": "Required",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "mio",
+									"description": "Required",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "123456",
+									"description": "Required",
+									"type": "text"
+								},
+								{
+									"key": "scope",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login_token",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login_token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login User with bearer token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"mio\",\r\n    \"password\": \"12345\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/logintoken",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"logintoken"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout and unset cookie",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/auth/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh bearer token",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/auth/refresh",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Akun",
+			"item": [
+				{
+					"name": "Get All Akun",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/akun?page=1&size=50",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"akun"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "50"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Akun by id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/akun/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"akun",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "7cea2d75-2226-4bb8-95e4-540b39b27ef1",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Akun list",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/akun/list?akun_kode=",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"akun",
+								"list"
+							],
+							"query": [
+								{
+									"key": "akun_kode",
+									"value": "",
+									"description": "String"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Akun potensi lain",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/akun/list/akunpotensilain?akun_kode",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"akun",
+								"list",
+								"akunpotensilain"
+							],
+							"query": [
+								{
+									"key": "akun_kode",
+									"value": null
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Akun pendapatan",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/akun/list/pendapatan?akun_kode",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"akun",
+								"list",
+								"pendapatan"
+							],
+							"query": [
+								{
+									"key": "akun_kode",
+									"value": null,
+									"description": "Ada namun tiada guna"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Akun",
+					"request": {
+						"auth": {
+							"type": "bearer"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"akun_id\": \"177103\",\r\n    \"akun_kode\": \"123456\",\r\n    \"akun_nama\": \"Test ENDPOINT\",\r\n    \"rek_id\": \"11111\",\r\n    \"rek_nama\": \"Jasa\",\r\n    \"akun_kelompok\": \"LAIN-LAIN\",\r\n    \"created_at\": \"2025-06-11T10:01:53.610537\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/akun",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"akun"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Edit Akun",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"f2b9dd8a-6996-4c08-b6c8-58ab7a243342\",\r\n    \"akun_id\": \"177103\",\r\n    \"akun_kode\": \"123456\",\r\n    \"akun_nama\": \"Test Update Akun 2\",\r\n    \"rek_id\": \"11111\",\r\n    \"rek_nama\": \"Jasa\",\r\n    \"akun_kelompok\": \"LAIN-LAIN\",\r\n    \"created_at\": \"2025-06-11T10:01:53.610537\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/akun/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"akun",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "f2b9dd8a-6996-4c08-b6c8-58ab7a243342",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Akun",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/akun/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"akun",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "f2b9dd8a-6996-4c08-b6c8-58ab7a243342",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Cara Bayar",
+			"item": [
+				{
+					"name": "Get All Cara bayar",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/carabayar?page=1&size=50",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"carabayar"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "50"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Cara bayar list",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/carabayar/list",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"carabayar",
+								"list"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Penjamin",
+			"item": [
+				{
+					"name": "Get All Penjamin",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/penjamin?penjamin_nama=&page=1&size=50",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"penjamin"
+							],
+							"query": [
+								{
+									"key": "penjamin_nama",
+									"value": "",
+									"description": "String"
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Integer"
+								},
+								{
+									"key": "size",
+									"value": "50",
+									"description": "Integer"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Penjamin list",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/penjamin/list",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"penjamin",
+								"list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sync Penjamin",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/penjamin/sync",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"penjamin",
+								"sync"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Instalasi",
+			"item": [
+				{
+					"name": "Get All Instalsi",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instalasi?page=1&size=100",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instalasi"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Integer"
+								},
+								{
+									"key": "size",
+									"value": "100",
+									"description": "Integer"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Instalasi list",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/penjamin/list",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"penjamin",
+								"list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sync Instalasi",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/instalasi/sync",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"instalasi",
+								"sync"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Kasir",
+			"item": [
+				{
+					"name": "Get All Kasir",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/kasir?page=1&size=50",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"kasir"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Integer"
+								},
+								{
+									"key": "size",
+									"value": "50",
+									"description": "Integer"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Kasir list",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/kasir/list",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"kasir",
+								"list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sync Kasir",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/kasir/sync",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"kasir",
+								"sync"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Loket",
+			"item": [
+				{
+					"name": "Get All Loket",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/loket?page=1&size=50",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"loket"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Integer"
+								},
+								{
+									"key": "size",
+									"value": "50",
+									"description": "Integer"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Loket list",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/loket/list",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"loket",
+								"list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sync Loket",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/loket/sync",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"loket",
+								"sync"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "SyncAPI",
+			"item": [
+				{
+					"name": "Get All Akun",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/syncapi?page=1&size=50",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"syncapi"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Integer"
+								},
+								{
+									"key": "size",
+									"value": "50",
+									"description": "Integer"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Akun by id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/syncapi/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"syncapi",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "2265c893-57ba-4748-ac52-40fdc7ce5ddb",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Menu",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/syncapi/menu",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"syncapi",
+								"menu"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Menu list",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/syncapi/list/:menu",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"syncapi",
+								"list",
+								":menu"
+							],
+							"variable": [
+								{
+									"key": "menu",
+									"value": "PELAPORAN",
+									"description": "String"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Akun",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"sinkronisasi_id\": \"string\",\r\n    \"sinkronisasi_nama\": \"string\",\r\n    \"sinkronisasi_menu\": \"string\",\r\n    \"sinkronisasi_status\": \"string\",\r\n    \"sinkronisasi_param\": \"string\",\r\n    \"sinkronisasi_api\": \"string\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/syncapi",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"syncapi"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Edit Akun",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"2265c893-57ba-4748-ac52-40fdc7ce5ddb\",\r\n    \"sinkronisasi_id\": \"3\",\r\n    \"sinkronisasi_nama\": \"Request Data Verif Pelayanan RI/RJ dan Obat\",\r\n    \"sinkronisasi_menu\": \"PENDAPATAN PELAYANAN\",\r\n    \"sinkronisasi_status\": \"0\",\r\n    \"sinkronisasi_param\": [{\"field\" : \"bulan_pelayanan\"}],\r\n    \"sinkronisasi_api\": \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/syncapi/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"syncapi",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "2265c893-57ba-4748-ac52-40fdc7ce5ddb",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Sinkronisasi",
+			"item": [
+				{
+					"name": "Get Menu",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"param\": []\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/sinkronisasi/request/:syncapi_id?page=1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sinkronisasi",
+								"request",
+								":syncapi_id"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Integer"
+								}
+							],
+							"variable": [
+								{
+									"key": "syncapi_id",
+									"value": "",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Kasir",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"param\": []\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/sinkronisasi/request/kasir/:syncapi_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sinkronisasi",
+								"request",
+								"kasir",
+								":syncapi_id"
+							],
+							"variable": [
+								{
+									"key": "syncapi_id",
+									"value": "",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Penerimaan umum",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"param\": []\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/sinkronisasi/request/penerimaanumum/:syncapi_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sinkronisasi",
+								"request",
+								"penerimaanumum",
+								":syncapi_id"
+							],
+							"variable": [
+								{
+									"key": "syncapi_id",
+									"value": "",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Rincian pendapatan",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"param\": []\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/sinkronisasi/request/rincianpendapatan/:syncapi_id?page=1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sinkronisasi",
+								"request",
+								"rincianpendapatan",
+								":syncapi_id"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								}
+							],
+							"variable": [
+								{
+									"key": "syncapi_id",
+									"value": "",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sync Data",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"requestDate\": \"2025-06-05T10:01:53.933950\",\r\n    \"menu\": \"string\",\r\n    \"data\": []\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/sinkronisasi/save",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sinkronisasi",
+								"save"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Pendapatan Pelayanan",
+			"item": [
+				{
+					"name": "Get All Pendapatan pelayanan",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/pendapatan_pelayanan?tgl_awal&tgl_akhir&jenis_pelayanan&penjamin&instalasi&status&page=1&size=50",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"pendapatan_pelayanan"
+							],
+							"query": [
+								{
+									"key": "tgl_awal",
+									"value": null
+								},
+								{
+									"key": "tgl_akhir",
+									"value": null
+								},
+								{
+									"key": "jenis_pelayanan",
+									"value": null
+								},
+								{
+									"key": "penjamin",
+									"value": null
+								},
+								{
+									"key": "instalasi",
+									"value": null
+								},
+								{
+									"key": "status",
+									"value": null
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "50"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Pendapatan pelayanan by id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/pendapatan_pelayanan/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"pendapatan_pelayanan",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "c9203b85-d1b3-41a8-9b88-6f784028be81",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Statistik Pendapatan pelayanan",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/pendapatan_pelayanan/statistik",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"pendapatan_pelayanan",
+								"statistik"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Billing Kasir",
+			"item": [
+				{
+					"name": "Get All Billing kasir",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/billing_kasir?periode=tanggal&page=1&size=100",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"billing_kasir"
+							],
+							"query": [
+								{
+									"key": "tgl_awal",
+									"value": "2023-10-26",
+									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "tgl_akhir",
+									"value": "2023-11-01",
+									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "bulan_awal",
+									"value": "",
+									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "bulan_akhir",
+									"value": "",
+									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "periode",
+									"value": "tanggal",
+									"description": "String"
+								},
+								{
+									"key": "year",
+									"value": "",
+									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "loket",
+									"value": "",
+									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "uraian",
+									"value": "",
+									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "bank",
+									"value": "",
+									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "cara_pembayaran",
+									"value": "",
+									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "no_closingkasir",
+									"value": "",
+									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Integer"
+								},
+								{
+									"key": "size",
+									"value": "100",
+									"description": "Integer"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Billing kasir by id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/billing_kasir/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"billing_kasir",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "606fb110-786d-4795-b934-f14dd5c934cd",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Statistik Billing kasir",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/billing_kasir/statistik",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"billing_kasir",
+								"statistik"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Validasi Billing kasir",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/billing_kasir/validasi/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"billing_kasir",
+								"validasi",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Validasi Billing kasir filter",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/billing_kasir/validasi/filter/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"billing_kasir",
+								"validasi",
+								"filter",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Validasi Billing kasir filter uraian",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/billing_kasir/validasi/filteruraian/:id?uraian",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"billing_kasir",
+								"validasi",
+								"filteruraian",
+								":id"
+							],
+							"query": [
+								{
+									"key": "uraian",
+									"value": null,
+									"description": "String"
+								}
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Validasi Billing kasir filter jumlah",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/billing_kasir/validasi/filterjumlah/:id?jumlah",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"billing_kasir",
+								"validasi",
+								"filterjumlah",
+								":id"
+							],
+							"query": [
+								{
+									"key": "jumlah",
+									"value": null
+								}
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Billing kasir",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"string\",\r\n    \"pendaftaran_id\": 0,\r\n    \"no_pendaftaran\": \"string\",\r\n    \"tgl_pendaftaran\": \"string\",\r\n    \"pasien_id\": 0,\r\n    \"no_rekam_medik\": \"string\",\r\n    \"pasien_nama\": \"string\",\r\n    \"pasien_alamat\": \"string\",\r\n    \"jenis_tagihan\": \"string\",\r\n    \"tgl_krs\": \"string\",\r\n    \"tgl_pelayanan\": \"string\",\r\n    \"carabayar_id\": 0,\r\n    \"carabayar_nama\": \"string\",\r\n    \"penjamin_id\": 0,\r\n    \"penjamin_nama\": \"string\",\r\n    \"instalasi_id\": 0,\r\n    \"instalasi_nama\": \"string\",\r\n    \"metode_bayar\": \"string\",\r\n    \"tandabuktibayar_id\": 0,\r\n    \"no_buktibayar\": \"string\",\r\n    \"tgl_buktibayar\": \"string\",\r\n    \"sep_id\": \"string\",\r\n    \"no_sep\": \"string\",\r\n    \"tgl_sep\": \"string\",\r\n    \"cara_pembayaran\": \"string\",\r\n    \"bank_tujuan\": \"string\",\r\n    \"admin_kredit\": \"string\",\r\n    \"admin_debit\": \"string\",\r\n    \"kartubank_pasien\": \"string\",\r\n    \"no_kartubank_pasien\": \"string\",\r\n    \"closingkasir_id\": \"string\",\r\n    \"tgl_closingkasir\": \"string\",\r\n    \"no_closingkasir\": \"string\",\r\n    \"kasir_id\": 0,\r\n    \"kasir_nama\": \"string\",\r\n    \"loket_id\": 0,\r\n    \"loket_nama\": \"string\",\r\n    \"guna_bayar\": \"string\",\r\n    \"total\": \"string\",\r\n    \"klasifikasi\": \"string\",\r\n    \"status_id\": 0,\r\n    \"bulan_mrs\": \"string\",\r\n    \"bulan_krs\": \"string\",\r\n    \"bulan_pelayanan\": \"string\",\r\n    \"akun_id\": 0,\r\n    \"selisih\": 0,\r\n    \"jumlah_netto\": 0,\r\n    \"rc_id\": 0,\r\n    \"is_web_change\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/billing_kasir/:tandabuktibayar_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"billing_kasir",
+								":tandabuktibayar_id"
+							],
+							"variable": [
+								{
+									"key": "tandabuktibayar_id",
+									"value": "",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Validasi",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"string\",\r\n    \"rc_id\": 0\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/billing_kasir/validasi/penerimaan_layanan",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"billing_kasir",
+								"validasi",
+								"penerimaan_layanan"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Cancel Validasi",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"string\",\r\n    \"rc_id\": 0\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/billing_kasir/cancel_validasi/penerimaan_layanan",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"billing_kasir",
+								"cancel_validasi",
+								"penerimaan_layanan"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Akun",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/billing_kasir/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"billing_kasir",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Billing Swa",
+			"item": [
+				{
+					"name": "Get All Penerimaan lain",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/billing_swa?tgl_awal&tgl_akhir&bulan_awal&bulan_akhir&year&uraian&sumber_transaksi&periode&cara_pembayar&page=1&size=100",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"billing_swa"
+							],
+							"query": [
+								{
+									"key": "tgl_awal",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "tgl_akhir",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "bulan_awal",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "bulan_akhir",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "year",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "uraian",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "sumber_transaksi",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "periode",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "cara_pembayar",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Integer"
+								},
+								{
+									"key": "size",
+									"value": "100",
+									"description": "Integer"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Statistik Penerimaan lain",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/billing_swa/statistik",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"billing_swa",
+								"statistik"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Penerimaan lain by id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/billing_swa",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"billing_swa"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Validasi Billing swa",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/billing_swa/validasi",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"billing_swa",
+								"validasi"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Validasi Billing swa filter",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/billing_swa/validasi/filter",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"billing_swa",
+								"validasi",
+								"filter"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Validasi Billing swa filter uraian",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/billing_swa/validasi/filteruraian",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"billing_swa",
+								"validasi",
+								"filteruraian"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Validasi Billing swa filter jumlah",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/billing_swa/validasi/filterjumlah",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"billing_swa",
+								"validasi",
+								"filterjumlah"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Billing swa",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/billing_swa",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"billing_swa"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Validasi",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/billing_swa/validasi/penerimaan_lain",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"billing_swa",
+								"validasi",
+								"penerimaan_lain"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Cancel Validasi",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/billing_swa/cancel_validasi/penerimaan_lain",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"billing_swa",
+								"cancel_validasi",
+								"penerimaan_lain"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Akun",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/billing_swa",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"billing_swa"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Potensi Pelayanan",
+			"item": [
+				{
+					"name": "Get All Potensi pelayanan",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/potensi_pelayanan",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"potensi_pelayanan"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Potensi pelayanan",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/potensi_pelayanan/getdata",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"potensi_pelayanan",
+								"getdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Potensi pelayanan by id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/potensi_pelayanan",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"potensi_pelayanan"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Statistik Potensi pelayanan",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/potensi_pelayanan/statistik",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"potensi_pelayanan",
+								"statistik"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Rincian Unregister Potensi pelayanan",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/potensi_pelayanan/rincian/unregister",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"potensi_pelayanan",
+								"rincian",
+								"unregister"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Rincian Register Potensi pelayanan",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/potensi_pelayanan/rincian/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"potensi_pelayanan",
+								"rincian",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Potensi pelayanan",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"string\",\r\n    \"pendaftaran_id\": 0,\r\n    \"no_pendaftaran\": \"string\",\r\n    \"tgl_pendaftaran\": \"string\",\r\n    \"pasien_id\": \"string\",\r\n    \"no_rekam_medik\": \"string\",\r\n    \"pasien_nama\": \"string\",\r\n    \"pasien_alamat\": \"string\",\r\n    \"jenis_tagihan\": \"string\",\r\n    \"tgl_pelayanan\": \"string\",\r\n    \"instalasi_id\": \"string\",\r\n    \"instalasi_nama\": \"string\",\r\n    \"carabayar_id\": \"string\",\r\n    \"carabayar_nama\": \"string\",\r\n    \"penjamin_id\": \"string\",\r\n    \"penjamin_nama\": \"string\",\r\n    \"no_pengajuan\": \"string\",\r\n    \"tgl_pengajuan\": \"string\",\r\n    \"no_dokumen\": \"string\",\r\n    \"tgl_dokumen\": \"string\",\r\n    \"uraian\": \"string\",\r\n    \"total_pengajuan\": 0,\r\n    \"total\": 0,\r\n    \"status_id\": \"string\",\r\n    \"akun_id\": \"string\",\r\n    \"terbayar\": 0,\r\n    \"pelayanan_id\": 0,\r\n    \"is_web_change\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/potensi_pelayanan",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"potensi_pelayanan"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get List Potensi pelayanan",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"tgl_awal\": \"string\",\r\n    \"tgl_akhir\": \"string\",\r\n    \"jenis_tagihan\": \"string\",\r\n    \"penjamin_id\": \"string\",\r\n    \"instalasi_id\": \"string\",\r\n    \"status_id\": \"string\",\r\n    \"carabayar_id\": \"string\",\r\n    \"page\": 0,\r\n    \"size\": 0\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/potensi_pelayanan/list?page=1&size=50",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"potensi_pelayanan",
+								"list"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Integer"
+								},
+								{
+									"key": "size",
+									"value": "50",
+									"description": "Integer"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Potensi pelayanan API",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"string\",\r\n    \"pendaftaran_id\": 0,\r\n    \"no_pendaftaran\": \"string\",\r\n    \"tgl_pendaftaran\": \"string\",\r\n    \"pasien_id\": \"string\",\r\n    \"no_rekam_medik\": \"string\",\r\n    \"pasien_nama\": \"string\",\r\n    \"pasien_alamat\": \"string\",\r\n    \"jenis_tagihan\": \"string\",\r\n    \"tgl_pelayanan\": \"string\",\r\n    \"instalasi_id\": \"string\",\r\n    \"instalasi_nama\": \"string\",\r\n    \"carabayar_id\": \"string\",\r\n    \"carabayar_nama\": \"string\",\r\n    \"penjamin_id\": \"string\",\r\n    \"penjamin_nama\": \"string\",\r\n    \"no_pengajuan\": \"string\",\r\n    \"tgl_pengajuan\": \"string\",\r\n    \"no_dokumen\": \"string\",\r\n    \"tgl_dokumen\": \"string\",\r\n    \"uraian\": \"string\",\r\n    \"total_pengajuan\": 0,\r\n    \"total\": 0,\r\n    \"status_id\": \"string\",\r\n    \"akun_id\": \"string\",\r\n    \"terbayar\": 0,\r\n    \"pelayanan_id\": 0,\r\n    \"is_web_change\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/potensi_pelayanan/createdata",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"potensi_pelayanan",
+								"createdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Potensi pelayanan terima",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"string\",\r\n    \"no_dokumen\": \"string\",\r\n    \"tgl_dokumen\": \"string\",\r\n    \"akun_id\": \"string\",\r\n    \"pihak3\": \"string\",\r\n    \"pihak3_alamat\": \"string\",\r\n    \"pihak3_telp\": \"string\",\r\n    \"uraian\": \"string\",\r\n    \"tgl_bayar\": \"string\",\r\n    \"no_bayar\": \"string\",\r\n    \"sumber_transaksi\": \"string\",\r\n    \"transaksi_id\": \"string\",\r\n    \"metode_pembayaran\": \"string\",\r\n    \"total\": \"string\",\r\n    \"pendapatan\": \"string\",\r\n    \"pdd\": \"string\",\r\n    \"piutang\": \"string\",\r\n    \"cara_pembayaran\": \"string\",\r\n    \"bank_tujuan\": \"string\",\r\n    \"admin_kredit\": \"string\",\r\n    \"admin_debit\": \"string\",\r\n    \"kartubank\": \"string\",\r\n    \"no_kartubank\": \"string\",\r\n    \"rc_id\": 0,\r\n    \"selisih\": 0,\r\n    \"jumlah_netto\": 0,\r\n    \"desc_piutang_pelayanan\": \"string\",\r\n    \"desc_piutang_lain\": \"string\",\r\n    \"piutang_id\": \"string\",\r\n    \"piutanglain_id\": \"string\",\r\n    \"akun_data\": {\r\n        \"akun_id\": \"string\",\r\n        \"akun_kode\": \"string\",\r\n        \"akun_nama\": \"string\"\r\n    },\r\n    \"is_web_change\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/potensi_pelayanan/terima/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"potensi_pelayanan",
+								"terima",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Potensi pelayanan",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"string\",\r\n    \"pendaftaran_id\": 0,\r\n    \"no_pendaftaran\": \"string\",\r\n    \"tgl_pendaftaran\": \"string\",\r\n    \"pasien_id\": \"string\",\r\n    \"no_rekam_medik\": \"string\",\r\n    \"pasien_nama\": \"string\",\r\n    \"pasien_alamat\": \"string\",\r\n    \"jenis_tagihan\": \"string\",\r\n    \"tgl_pelayanan\": \"string\",\r\n    \"instalasi_id\": \"string\",\r\n    \"instalasi_nama\": \"string\",\r\n    \"carabayar_id\": 0,\r\n    \"carabayar_nama\": \"string\",\r\n    \"penjamin_id\": 0,\r\n    \"penjamin_nama\": \"string\",\r\n    \"no_pengajuan\": \"string\",\r\n    \"tgl_pengajuan\": \"string\",\r\n    \"no_dokumen\": \"string\",\r\n    \"tgl_dokumen\": \"string\",\r\n    \"uraian\": \"string\",\r\n    \"total_pengajuan\": \"string\",\r\n    \"total\": \"string\",\r\n    \"status_id\": \"string\",\r\n    \"akun_id\": \"string\",\r\n    \"pelayanan_id\": 0,\r\n    \"terbayar\": 0,\r\n    \"is_web_change\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/potensi_pelayanan/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"potensi_pelayanan",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Potensi pelayanan API",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"string\",\r\n    \"pendaftaran_id\": 0,\r\n    \"no_pendaftaran\": \"string\",\r\n    \"tgl_pendaftaran\": \"string\",\r\n    \"pasien_id\": \"string\",\r\n    \"no_rekam_medik\": \"string\",\r\n    \"pasien_nama\": \"string\",\r\n    \"pasien_alamat\": \"string\",\r\n    \"jenis_tagihan\": \"string\",\r\n    \"tgl_pelayanan\": \"string\",\r\n    \"instalasi_id\": \"string\",\r\n    \"instalasi_nama\": \"string\",\r\n    \"carabayar_id\": 0,\r\n    \"carabayar_nama\": \"string\",\r\n    \"penjamin_id\": 0,\r\n    \"penjamin_nama\": \"string\",\r\n    \"no_pengajuan\": \"string\",\r\n    \"tgl_pengajuan\": \"string\",\r\n    \"no_dokumen\": \"string\",\r\n    \"tgl_dokumen\": \"string\",\r\n    \"uraian\": \"string\",\r\n    \"total_pengajuan\": \"string\",\r\n    \"total\": \"string\",\r\n    \"status_id\": \"string\",\r\n    \"akun_id\": \"string\",\r\n    \"pelayanan_id\": 0,\r\n    \"terbayar\": 0,\r\n    \"is_web_change\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/potensi_pelayanan/editdata/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"potensi_pelayanan",
+								"editdata",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Rincian Potensi pelayanan",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"penjamin_id\": 0,\r\n    \"tahun\": 0,\r\n    \"bulan\": 0,\r\n    \"sumber_pembiayaan\": \"string\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/potensi_pelayanan/rincian/register/:potensi_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"potensi_pelayanan",
+								"rincian",
+								"register",
+								":potensi_id"
+							],
+							"variable": [
+								{
+									"key": "potensi_id",
+									"value": "",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Rincian Potensi pelayanan",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/potensi_pelayanan/rincian/unregister/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"potensi_pelayanan",
+								"rincian",
+								"unregister",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Potensi pelayanan",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/potensi_pelayanan/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"potensi_pelayanan",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Penerimaan Lain",
+			"item": [
+				{
+					"name": "Get All Penerimaan lain",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/penerimaan_lain?id&tgl_awal&tgl_akhir&bulan_awal&bulan_akhir&year&uraian&sumber_transaksi&periode&akun_id&page&size",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"penerimaan_lain"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": null
+								},
+								{
+									"key": "tgl_awal",
+									"value": null
+								},
+								{
+									"key": "tgl_akhir",
+									"value": null
+								},
+								{
+									"key": "bulan_awal",
+									"value": null
+								},
+								{
+									"key": "bulan_akhir",
+									"value": null
+								},
+								{
+									"key": "year",
+									"value": null
+								},
+								{
+									"key": "uraian",
+									"value": null
+								},
+								{
+									"key": "sumber_transaksi",
+									"value": null
+								},
+								{
+									"key": "periode",
+									"value": null
+								},
+								{
+									"key": "akun_id",
+									"value": null
+								},
+								{
+									"key": "page",
+									"value": null,
+									"description": "Integer"
+								},
+								{
+									"key": "size",
+									"value": null,
+									"description": "Integer"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Penerimaan lain get data",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/penerimaan_lain/getdata?id&tgl_awal&tgl_akhir&bulan_awal&bulan_akhir&year&uraian&sumber_transaksi&periode&akun_id&page=1&size=50",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"penerimaan_lain",
+								"getdata"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "tgl_awal",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "tgl_akhir",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "bulan_awal",
+									"value": null
+								},
+								{
+									"key": "bulan_akhir",
+									"value": null
+								},
+								{
+									"key": "year",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "uraian",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "sumber_transaksi",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "periode",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "akun_id",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Integer"
+								},
+								{
+									"key": "size",
+									"value": "50",
+									"description": "Integer"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Penerimaan lain by id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/penerimaan_lain/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"penerimaan_lain",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Statistik Penerimaan lain",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/penerimaan_lain/statistik",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"penerimaan_lain",
+								"statistik"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Validasi Billing swa",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/penerimaan_lain/validasi",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"penerimaan_lain",
+								"validasi"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Validasi Billing swa filter",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/penerimaan_lain/validasi/filter",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"penerimaan_lain",
+								"validasi",
+								"filter"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Validasi Billing swa filter uraian",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/penerimaan_lain/validasi/filteruraian",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"penerimaan_lain",
+								"validasi",
+								"filteruraian"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Validasi Billing swa filter jumlah",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/penerimaan_lain/validasi/filterjumlah",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"penerimaan_lain",
+								"validasi",
+								"filterjumlah"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Penerimaan lain",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"string\",\r\n    \"no_dokumen\": \"string\",\r\n    \"tgl_dokumen\": \"string\",\r\n    \"akun_id\": \"string\",\r\n    \"pihak3\": \"string\",\r\n    \"pihak3_alamat\": \"string\",\r\n    \"pihak3_telp\": \"string\",\r\n    \"uraian\": \"string\",\r\n    \"tgl_bayar\": \"string\",\r\n    \"no_bayar\": \"string\",\r\n    \"sumber_transaksi\": \"string\",\r\n    \"transaksi_id\": \"string\",\r\n    \"metode_pembayaran\": \"string\",\r\n    \"total\": \"string\",\r\n    \"pendapatan\": \"string\",\r\n    \"pdd\": \"string\",\r\n    \"piutang\": \"string\",\r\n    \"cara_pembayaran\": \"string\",\r\n    \"bank_tujuan\": \"string\",\r\n    \"admin_kredit\": \"string\",\r\n    \"admin_debit\": \"string\",\r\n    \"kartubank\": \"string\",\r\n    \"no_kartubank\": \"string\",\r\n    \"rc_id\": 0,\r\n    \"selisih\": 0,\r\n    \"jumlah_netto\": 0,\r\n    \"desc_piutang_pelayanan\": \"string\",\r\n    \"desc_piutang_lain\": \"string\",\r\n    \"piutang_id\": \"string\",\r\n    \"piutanglain_id\": \"string\",\r\n    \"akun_data\": {\r\n        \"akun_id\": \"string\",\r\n        \"akun_kode\": \"string\",\r\n        \"akun_nama\": \"string\"\r\n    },\r\n    \"is_web_change\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/penerimaan_lain",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"penerimaan_lain"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Penerimaan lain",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"tgl_awal\": \"string\",\r\n    \"tgl_akhir\": \"string\",\r\n    \"bulan_awal\": \"string\",\r\n    \"bulan_akhir\": \"string\",\r\n    \"year\": \"string\",\r\n    \"uraian\": \"string\",\r\n    \"sumber_transaksi\": \"string\",\r\n    \"periode\": \"string\",\r\n    \"akun_id\": \"string\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/penerimaan_lain/list?page=1&size=50",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"penerimaan_lain",
+								"list"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Integer"
+								},
+								{
+									"key": "size",
+									"value": "50",
+									"description": "Integer"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Penerimaan lain API",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"string\",\r\n    \"no_dokumen\": \"string\",\r\n    \"tgl_dokumen\": \"string\",\r\n    \"akun_id\": \"string\",\r\n    \"pihak3\": \"string\",\r\n    \"pihak3_alamat\": \"string\",\r\n    \"pihak3_telp\": \"string\",\r\n    \"uraian\": \"string\",\r\n    \"tgl_bayar\": \"string\",\r\n    \"no_bayar\": \"string\",\r\n    \"sumber_transaksi\": \"string\",\r\n    \"transaksi_id\": \"string\",\r\n    \"metode_pembayaran\": \"string\",\r\n    \"total\": \"string\",\r\n    \"pendapatan\": \"string\",\r\n    \"pdd\": \"string\",\r\n    \"piutang\": \"string\",\r\n    \"cara_pembayaran\": \"string\",\r\n    \"bank_tujuan\": \"string\",\r\n    \"admin_kredit\": \"string\",\r\n    \"admin_debit\": \"string\",\r\n    \"kartubank\": \"string\",\r\n    \"no_kartubank\": \"string\",\r\n    \"rc_id\": 0,\r\n    \"selisih\": 0,\r\n    \"jumlah_netto\": 0,\r\n    \"desc_piutang_pelayanan\": \"string\",\r\n    \"desc_piutang_lain\": \"string\",\r\n    \"piutang_id\": \"string\",\r\n    \"piutanglain_id\": \"string\",\r\n    \"akun_data\": {\r\n        \"akun_id\": \"string\",\r\n        \"akun_kode\": \"string\",\r\n        \"akun_nama\": \"string\"\r\n    },\r\n    \"is_web_change\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/penerimaan_lain/createdata",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"penerimaan_lain",
+								"createdata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Penerimaan lain",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"string\",\r\n    \"no_dokumen\": \"string\",\r\n    \"tgl_dokumen\": \"string\",\r\n    \"akun_id\": \"string\",\r\n    \"pihak3\": \"string\",\r\n    \"pihak3_alamat\": \"string\",\r\n    \"pihak3_telp\": \"string\",\r\n    \"uraian\": \"string\",\r\n    \"tgl_bayar\": \"string\",\r\n    \"no_bayar\": \"string\",\r\n    \"sumber_transaksi\": \"string\",\r\n    \"transaksi_id\": \"string\",\r\n    \"metode_pembayaran\": \"string\",\r\n    \"total\": \"string\",\r\n    \"pendapatan\": \"string\",\r\n    \"pdd\": \"string\",\r\n    \"piutang\": \"string\",\r\n    \"cara_pembayaran\": \"string\",\r\n    \"bank_tujuan\": \"string\",\r\n    \"admin_kredit\": \"string\",\r\n    \"admin_debit\": \"string\",\r\n    \"kartubank\": \"string\",\r\n    \"no_kartubank\": \"string\",\r\n    \"rc_id\": 0,\r\n    \"selisih\": 0,\r\n    \"jumlah_netto\": 0,\r\n    \"desc_piutang_pelayanan\": \"string\",\r\n    \"desc_piutang_lain\": \"string\",\r\n    \"piutang_id\": \"string\",\r\n    \"piutanglain_id\": \"string\",\r\n    \"akun_data\": {\r\n        \"akun_id\": \"string\",\r\n        \"akun_kode\": \"string\",\r\n        \"akun_nama\": \"string\"\r\n    },\r\n    \"is_web_change\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/penerimaan_lain/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"penerimaan_lain",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Penerimaan lain API",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"string\",\r\n    \"no_dokumen\": \"string\",\r\n    \"tgl_dokumen\": \"string\",\r\n    \"akun_id\": \"string\",\r\n    \"pihak3\": \"string\",\r\n    \"pihak3_alamat\": \"string\",\r\n    \"pihak3_telp\": \"string\",\r\n    \"uraian\": \"string\",\r\n    \"tgl_bayar\": \"string\",\r\n    \"no_bayar\": \"string\",\r\n    \"sumber_transaksi\": \"string\",\r\n    \"transaksi_id\": \"string\",\r\n    \"metode_pembayaran\": \"string\",\r\n    \"total\": \"string\",\r\n    \"pendapatan\": \"string\",\r\n    \"pdd\": \"string\",\r\n    \"piutang\": \"string\",\r\n    \"cara_pembayaran\": \"string\",\r\n    \"bank_tujuan\": \"string\",\r\n    \"admin_kredit\": \"string\",\r\n    \"admin_debit\": \"string\",\r\n    \"kartubank\": \"string\",\r\n    \"no_kartubank\": \"string\",\r\n    \"rc_id\": 0,\r\n    \"selisih\": 0,\r\n    \"jumlah_netto\": 0,\r\n    \"desc_piutang_pelayanan\": \"string\",\r\n    \"desc_piutang_lain\": \"string\",\r\n    \"piutang_id\": \"string\",\r\n    \"piutanglain_id\": \"string\",\r\n    \"akun_data\": {\r\n        \"akun_id\": \"string\",\r\n        \"akun_kode\": \"string\",\r\n        \"akun_nama\": \"string\"\r\n    },\r\n    \"is_web_change\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/penerimaan_lain/editdata/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"penerimaan_lain",
+								"editdata",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Validasi",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"string\",\r\n    \"rc_id\": 0,\r\n    \"akun_id\": 0\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/penerimaan_lain/validasi/penerimaan_lain",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"penerimaan_lain",
+								"validasi",
+								"penerimaan_lain"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Cancel Validasi",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"string\",\r\n    \"rc_id\": 0\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/penerimaan_lain/cancel_validasi/penerimaan_lain",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"penerimaan_lain",
+								"cancel_validasi",
+								"penerimaan_lain"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Akun",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/penerimaan_lain/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"penerimaan_lain",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Potensi Lain",
+			"item": [
+				{
+					"name": "Get All Potensi lain",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/potensi_lain",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"potensi_lain"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Potensi lain by id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/potensi_lain",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"potensi_lain"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Statistik Potensi lain",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/potensi_lain/statistik",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"potensi_lain",
+								"statistik"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Potensi lain",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/potensi_lain",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"potensi_lain"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Potensi lain terima",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/potensi_lain/terima",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"potensi_lain",
+								"terima"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Potensi lain",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/potensi_lain",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"potensi_lain"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Potensi lain",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/potensi_lain",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"potensi_lain"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Data Closing",
+			"item": [
+				{
+					"name": "Get Data closing",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/data_closing?closing_id=&tgl_closing_start&tgl_closing_end&rc_id&kasir_id&kasir_nama&penyetor_id&penyetor_nama&is_web_change&page=1&size=50",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"data_closing"
+							],
+							"query": [
+								{
+									"key": "closing_id",
+									"value": "",
+									"description": "Integer"
+								},
+								{
+									"key": "tgl_closing_start",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "tgl_closing_end",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "rc_id",
+									"value": null,
+									"description": "Integer"
+								},
+								{
+									"key": "kasir_id",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "kasir_nama",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "penyetor_id",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "penyetor_nama",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "is_web_change",
+									"value": null,
+									"description": "Boolean"
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Integer"
+								},
+								{
+									"key": "size",
+									"value": "50",
+									"description": "Integer"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Data closing",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"tgl_closing\": \"2025-06-05\",\r\n    \"no_closing\": \"string\",\r\n    \"vol_tunai\": 0,\r\n    \"vol_transfer_jatim\": 0,\r\n    \"vol_transfer_mandiri\": 0,\r\n    \"vol_transfer_bca\": 0,\r\n    \"vol_transfer_lainnya\": 0,\r\n    \"vol_atm_jatim\": 0,\r\n    \"vol_atm_mandiri\": 0,\r\n    \"vol_atm_bca\": 0,\r\n    \"vol_atm_lainnya\": 0,\r\n    \"vol_edc\": 0,\r\n    \"vol_qris\": 0,\r\n    \"vol_mb\": 0,\r\n    \"vol_ecomm\": 0,\r\n    \"vol_ue\": 0,\r\n    \"tunai\": 0,\r\n    \"transfer_jatim\": 0,\r\n    \"transfer_mandiri\": 0,\r\n    \"transfer_bca\": 0,\r\n    \"transfer_lainnya\": 0,\r\n    \"atm_jatim\": 0,\r\n    \"atm_mandiri\": 0,\r\n    \"atm_bca\": 0,\r\n    \"atm_lainnya\": 0,\r\n    \"edc\": 0,\r\n    \"qris\": 0,\r\n    \"mb\": 0,\r\n    \"ecomm\": 0,\r\n    \"ue\": 0,\r\n    \"rc_id\": 0,\r\n    \"kasir_id\": 0,\r\n    \"kasir_nama\": \"string\",\r\n    \"penyetor_id\": 0,\r\n    \"penyetor_nama\": \"string\",\r\n    \"is_web_change\": true,\r\n    \"keterangan\": \"string\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/data_closing",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"data_closing"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Data closing",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/data_closing/list_closing?page=1&size=50",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"data_closing",
+								"list_closing"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Integer"
+								},
+								{
+									"key": "size",
+									"value": "50",
+									"description": "Integer"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Data closing",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"tgl_closing\": \"2025-06-05\",\r\n    \"no_closing\": \"string\",\r\n    \"vol_tunai\": 0,\r\n    \"vol_transfer_jatim\": 0,\r\n    \"vol_transfer_mandiri\": 0,\r\n    \"vol_transfer_bca\": 0,\r\n    \"vol_transfer_lainnya\": 0,\r\n    \"vol_atm_jatim\": 0,\r\n    \"vol_atm_mandiri\": 0,\r\n    \"vol_atm_bca\": 0,\r\n    \"vol_atm_lainnya\": 0,\r\n    \"vol_edc\": 0,\r\n    \"vol_qris\": 0,\r\n    \"vol_mb\": 0,\r\n    \"vol_ecomm\": 0,\r\n    \"vol_ue\": 0,\r\n    \"tunai\": 0,\r\n    \"transfer_jatim\": 0,\r\n    \"transfer_mandiri\": 0,\r\n    \"transfer_bca\": 0,\r\n    \"transfer_lainnya\": 0,\r\n    \"atm_jatim\": 0,\r\n    \"atm_mandiri\": 0,\r\n    \"atm_bca\": 0,\r\n    \"atm_lainnya\": 0,\r\n    \"edc\": 0,\r\n    \"qris\": 0,\r\n    \"mb\": 0,\r\n    \"ecomm\": 0,\r\n    \"ue\": 0,\r\n    \"rc_id\": 0,\r\n    \"kasir_id\": 0,\r\n    \"kasir_nama\": \"string\",\r\n    \"penyetor_id\": 0,\r\n    \"penyetor_nama\": \"string\",\r\n    \"is_web_change\": true,\r\n    \"keterangan\": \"string\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/data_closing/:closing_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"data_closing",
+								":closing_id"
+							],
+							"variable": [
+								{
+									"key": "closing_id",
+									"value": "",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Data closing",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/data_closing/:closing_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"data_closing",
+								":closing_id"
+							],
+							"variable": [
+								{
+									"key": "closing_id",
+									"value": "",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Temp Penerimaan Swa",
+			"item": [
+				{
+					"name": "Get All Temp penerimaan swa",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/temp_penerimaan_swa?tanggal=&sumber_transaksi&page=1&size=50",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"temp_penerimaan_swa"
+							],
+							"query": [
+								{
+									"key": "tanggal",
+									"value": "",
+									"description": "String"
+								},
+								{
+									"key": "sumber_transaksi",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Integer"
+								},
+								{
+									"key": "size",
+									"value": "50",
+									"description": "Integer"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Temp penerimaan swa by id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/temp_penerimaan_swa/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"temp_penerimaan_swa",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Rekening Koran",
+			"item": [
+				{
+					"name": "Get All Rekening koran",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/rekening_koran",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rekening_koran"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Rekening koran by id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/rekening_koran/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rekening_koran",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "15"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Sum Rekening koran",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/rekening_koran/sum_rekening_koran?tgl_awal&tgl_akhir&bulan_awal&bulan_akhir&year&uraian&bank&periode&debit&kredit&kualifikasi",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rekening_koran",
+								"sum_rekening_koran"
+							],
+							"query": [
+								{
+									"key": "tgl_awal",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "tgl_akhir",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "bulan_awal",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "bulan_akhir",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "year",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "uraian",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "bank",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "periode",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "debit",
+									"value": null,
+									"description": "Number"
+								},
+								{
+									"key": "kredit",
+									"value": null,
+									"description": "Number"
+								},
+								{
+									"key": "kualifikasi",
+									"value": null,
+									"description": "Integer"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Statistik Rekening koran",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/rekening_koran/statistik",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rekening_koran",
+								"statistik"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Uncheckpb Rekening koran",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/rekening_koran/pb/uncheck",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rekening_koran",
+								"pb",
+								"uncheck"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Checkpb Rekening koran",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/rekening_koran/pb/check/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rekening_koran",
+								"pb",
+								"check",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "15"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sinkronisasi",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/rekening_koran/bukti_setor",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rekening_koran",
+								"bukti_setor"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Mutasi",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/rekening_koran/bank/upload",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rekening_koran",
+								"bank",
+								"upload"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Mutasi Bank",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/rekening_koran/mutasi/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rekening_koran",
+								"mutasi",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sinkronisasi",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/rekening_koran/sinkronisasi",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rekening_koran",
+								"sinkronisasi"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sinkronisasi API",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/rekening_koran/sinkronisasi-api",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rekening_koran",
+								"sinkronisasi-api"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update All Rekening koran",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/rekening_koran",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rekening_koran"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Pb Rekening koran",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/rekening_koran/pb",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rekening_koran",
+								"pb"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Pb Rekening koran",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/rekening_koran/pb_cancel",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rekening_koran",
+								"pb_cancel"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Bukti Setor",
+			"item": [
+				{
+					"name": "Get All Bukti setor",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/bukti_setor?tgl_awal&tgl_akhir&bulan_awal&bulah_akhir&year&bank&periode&page=1&size=50",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bukti_setor"
+							],
+							"query": [
+								{
+									"key": "tgl_awal",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "tgl_akhir",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "bulan_awal",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "bulah_akhir",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "year",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "bank",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "periode",
+									"value": null,
+									"description": "Strings"
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Integer"
+								},
+								{
+									"key": "size",
+									"value": "50",
+									"description": "Integer"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Statistik Bukti setor",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/bukti_setor/statistik",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bukti_setor",
+								"statistik"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "BKU",
+			"item": [
+				{
+					"name": "Get All Bku",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/bku?tgl_awal&tgl_akhir&bulan_awal&bulan_akhir&periode&year&jenis&bku_id&page=1&size=100",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bku"
+							],
+							"query": [
+								{
+									"key": "tgl_awal",
+									"value": null
+								},
+								{
+									"key": "tgl_akhir",
+									"value": null
+								},
+								{
+									"key": "bulan_awal",
+									"value": null
+								},
+								{
+									"key": "bulan_akhir",
+									"value": null
+								},
+								{
+									"key": "periode",
+									"value": null
+								},
+								{
+									"key": "year",
+									"value": null
+								},
+								{
+									"key": "jenis",
+									"value": null
+								},
+								{
+									"key": "bku_id",
+									"value": null
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Integer"
+								},
+								{
+									"key": "size",
+									"value": "100",
+									"description": "Integer"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Bku by id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/bku/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bku",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "128",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Bku Bku",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/bku/bku?tgl_awal&tgl_akhir&bulan_awal&bulan_akhir&periode&year&jenis&no_bku&page=1&size=100",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bku",
+								"bku"
+							],
+							"query": [
+								{
+									"key": "tgl_awal",
+									"value": null
+								},
+								{
+									"key": "tgl_akhir",
+									"value": null
+								},
+								{
+									"key": "bulan_awal",
+									"value": null
+								},
+								{
+									"key": "bulan_akhir",
+									"value": null
+								},
+								{
+									"key": "periode",
+									"value": null
+								},
+								{
+									"key": "year",
+									"value": null
+								},
+								{
+									"key": "jenis",
+									"value": null
+								},
+								{
+									"key": "no_bku",
+									"value": null
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Integer"
+								},
+								{
+									"key": "size",
+									"value": "100",
+									"description": "Integer"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Statistik Bku",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/bku/statistik",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bku",
+								"statistik"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get List All Bku",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/bku/list?no_bku=",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bku",
+								"list"
+							],
+							"query": [
+								{
+									"key": "no_bku",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Rincian Bku",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/bku/rincian",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bku",
+								"rincian"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Detail Rincian Bku",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/bku/rincian/detail/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bku",
+								"rincian",
+								"detail",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Bku",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/bku",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bku"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Bku",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/bku/bku_post",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bku",
+								"bku_post"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get List Bku",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/bku/listbku",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bku",
+								"listbku"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add All Bku",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/bku/all_bku",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bku",
+								"all_bku"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Rincian Bku",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/bku/bkurincian",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bku",
+								"bkurincian"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Bku web",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/bku",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bku"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Bku Bku",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/bku/bku_put",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bku",
+								"bku_put"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Rincian Bku",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/bku/rincian",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bku",
+								"rincian"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Validasi Bku",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/bku/validasi",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bku",
+								"validasi"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Validasi Bku",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/bku/cancel_validasi",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bku",
+								"cancel_validasi"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Bku",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/bku",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bku"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Rincian Bku",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/bku/rincian",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bku",
+								"rincian"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Statistik",
+			"item": [
+				{
+					"name": "Get Statistik dashboard",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/statistik/dashboard",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"statistik",
+								"dashboard"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Rekap",
+			"item": [
+				{
+					"name": "Get Pasien rawat jalan bpjs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/rekap/pasien_rawat_jalan_bpjs",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rekap",
+								"pasien_rawat_jalan_bpjs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Pasien rawat inap bpjs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/rekap/pasien_rawat_inap_bpjs",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"rekap",
+								"pasien_rawat_inap_bpjs"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Pasien BPJS",
+			"item": [
+				{
+					"name": "Get All Status Pasien bpjs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/pasienbpjs",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"pasienbpjs"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Pasien BPJS Tarik",
+			"item": [
+				{
+					"name": "Get All Status Pasien bpjs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/pasienbpjs/tarik?tgl_awal&tgl_akhir&no_rekam_medik=&pasien_nama=&no_pendaftaran&page&size",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"pasienbpjs",
+								"tarik"
+							],
+							"query": [
+								{
+									"key": "tgl_awal",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "tgl_akhir",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "no_rekam_medik",
+									"value": "",
+									"description": "String"
+								},
+								{
+									"key": "pasien_nama",
+									"value": "",
+									"description": "String"
+								},
+								{
+									"key": "no_pendaftaran",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "page",
+									"value": null,
+									"description": "Integer"
+								},
+								{
+									"key": "size",
+									"value": null,
+									"description": "Integer"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Status Pasien bpjs tarik",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/pasienbpjs/tarik/tarik?tgl_awal&tgl_akhir&no_rekam_medik&no_sep&no_pendaftaran",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"pasienbpjs",
+								"tarik",
+								"tarik"
+							],
+							"query": [
+								{
+									"key": "tgl_awal",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "tgl_akhir",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "no_rekam_medik",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "no_sep",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "no_pendaftaran",
+									"value": null,
+									"description": "String"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Get data",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/info?id=1",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"info"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "1"
+						}
+					]
+				},
+				"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+			},
+			"response": []
+		},
+		{
+			"name": "Post data",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Successful POST request\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"Add your name in the body\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/info",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"info"
+					]
+				},
+				"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+			},
+			"response": []
+		},
+		{
+			"name": "Update data",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Successful PUT request\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"Add your name in the body\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/info?id=1",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"info"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "1"
+						}
+					]
+				},
+				"description": "This is a PUT request and it is used to overwrite an existing piece of data. For instance, after you create an entity with a POST request, you may want to modify that later. You can do that using a PUT request. You typically identify the entity being updated by including an identifier in the URL (eg. `id=1`).\n\nA successful PUT request typically returns a `200 OK`, `201 Created`, or `204 No Content` response code."
+			},
+			"response": []
+		},
+		{
+			"name": "Delete data",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Successful DELETE request\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 202, 204]);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/info?id=1",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"info"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "1"
+						}
+					]
+				},
+				"description": "This is a DELETE request, and it is used to delete data that was previously created via a POST request. You typically identify the entity being updated by including an identifier in the URL (eg. `id=1`).\n\nA successful DELETE request typically returns a `200 OK`, `202 Accepted`, or `204 No Content` response code."
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "id",
+			"value": "1"
+		},
+		{
+			"key": "base_url",
+			"value": "https://postman-rest-api-learner.glitch.me/"
+		}
+	]
+}

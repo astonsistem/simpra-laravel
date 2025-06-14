@@ -26,10 +26,6 @@ use App\Http\Controllers\StatistikController;
 use App\Http\Controllers\SyncApiController;
 use App\Http\Controllers\TempPenerimaanSwaController;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-
 Route::post('auth/login_token', [AuthController::class, 'login']);
 Route::post('auth/logintoken', [AuthController::class, 'loginToken']);
 Route::middleware([
@@ -132,17 +128,41 @@ Route::get('temp_penerimaan_swa', [TempPenerimaanSwaController::class, 'index'])
 Route::get('temp_penerimaan_swa/{id}', [TempPenerimaanSwaController::class, 'show']);
 
 Route::get('rekening_koran', [RekeningKoranController::class, 'index']);
+Route::get('rekening_koran/statistik', [RekeningKoranController::class, 'statistik']);
+Route::get('rekening_koran/sum_rekening_koran', [RekeningKoranController::class, 'sum']);
+Route::get('rekening_koran/statistik', [RekeningKoranController::class, 'statistik']);
+Route::get('rekening_koran/{id}', [RekeningKoranController::class, 'show']);
+Route::get('rekening_koran/pb/uncheck', [RekeningKoranController::class, 'pbUncheck']);
+Route::get('rekening_koran/pb/check/{rc_id}', [RekeningKoranController::class, 'pbCheck']);
+Route::get('rekening_koran/bukti_setor/{rc_id}', [RekeningKoranController::class, 'buktiSetor']);
+Route::post('rekening_koran/{bank}/upload', [RekeningKoranController::class, 'index']);
+Route::post('rekening_koran/mutasi/{bank}', [RekeningKoranController::class, 'index']);
+Route::post('rekening_koran/sinkronisasi', [RekeningKoranController::class, 'index']);
+Route::post('rekening_koran/sinkronisasi-api/{bank}', [RekeningKoranController::class, 'index']);
+Route::put('rekening_koran/{id}', [RekeningKoranController::class, 'update']);
+Route::put('rekening_koran/pb/{id}', [RekeningKoranController::class, 'updatePb']);
+Route::put('rekening_koran/pb_cancel/{id}', [RekeningKoranController::class, 'updatePbCancel']);
 
 Route::get('bukti_setor', [BuktiSetorController::class, 'index']);
-Route::get('bukti_setor/statistik', [BuktiSetorController::class, 'statistik']);
+Route::get('BuktiSetor/statistik', [BuktiSetorController::class, 'statistik']);
 
 Route::get('bku', [BkuController::class, 'index']);
-Route::get('bku/listbku', [BkuController::class, 'index']);
-Route::get('bku/bku', [BkuController::class, 'index']);
-Route::get('bku/statistik', [BkuController::class, 'index']);
-Route::get('bku/bku_post', [BkuController::class, 'index']);
-Route::get('bku/bku_put', [BkuController::class, 'index']);
-Route::get('bku/all_bku', [BkuController::class, 'index']);
+Route::get('bku/list', [BkuController::class, 'list']);
+Route::get('bku/bku', [BkuController::class, 'bku']);
+Route::get('bku/statistik', [BkuController::class, 'statistik']);
+Route::get('bku/rincian/{id}', [BkuController::class, 'rincian']);
+Route::get('bku/rincian/detail/{id}', [BkuController::class, 'detailRincian']);
+Route::get('bku/{id}', [BkuController::class, 'show']);
+Route::post('bku', [BkuController::class, 'store']);
+Route::post('bku/listbku', [BkuController::class, 'listbku']);
+Route::post('bku/bku_post', [BkuController::class, 'listbku']);
+Route::post('bku/all_bku', [BkuController::class, 'listbku']);
+Route::post('bkurincian', [BkuController::class, 'bkurincian']);
+Route::put('bku/{id}', [BkuController::class, 'index']);
+Route::put('bku/bku_put/{id}', [BkuController::class, 'index']);
+Route::put('bku/rincian/{id}', [BkuController::class, 'index']);
+Route::put('bku/validasi/{id}', [BkuController::class, 'updateValidasi']);
+Route::put('bku/cancel-validasi/{id}', [BkuController::class, 'cancelValidasi']);
 Route::delete('bku/{id}', [BkuController::class, 'destroy']);
 Route::delete('bku/rincian/{id}', [BkuController::class, 'destroyRincian']);
 

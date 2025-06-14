@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\BillingKasirRequest;
 use App\Http\Resources\BillingKasirCollection;
 use App\Http\Resources\BillingKasirResource;
 use App\Models\DataPenerimaanLayanan;
+use App\Models\DataRekeningKoran;
+use App\Models\Kasir;
+use App\Models\Loket;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
@@ -61,7 +65,7 @@ class BillingKasirController extends Controller
                 $query->where('loket_id', $loket);
             }
             if (!empty($uraian)) {
-                $query->where('status_id', "%$uraian%");
+                $query->where('status_id', 'ILIKE', "%$uraian%");
             }
             if (!empty($bank)) {
                 $query->where('bank_tujuan', 'ILIKE', "%$bank%");
@@ -138,11 +142,62 @@ class BillingKasirController extends Controller
 
     public function statistik(Request $request)
     {
+        // sum_penerimaan = get_sum_billing_kasirs(db)
+        // jumlah_penerimaan = count_billing_kasirs(db)
+        // penerimaan_tunai = get_sum_total_by_payment_method(db,"TUNAI")
+        // penerimaan_non_tunai = get_sum_total_by_not_payment_method(db,"TUNAI")
+        // pendapatan_tersetor = get_sum_total_by_status(db,['5','6'])
+        // kas_on_hand = get_sum_total_by_not_status(db,['5','6'], "TUNAI")
+
+
+        return response()->json([
+            'penerimaan' => "sum_penerimaan.total",
+            'jumlah_penerimaan' => "jumlah_penerimaan",
+            'penerimaan_tunai' => "penerimaan_tunai.total",
+            'jumlah_penerimaan_tunai' => "penerimaan_tunai.count_total",
+            'penerimaan_non_tunai' => "penerimaan_non_tunai.total",
+            'jumlah_penerimaan_non_tunai' => "penerimaan_non_tunai.count_total",
+            'kas_on_hand' => "kas_on_hand.total",
+            'jumlah_kas_on_hand' => "kas_on_hand.count_total",
+            'pendapatan_tersetor' => "pendapatan_tersetor.total",
+            'jumlah_pendapatan_tersetor' => "pendapatan_tersetor.count_total"
+        ]);
     }
 
-    public function update(Request $request, string $id)
+    public function update(BillingKasirRequest $request, string $id)
     {
-        //
+        try {
+            $data = $request->validated();
+
+            $billingKasir = DataPenerimaanLayanan::where('tandabuktibayar_id', $id)->firstOrFail();
+
+            if (!empty($data['loket_id'])) {
+                $loket = Loket::where('id', $data['loket_id'])->first();
+                if ($loket) {
+                    $data['loket_nama'] = $loket->loket_nama;
+                }
+            }
+
+            if (!empty($data['kasir_id'])) {
+                $kasir = Kasir::where('id', $data['kasir_id'])->first();
+                if ($kasir) {
+                    $data['kasir_nama'] = $kasir->kasir_nama;
+                }
+            }
+
+            $billingKasir->update($data);
+
+            return response()->json([
+                'message' => 'Berhasil memperbarui data billing kasir',
+                'data' => new BillingKasirResource($billingKasir),
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => 500,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+                'data'    => null
+            ], 500);
+        }
     }
 
     public function destroy($id)
@@ -179,5 +234,87 @@ class BillingKasirController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function validasi(string $id)
+    {
+        try {
+            $billingKasir = DataPenerimaanLayanan::where('tandabuktibayar_id', $id)->firstOrFail();
+            if (!$billingKasir) {
+                return response()->json([
+                    'message' => 'Not found'
+                ], 404);
+            }
+
+            $tglBuktiBayar = $billingKasir->tgl_buktibayar;
+            $bankTujuan = $billingKasir->bank_tujuan;
+            $rcId = $billingKasir->rc_id;
+
+            $rekeningKoran = DataRekeningKoran::where('rc_id', $rcId)
+                ->where('tgl_rc', '>=', $tglBuktiBayar)
+                ->where('bank_tujuan', $bankTujuan)
+                ->get();
+
+            $caraPembayaran = $billingKasir->cara_pembayaran;
+            $totalSetor = 0;
+
+            if (in_array($caraPembayaran, ['TUNAI', 'EDC'])) {
+                // $totalSetor =  sum_total_setor(db, no_closing, cara_pembayaran);
+
+                $rekeningKoran = $rekeningKoran->filter(function ($koran) use ($totalSetor) {
+                    return $koran->kredit == $totalSetor;
+                });
+            } elseif (in_array($caraPembayaran, ['QRIS', 'TRANSFER'])) {
+                $jumlahNetto =
+                    ($billingKasir->total ?? 0) -
+                    ($billingKasir->admin_kredit ?? 0) +
+                    ($billingKasir->selisih ?? 0);
+
+                $rekeningKoran = $rekeningKoran->filter(function ($koran) use ($jumlahNetto) {
+                    return $koran->kredit == $jumlahNetto;
+                });
+
+                $totalSetor = $jumlahNetto;
+            }
+
+            return response()->json([
+                'message' => 'success',
+                'data' => [
+                    'penerimaan_pelayanan' => new BillingKasirResource($billingKasir),
+                    'rekening_koran' => $rekeningKoran,
+                    'total_setor' => $totalSetor
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error: ' . $e->getMessage(),
+                'data' => null
+            ], 500);
+        }
+    }
+
+    public function validasiFilter(string $id)
+    {
+        //
+    }
+
+    public function validasiFilterUraian(string $id)
+    {
+        //
+    }
+
+    public function validasiFilterJumlah(string $id)
+    {
+        //
+    }
+
+    public function updateValidasi()
+    {
+        //
+    }
+
+    public function cancelValidasi()
+    {
+        //
     }
 }

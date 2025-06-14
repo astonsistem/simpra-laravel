@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\Rule;
 
 class CreateUserRequest extends FormRequest
 {
@@ -15,16 +16,24 @@ class CreateUserRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
-            "nip" => 'required|string',
-            "nama" => 'required|string',
-            "no_telp" => 'required|string',
-            "jabatan" => 'required|string',
-            "email" => 'required|string',
-            "username" => 'required|string',
-            "role" => 'required|string',
-            "password" => 'required|string'
+        $userId = $this->route('id');
+
+        $rules = [
+            "nip"       => ['required', 'string', Rule::unique('users', 'nip')->ignore($userId)],
+            "nama"      => 'required|string',
+            "no_telp"   => 'required|string',
+            "jabatan"   => 'required|string',
+            "email"     => ['required', 'string', 'email', Rule::unique('users', 'email')->ignore($userId)],
+            "username"  => ['required', 'string', Rule::unique('users', 'username')->ignore($userId)],
+            "role"      => 'required|string',
+            "password"  => 'sometimes|nullable|string',
         ];
+
+        if (!$userId) {
+            $rules['password'] = 'required|string';
+        }
+
+        return $rules;
     }
 
     public function messages(): array

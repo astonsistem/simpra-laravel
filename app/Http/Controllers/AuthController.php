@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Hash;
+use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
@@ -31,14 +32,15 @@ class AuthController extends Controller
     {
         $credentials = $request->validated();
 
-        if (!$token = JWTAuth::attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+        try {
+            if (!$token = JWTAuth::attempt($credentials)) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Could not create token'], 500);
         }
 
-        return response()->json([
-            'token' => $token,
-            "token_type" => "bearer",
-        ], 200);
+        return $this->respondWithToken($token);
     }
 
     public function loginToken(LoginUserRequest $request)
@@ -48,10 +50,12 @@ class AuthController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        return response()->json([
-            'token' => $token,
-            'token_type' => "bearer"
-        ], 200);
+        return $this->respondWithToken($token);
+    }
+
+    public function me()
+    {
+        return response()->json(auth()->user());
     }
 
     public function logout()
@@ -69,16 +73,9 @@ class AuthController extends Controller
     protected function respondWithToken($token)
     {
         return response()->json([
-            'access_token' => $token,
+            'token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 60
-        ]);
-    }
-
-    public function me()
-    {
-        return response()->json([
-            'user' => auth()->user()
         ]);
     }
 
@@ -93,9 +90,19 @@ class AuthController extends Controller
                     'message' => 'Not found'
                 ], 404);
             }
+
+            if (isset($data['password']) && !Hash::check($data['password'], $user->hashed_password)) {
+                $data['hashed_password'] = Hash::make($data['password']);
+            } else {
+                unset($data['password']);
+            }
             $user->update($data);
 
-            return response()->json(new UserResource($user), 200);
+            return response()->json([
+                'status' => 200,
+                'message' => "Berhasil Memperbarui data user",
+                'data' => new UserResource($user)
+            ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'status'  => 500,
@@ -216,7 +223,5 @@ class AuthController extends Controller
         }
     }
 
-    public function adminonly()
-    {
-    }
+    public function adminonly() {}
 }

@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Bku extends Model
+class DataBku extends Model
 {
     protected $table = "data_bku";
     protected $primaryKey = "bku_id";

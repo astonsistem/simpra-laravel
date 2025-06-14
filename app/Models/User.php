@@ -67,9 +67,4 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hashed_password;
     }
-
-    public function getAuthIdentifierName()
-    {
-        return 'username';
-    }
 }
