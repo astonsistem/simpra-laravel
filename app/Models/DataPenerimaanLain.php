@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class DataPenerimaanLain extends Model
 {
@@ -50,5 +51,37 @@ class DataPenerimaanLain extends Model
     protected $casts = [
         'id' => 'string',
     ];
-    // akun_data = relationship("AkunModel", foreign_keys=[akun_id])
+
+    public function masterAkun()
+    {
+        return $this->belongsTo(MasterAkun::class, 'akun_id', 'akun_id');
+    }
+
+    public static function sumTotal(?string $type = null, ?string $month = null, ?string $sumberTransaksi = null): int
+    {
+        $query = self::query()
+            ->selectRaw('SUM(total) as total');
+        if (!empty($month)) {
+            $query->whereMonth('tgl_bayar', $month);
+        }
+        if (!empty($type)) {
+            $query->where('type', $type);
+        }
+        if (!empty($sumberTransaksi)) {
+            $query->where('sumber_transaksi', $sumberTransaksi);
+        }
+        $result = $query->first();
+
+        return $result?->total ?? 0;
+    }
+
+    public static function sumTotalByRcId(int $rcId): float
+    {
+        $result = self::query()
+            ->selectRaw('SUM(COALESCE(total,0) - COALESCE(admin_kredit,0) + COALESCE(selisih,0)) as total')
+            ->where('rc_id', $rcId)
+            ->first();
+
+        return $result?->total ?? 0;
+    }
 }

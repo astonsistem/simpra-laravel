@@ -65,4 +65,22 @@ class DataPenerimaanLayanan extends Model
     protected $casts = [
         'id' => 'string',
     ];
+
+    public static function sumTotalSetor(?string $noClosing = null, ?string $caraPembayaran = null): float
+    {
+        $query = self::query()
+            ->selectRaw('SUM(COALESCE(total, 0) - COALESCE(admin_kredit, 0) + COALESCE(selisih, 0)) as total');
+
+        if (!empty($noClosing)) {
+            $query->where('no_closingkasir', $noClosing);
+        }
+
+        if (!empty($caraPembayaran)) {
+            $query->where('cara_pembayaran', $caraPembayaran);
+        }
+
+        $result = $query->first();
+
+        return $result?->total ?? 0;
+    }
 }

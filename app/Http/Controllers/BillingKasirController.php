@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\BillingKasirRequest;
+use App\Http\Requests\ValidasiBillingKasirRequest;
 use App\Http\Resources\BillingKasirCollection;
 use App\Http\Resources\BillingKasirResource;
 use App\Models\DataPenerimaanLayanan;
@@ -10,6 +11,7 @@ use App\Models\DataRekeningKoran;
 use App\Models\Kasir;
 use App\Models\Loket;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
 
@@ -239,7 +241,9 @@ class BillingKasirController extends Controller
     public function validasi(string $id)
     {
         try {
-            $billingKasir = DataPenerimaanLayanan::where('tandabuktibayar_id', $id)->firstOrFail();
+            $billingKasir = DataPenerimaanLayanan::where('id', $id)->firstOrFail();
+            $rekeningKoran = [];
+            $totalSetor = 0;
             if (!$billingKasir) {
                 return response()->json([
                     'message' => 'Not found'
@@ -250,16 +254,13 @@ class BillingKasirController extends Controller
             $bankTujuan = $billingKasir->bank_tujuan;
             $rcId = $billingKasir->rc_id;
 
-            $rekeningKoran = DataRekeningKoran::where('rc_id', $rcId)
-                ->where('tgl_rc', '>=', $tglBuktiBayar)
-                ->where('bank_tujuan', $bankTujuan)
-                ->get();
+            $rekeningKoran = DataRekeningKoran::getTanggalRc($rcId, $tglBuktiBayar, $bankTujuan);
 
+            $noClosing = $billingKasir->no_closingkasir;
             $caraPembayaran = $billingKasir->cara_pembayaran;
-            $totalSetor = 0;
 
             if (in_array($caraPembayaran, ['TUNAI', 'EDC'])) {
-                // $totalSetor =  sum_total_setor(db, no_closing, cara_pembayaran);
+                $totalSetor =  DataPenerimaanLayanan::sumTotalSetor($noClosing, $caraPembayaran);
 
                 $rekeningKoran = $rekeningKoran->filter(function ($koran) use ($totalSetor) {
                     return $koran->kredit == $totalSetor;
@@ -278,9 +279,10 @@ class BillingKasirController extends Controller
             }
 
             return response()->json([
+                'status' => 200,
                 'message' => 'success',
                 'data' => [
-                    'penerimaan_pelayanan' => new BillingKasirResource($billingKasir),
+                    'penerimaan_pelayanan' => $billingKasir,
                     'rekening_koran' => $rekeningKoran,
                     'total_setor' => $totalSetor
                 ]
@@ -295,26 +297,280 @@ class BillingKasirController extends Controller
 
     public function validasiFilter(string $id)
     {
-        //
+        try {
+            $billingKasir = DataPenerimaanLayanan::where('id', $id)->firstOrFail();
+            $rekeningKoran = [];
+            $totalSetor = 0;
+            if (!$billingKasir) {
+                return response()->json([
+                    'message' => 'Not found'
+                ], 404);
+            }
+
+            $tglBuktiBayar = $billingKasir->tgl_buktibayar;
+            $bankTujuan = $billingKasir->bank_tujuan;
+            $rcId = $billingKasir->rc_id;
+
+            $rekeningKoran = DataRekeningKoran::getTanggalRcFilter($tglBuktiBayar, $bankTujuan);
+
+            $noClosing = $billingKasir->no_closingkasir;
+            $caraPembayaran = $billingKasir->cara_pembayaran;
+
+            if (in_array($caraPembayaran, ['TUNAI', 'EDC'])) {
+                $totalSetor =  DataPenerimaanLayanan::sumTotalSetor($noClosing, $caraPembayaran);
+            } elseif (in_array($caraPembayaran, ['QRIS', 'TRANSFER'])) {
+                $jumlahNetto =
+                    ($billingKasir->total ?? 0) -
+                    ($billingKasir->admin_kredit ?? 0) +
+                    ($billingKasir->selisih ?? 0);
+                $totalSetor = $jumlahNetto;
+            }
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'success',
+                'data' => [
+                    'penerimaan_pelayanan' => $billingKasir,
+                    'rekening_koran' => $rekeningKoran,
+                    'total_setor' => $totalSetor
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error: ' . $e->getMessage(),
+                'data' => null
+            ], 500);
+        }
     }
 
-    public function validasiFilterUraian(string $id)
+    public function validasiFilterUraian(Request $request, string $id)
     {
-        //
+        try {
+            $uraian = $request->query('uraian');
+
+            $billingKasir = DataPenerimaanLayanan::where('id', $id)->firstOrFail();
+            $rekeningKoran = [];
+            $totalSetor = 0;
+            if (!$billingKasir) {
+                return response()->json([
+                    'message' => 'Not found'
+                ], 404);
+            }
+
+            $tglBuktiBayar = $billingKasir->tgl_buktibayar;
+            $bankTujuan = $billingKasir->bank_tujuan;
+            $uraian = $billingKasir->rc_id;
+
+            $rekeningKoran = DataRekeningKoran::getTanggalRcFilterUraian($tglBuktiBayar, $bankTujuan, $uraian);
+
+            $noClosing = $billingKasir->no_closingkasir;
+            $caraPembayaran = $billingKasir->cara_pembayaran;
+
+            if (in_array($caraPembayaran, ['TUNAI', 'EDC'])) {
+                $totalSetor =  DataPenerimaanLayanan::sumTotalSetor($noClosing, $caraPembayaran);
+            } elseif (in_array($caraPembayaran, ['QRIS', 'TRANSFER'])) {
+                $jumlahNetto =
+                    ($billingKasir->total ?? 0) -
+                    ($billingKasir->admin_kredit ?? 0) +
+                    ($billingKasir->selisih ?? 0);
+                $totalSetor = $jumlahNetto;
+            }
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'success',
+                'data' => [
+                    'penerimaan_pelayanan' => $billingKasir,
+                    'rekening_koran' => $rekeningKoran,
+                    'total_setor' => $totalSetor
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error: ' . $e->getMessage(),
+                'data' => null
+            ], 500);
+        }
     }
 
-    public function validasiFilterJumlah(string $id)
+    public function validasiFilterJumlah(Request $request, string $id)
     {
-        //
+        try {
+            $jumlah = $request->query('jumlah');
+
+            $billingKasir = DataPenerimaanLayanan::where('id', $id)->firstOrFail();
+            $rekeningKoran = [];
+            $totalSetor = 0;
+            if (!$billingKasir) {
+                return response()->json([
+                    'message' => 'Not found'
+                ], 404);
+            }
+
+            $tglBuktiBayar = $billingKasir->tgl_buktibayar;
+            $bankTujuan = $billingKasir->bank_tujuan;
+
+            $rekeningKoran = DataRekeningKoran::getTanggalRcFilterJumlah($tglBuktiBayar, $bankTujuan, $jumlah);
+
+            $noClosing = $billingKasir->no_closingkasir;
+            $caraPembayaran = $billingKasir->cara_pembayaran;
+
+            if (in_array($caraPembayaran, ['TUNAI', 'EDC'])) {
+                $totalSetor =  DataPenerimaanLayanan::sumTotalSetor($noClosing, $caraPembayaran);
+            } elseif (in_array($caraPembayaran, ['QRIS', 'TRANSFER'])) {
+                $jumlahNetto =
+                    ($billingKasir->total ?? 0) -
+                    ($billingKasir->admin_kredit ?? 0) +
+                    ($billingKasir->selisih ?? 0);
+                $totalSetor = $jumlahNetto;
+            }
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'success',
+                'data' => [
+                    'penerimaan_pelayanan' => $billingKasir,
+                    'rekening_koran' => $rekeningKoran,
+                    'total_setor' => $totalSetor
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error: ' . $e->getMessage(),
+                'data' => null
+            ], 500);
+        }
     }
 
-    public function updateValidasi()
+    public function updateValidasi(ValidasiBillingKasirRequest $request)
     {
-        //
+        $data = $request->validated();
+        $billingKasirId = $data['id'];
+        $rcId = $data['rc_id'];
+
+        $currentUserId = auth()->user()->id;
+
+        try {
+            DB::transaction(function () use ($billingKasirId, $rcId, $currentUserId) {
+                $billingKasir = DataPenerimaanLayanan::where('id', $billingKasirId)
+                    ->where(function ($query) {
+                        $query->where('status_id', '!=', 6)
+                            ->orWhereNull('status_id');
+                    })
+                    ->first();
+
+                if (!$billingKasir) {
+                    throw new \Exception('Penerimaan layanan tidak ditemukan atau status tidak valid.');
+                }
+
+                $rcIdValue = ($rcId === 0 || $rcId === '0') ? null : $rcId;
+
+                DataPenerimaanLayanan::where('id', $billingKasirId)
+                    ->where(function ($query) {
+                        $query->where('status_id', '!=', 6)->orWhereNull('status_id');
+                    })
+                    ->update([
+                        'rc_id'     => $rcIdValue,
+                        'status_id' => 5,
+                        'monev_id'  => $currentUserId,
+                    ]);
+
+                $billingKasirTableName = (new DataPenerimaanLayanan())->getTable();
+                $rekeningKoranTableName = (new DataRekeningKoran())->getTable();
+
+                $klarifLayananSubquery = DB::table($billingKasirTableName)
+                    ->select(DB::raw('SUM(COALESCE(total,0) - COALESCE(admin_kredit,0) + COALESCE(selisih,0))'))
+                    ->where('rc_id', $rcId);
+
+                DB::table($rekeningKoranTableName)
+                    ->where('rc_id', $rcId)
+                    ->update([
+                        'klarif_layanan' => DB::raw('(' . $klarifLayananSubquery->toSql() . ')'),
+                        'akun_id'        => '1010102',
+                    ]);
+            });
+
+            return response()->json([
+                'message' => 'Berhasil validasi penerimaan layanan',
+                'status'  => 200,
+            ], 200);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Kesalahan validasi.',
+                'errors'  => $e->errors(),
+                'status'  => 422,
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat validasi penerimaan layanan.',
+                'error'   => $e->getMessage(),
+                'status'  => 500,
+            ], 500);
+        }
     }
 
-    public function cancelValidasi()
+    public function cancelValidasi(ValidasiBillingKasirRequest $request)
     {
-        //
+        $data = $request->validated();
+        $billingKasirId = $data['id'];
+        $rcId = $data['rc_id'];
+
+        try {
+            DB::transaction(function () use ($billingKasirId, $rcId) {
+                $billingKasir = DataPenerimaanLayanan::where('id', $billingKasirId)
+                    ->where(function ($query) {
+                        $query->where('status_id', '!=', 6)
+                            ->orWhereNull('status_id');
+                    })
+                    ->first();
+
+                if (!$billingKasir) {
+                    throw new \Exception('Penerimaan layanan tidak ditemukan atau status tidak valid.');
+                }
+
+                DataPenerimaanLayanan::where('id', $billingKasirId)
+                    ->where(function ($query) {
+                        $query->where('status_id', '!=', 6)->orWhereNull('status_id');
+                    })
+                    ->update([
+                        'rc_id'     => null,
+                        'status_id' => 5,
+                        'monev_id'  => null,
+                    ]);
+
+                $billingKasirTableName = (new DataPenerimaanLayanan())->getTable();
+                $rekeningKoranTableName = (new DataRekeningKoran())->getTable();
+
+                $klarifLayananSubquery = DB::table($billingKasirTableName)
+                    ->select(DB::raw('COALESCE(SUM(total - admin_kredit + selisih), 0)'))
+                    ->where('rc_id', $rcId);
+
+                DB::table($rekeningKoranTableName)
+                    ->where('rc_id', $rcId)
+                    ->update([
+                        'klarif_layanan' => DB::raw('(' . $klarifLayananSubquery->toSql() . ')'),
+                        'akun_id'        => DB::raw(
+                            "CASE WHEN (" . $klarifLayananSubquery->toSql() . ") = 0 THEN NULL ELSE akun_id END"
+                        ),
+                    ]);
+            });
+
+            return response()->json([
+                'message' => 'Berhasil membatalkan validasi penerimaan layanan',
+                'status'  => 200,
+            ], 200);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Kesalahan validasi.',
+                'errors'  => $e->errors(),
+                'status'  => 422,
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat membatalkan validasi penerimaan layanan.',
+                'error'   => $e->getMessage(),
+                'status'  => 500,
+            ], 500);
+        }
     }
 }

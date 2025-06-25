@@ -161,11 +161,83 @@ class BkuController extends Controller
 
     public function destroy(string $id)
     {
-        //
+        try {
+            $validator = Validator::make(['id' => $id], [
+                'id' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'detail' => [
+                        [
+                            'loc' => ['path', 'id'],
+                            'msg' => 'ID is required.',
+                            'type' => 'validation'
+                        ]
+                    ]
+                ], 422);
+            }
+
+            $bku = DataBku::where('bku_id', $id)->firstOrFail();
+            $bkuRincian = DataRincianBku::where('bku_id', $id)->firstOrFail();
+            if (!$bku) {
+                return response()->json([
+                    'message' => 'Not found'
+                ], 404);
+            }
+
+            $bku->delete();
+            $bkuRincian->delete();
+
+            return response()->json([
+                'status'  => 200,
+                'message' => 'Berhasil menghapus data'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan pada server.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function destroyRincian(string $id)
     {
-        //
+        try {
+            $validator = Validator::make(['id' => $id], [
+                'id' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'detail' => [
+                        [
+                            'loc' => ['path', 'id'],
+                            'msg' => 'ID is required.',
+                            'type' => 'validation'
+                        ]
+                    ]
+                ], 422);
+            }
+
+            $bkuRincian = DataRincianBku::where('bku_id', $id)->firstOrFail();
+            if (!$bkuRincian) {
+                return response()->json([
+                    'message' => 'Not found'
+                ], 404);
+            }
+
+            $bkuRincian->delete();
+
+            return response()->json([
+                'status'  => 200,
+                'message' => 'Berhasil menghapus data'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan pada server.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

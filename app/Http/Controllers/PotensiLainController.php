@@ -34,43 +34,29 @@ class PotensiLainController extends Controller
             $bulanAkhir = $request->input('bulan_akhir');
             $year = $request->input('year');
             $periode = $request->input('periode');
-            $loket = $request->input('loket');
             $uraian = $request->input('uraian');
-            $bank = $request->input('bank');
-            $caraPembayaran = $request->input('cara_pembayaran');
-            $noClosingkasir = $request->input('no_closingkasir');
+            $pihak3 = $request->input('pihak3');
 
             $query = DokumenNonlayanan::query();
 
             if (!empty($tglAwal) && !empty($tglAkhir) && $periode == "tanggal") {
                 $startDate = Carbon::parse($tglAwal)->startOfDay();
                 $endDate = Carbon::parse($tglAkhir)->endOfDay();
-                $query->whereBetween('tgl_pelayanan', [$startDate, $endDate]);
+                $query->whereBetween('tgl_dokumen', [$startDate, $endDate]);
             }
             if (!empty($bulanAwal) && !empty($bulanAkhir) && $periode === "bulan") {
-                $query->whereBetween('bulan_pelayanan', [(int)$bulanAwal, (int)$bulanAkhir]);
-            }
-            if (!empty($year)) {
-                $query->whereYear('tgl_buktibayar', (int)$year);
-            }
-            if (!empty($loket)) {
-                $query->where('loket_id', $loket);
+                $query->whereMonth('tgl_dokumen', '>=', (int)$bulanAwal);
+                $query->whereMonth('tgl_dokumen', '<=', (int)$bulanAkhir);
             }
             if (!empty($uraian)) {
-                $query->where('status_id', "%$uraian%");
+                $query->where('uraian', $uraian);
             }
-            if (!empty($bank)) {
-                $query->where('bank_tujuan', 'ILIKE', "%$bank%");
-            }
-            if (!empty($caraPembayaran)) {
-                $query->where('cara_pembayaran', $caraPembayaran);
-            }
-            if (!empty($noClosingkasir)) {
-                $query->where('no_closingkasir', 'ILIKE', "%$noClosingkasir%");
+            if (!empty($pihak3)) {
+                $query->where('pihak3', $pihak3);
             }
 
             $totalItems = $query->count();
-            $items = $query->skip(($page - 1) * $size)->take($size)->orderBy('tgl_buktibayar', 'desc')->orderBy('no_buktibayar', 'desc')->get();
+            $items = $query->skip(($page - 1) * $size)->take($size)->orderBy('id', 'desc')->get();
 
             $totalPages = ceil($totalItems / $size);
 
@@ -98,7 +84,6 @@ class PotensiLainController extends Controller
             ], 500);
         }
     }
-
 
     public function show(string $id)
     {

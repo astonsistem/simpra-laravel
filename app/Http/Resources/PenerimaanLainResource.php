@@ -4,11 +4,9 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use phpDocumentor\Reflection\Types\Boolean;
 
-class BillingSwaResource extends JsonResource
+class PenerimaanLainResource extends JsonResource
 {
-
     public function toArray(Request $request): array
     {
         return [
@@ -35,7 +33,7 @@ class BillingSwaResource extends JsonResource
             'admin_debit' => (string) $this->admin_debit,
             'kartubank' => (string) $this->kartubank,
             'no_kartubank' => (string) $this->no_kartubank,
-            'rc_id' => (int) $this->rc_id,
+            'rc_id' => $this->rc_id,
             'selisih' => (int) $this->selisih,
             'jumlah_netto' => (int) $this->jumlah_netto,
             'desc_piutang_pelayanan' => (string) $this->desc_piutang_pelayanan,

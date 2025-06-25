@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class SyncPotensiPelayanan extends Model
+class DataPotensiPelayanan extends Model
 {
     protected $table = "data_potensi_pelayanan";
 

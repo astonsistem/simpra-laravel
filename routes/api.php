@@ -88,35 +88,57 @@ Route::get('pendapatan_pelayanan', [PendapatanPelayananController::class, 'index
 Route::get('pendapatan_pelayanan/statistik', [PendapatanPelayananController::class, 'statistik']);
 Route::get('pendapatan_pselayanan/{id}', [PendapatanPelayananController::class, 'show']);
 
-Route::get('billing_kasir', [BillingKasirController::class, 'index']);
-Route::get('billing_kasir/statistik', [BillingKasirController::class, 'statistik']);
-Route::get('billing_kasir/validasi/{id}', [BillingKasirController::class, 'index']);
-Route::get('billing_kasir/validasi/filter/{id}', [BillingKasirController::class, 'index']);
-Route::get('billing_kasir/validasi/filteruraian/{id}', [BillingKasirController::class, 'index']);
-Route::get('billing_kasir/validasi/filterjumlah/{id}', [BillingKasirController::class, 'index']);
-Route::get('billing_kasir/{id}', [BillingKasirController::class, 'show']);
-Route::put('billing_kasir/{id}', [BillingKasirController::class, 'index']);
-Route::put('billing_kasir/validasi/penerimaan_layanan', [BillingKasirController::class, 'index']);
-Route::put('billing_kasir/cancel_validasi/penerimaan_layanan', [BillingKasirController::class, 'index']);
-Route::delete('billing_kasir/{id}', [BillingKasirController::class, 'destroy']);
+Route::middleware([
+    'middleware' => 'api',
+    'prefix' => 'auth'
+])->group(function () {
+    Route::get('billing_kasir', [BillingKasirController::class, 'index']);
+    Route::get('billing_kasir/statistik', [BillingKasirController::class, 'statistik']);
+    Route::get('billing_kasir/validasi/{id}', [BillingKasirController::class, 'validasi']);
+    Route::get('billing_kasir/validasi/filter/{id}', [BillingKasirController::class, 'validasiFilter']);
+    Route::get('billing_kasir/validasi/filteruraian/{id}', [BillingKasirController::class, 'validasiFilterUraian']);
+    Route::get('billing_kasir/validasi/filterjumlah/{id}', [BillingKasirController::class, 'validasiFilterJumlah']);
+    Route::get('billing_kasir/{id}', [BillingKasirController::class, 'show']);
+    Route::put('billing_kasir/validasi/penerimaan_layanan', [BillingKasirController::class, 'updateValidasi']);
+    Route::put('billing_kasir/cancel_validasi/penerimaan_layanan', [BillingKasirController::class, 'cancelValidasi']);
+    Route::put('billing_kasir/{id}', [BillingKasirController::class, 'update']);
+    Route::delete('billing_kasir/{id}', [BillingKasirController::class, 'destroy']);
+});
 
-Route::get('billing_swa', [BillingSwaController::class, 'index']);
-Route::get('billing_swa/statistik', [BillingSwaController::class, 'statistik']);
-Route::get('billing_swa/validasi/{id}', [BillingSwaController::class, 'statistik']);
-Route::get('billing_swa/validasi/filter/{id}', [BillingSwaController::class, 'statistik']);
-Route::get('billing_swa/validasi/filteruraian/{id}', [BillingSwaController::class, 'statistik']);
-Route::get('billing_swa/validasi/filterjumlah/{id}', [BillingSwaController::class, 'statistik']);
-Route::get('billing_swa/{id}', [BillingSwaController::class, 'show']);
-Route::put('billing_swa/{id}', [BillingSwaController::class, 'show']);
-Route::put('billing_swa/validasi/penerimaan_lain', [BillingSwaController::class, 'show']);
-Route::put('billing_swa/cancel_validasi/penerimaan_lain', [BillingSwaController::class, 'show']);
-Route::delete('billing_swa/{id}', [BillingSwaController::class, 'destroy']);
+Route::middleware([
+    'middleware' => 'api',
+    'prefix' => 'auth'
+])->group(function () {
+    Route::get('billing_swa', [BillingSwaController::class, 'index']);
+    Route::get('billing_swa/statistik', [BillingSwaController::class, 'statistik']);
+    Route::get('billing_swa/validasi/{id}', [BillingSwaController::class, 'validasi']);
+    Route::get('billing_swa/validasi/filter/{id}', [BillingSwaController::class, 'validasiFilter']);
+    Route::get('billing_swa/validasi/filteruraian/{id}', [BillingSwaController::class, 'validasiFilterUraian']);
+    Route::get('billing_swa/validasi/filterjumlah/{id}', [BillingSwaController::class, 'validasiFilterJumlah']);
+    Route::get('billing_swa/{id}', [BillingSwaController::class, 'show']);
+    Route::put('billing_swa/{id}', [BillingSwaController::class, 'update']);
+    Route::put('billing_swa/validasi/penerimaan_lain', [BillingSwaController::class, 'updateValidasi']);
+    Route::put('billing_swa/cancel_validasi/penerimaan_lain', [BillingSwaController::class, 'cancelValidasi']);
+    Route::delete('billing_swa/{id}', [BillingSwaController::class, 'destroy']);
+});
 
 Route::get('potensi_pelayanan', [PotensiPelayananController::class, 'index']);
+Route::get('potensi_pelayanan/getdata', [PotensiPelayananController::class, 'getdata']);
+Route::get('potensi_pelayanan/statistik', [PotensiPelayananController::class, 'statistik']);
+Route::get('potensi_pelayanan/{id}', [PotensiPelayananController::class, 'index']);
 
 Route::get('penerimaan_lain', [PenerimaanLainController::class, 'index']);
+Route::get('penerimaan_lain/getdata', [PenerimaanLainController::class, 'getdata']);
+Route::get('penerimaan_lain/statistik', [PenerimaanLainController::class, 'statistik']);
+Route::get('penerimaan_lain/{id}', [PenerimaanLainController::class, 'show']);
 
 Route::get('potensi_lain', [PotensiLainController::class, 'index']);
+Route::get('potensi_lain/statistik', [PotensiLainController::class, 'statistik']);
+Route::get('potensi_lain/{id}', [PotensiLainController::class, 'show']);
+Route::post('potensi_lain', [PotensiLainController::class, 'store']);
+Route::post('potensi_lain/terima/{id}', [PotensiLainController::class, 'terima']);
+Route::put('potensi_lain/{id}', [PotensiLainController::class, 'update']);
+Route::delete('potensi_lain/{id}', [PotensiLainController::class, 'destroy']);
 
 Route::get('data_closing', [DataClosingController::class, 'index']);
 Route::post('data_closing/list_closing', [DataClosingController::class, 'list']);
