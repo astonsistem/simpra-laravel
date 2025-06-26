@@ -176,4 +176,52 @@ class DataRekeningKoran extends Model
 
         return $query->skip($skip)->take($limit)->get();
     }
+
+    public static function sumBuktiSetor($currentMonth)
+    {
+        $result = self::query()
+            ->selectRaw('SUM(COALESCE(klarif_layanan, 0) + COALESCE(klarif_lain, 0)) as total')
+            ->whereRaw('EXTRACT(MONTH FROM tgl_rc) <= ?', $currentMonth)
+            ->first();
+
+        return $result?->total ?? 0;
+    }
+
+    public static function sumBuktiSetorCurrent($currentMonth)
+    {
+        $result = self::query()
+            ->selectRaw('SUM(COALESCE(klarif_layanan, 0) + COALESCE(klarif_lain, 0)) as total')
+            ->whereRaw('EXTRACT(MONTH FROM tgl_rc) = ?', $currentMonth)
+            ->first();
+
+        return $result?->total ?? 0;
+    }
+
+    public static function countBuktiSetor($currentMonth)
+    {
+        $result = self::query()
+            ->selectRaw('COUNT(*) as total')
+            ->whereRaw('EXTRACT(MONTH FROM tgl_rc) <= ?', $currentMonth)
+            ->where(function ($query) {
+                $query->where('klarif_layanan', '<>', 0)
+                    ->orWhere('klarif_lain', '<>', 0);
+            })
+            ->first();
+
+        return $result?->total ?? 0;
+    }
+
+    public static function countBuktiSetorCurrent($currentMonth)
+    {
+        $result = self::query()
+            ->selectRaw('COUNT(*) as total')
+            ->whereRaw('EXTRACT(MONTH FROM tgl_rc) = ?', $currentMonth)
+            ->where(function ($query) {
+                $query->where('klarif_layanan', '<>', 0)
+                    ->orWhere('klarif_lain', '<>', 0);
+            })
+            ->first();
+
+        return $result?->total ?? 0;
+    }
 }

@@ -178,7 +178,7 @@ Route::put('rekening_koran/pb/{id}', [RekeningKoranController::class, 'updatePb'
 Route::put('rekening_koran/pb_cancel/{id}', [RekeningKoranController::class, 'updatePbCancel']);
 
 Route::get('bukti_setor', [BuktiSetorController::class, 'index']);
-Route::get('BuktiSetor/statistik', [BuktiSetorController::class, 'statistik']);
+Route::get('bukti_setor/statistik', [BuktiSetorController::class, 'statistik']);
 
 Route::get('bku', [BkuController::class, 'index']);
 Route::get('bku/list', [BkuController::class, 'list']);

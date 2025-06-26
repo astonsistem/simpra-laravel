@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\DataClosingRequest;
 use App\Http\Resources\DataClosingCollection;
+use App\Http\Resources\DataClosingResource;
 use App\Models\DataClosing;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class DataClosingController extends Controller
@@ -103,30 +106,122 @@ class DataClosingController extends Controller
         }
     }
 
-    public function list()
+    public function list(Request $request)
     {
-        //
+        try {
+            $request->validate([
+                'page' => 'nullable|integer|min:1',
+                'size' => 'nullable|integer|min:1',
+            ]);
+
+            $page = $request->input('page', 1) ?? 1;
+            $size = $request->input('size', 100) ?? 100;
+
+            $query = DataClosing::query();
+
+            $totalItems = $query->count();
+            $items = $query->skip(($page - 1) * $size)->take($size)->get();
+
+            $totalPages = ceil($totalItems / $size);
+
+            return response()->json(
+                new DataClosingCollection($items, $totalItems, $page, $size, $totalPages)
+            );
+        } catch (ValidationException $e) {
+            $errors = [];
+            foreach ($e->errors() as $field => $messages) {
+                foreach ($messages as $message) {
+                    $errors[] = [
+                        'loc' => ['query', $field],
+                        'msg' => $message,
+                        'type' => 'validation',
+                    ];
+                }
+            }
+            return response()->json([
+                'detail' => $errors
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan pada server.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
-    public function store(Request $request)
+    public function store(DataClosingRequest $request)
     {
-        //
+        try {
+            $data = $request->validated();
+
+            $checkData = DataClosing::where('no_closing', $data['no_closing'])->first();
+            if ($checkData) {
+                return response()->json([
+                    'message' => "No Closing sudah ada."
+                ], 400);
+            }
+
+            DB::beginTransaction();
+
+            $dataClosing = DataClosing::create($data);
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Berhasil menambahkan data sync',
+                'data' => new DataClosingResource($dataClosing),
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status'  => 500,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+                'data'    => null
+            ], 500);
+        }
     }
 
-    public function update(Request $request, string $id)
+    public function update(DataClosingRequest $request, string $id)
     {
-        //
+        try {
+            $data = $request->validated();
+
+            $dataClosing = DataClosing::find($id);
+            if (!$dataClosing) {
+                return response()->json([
+                    'message' => 'Not found'
+                ], 404);
+            }
+
+            DB::beginTransaction();
+
+            $dataClosing->update($data);
+
+            DB::commit();
+
+            return response()->json(new DataClosingResource($dataClosing), 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status'  => 500,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+                'data'    => null
+            ], 500);
+        }
     }
 
     public function destroy($id)
     {
         try {
-            if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $id)) {
+            if (empty($id)) {
                 return response()->json([
                     'detail' => [
                         [
                             'loc' => ['path', 'id'],
-                            'msg' => 'ID must be a valid UUID format.',
+                            'msg' => 'ID is required.',
                             'type' => 'validation'
                         ]
                     ]
@@ -140,13 +235,19 @@ class DataClosingController extends Controller
                 ], 404);
             }
 
+            DB::beginTransaction();
+
             $dataClosing->delete();
+
+            DB::commit();
 
             return response()->json([
                 'status'  => 200,
-                'message' => 'Berhasil menghapus data'
+                'message' => "Data dengan ID $id berhasil dihapus"
             ], 200);
         } catch (\Exception $e) {
+            DB::rollBack();
+
             return response()->json([
                 'message' => 'Terjadi kesalahan pada server.',
                 'error' => $e->getMessage()

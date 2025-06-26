@@ -227,7 +227,7 @@ class PenerimaanLainController extends Controller
         }
     }
 
-    public function statistik(Request $request)
+    public function statistik()
     {
         $currentMonth = Carbon::now()->format('m');
 

@@ -85,6 +85,18 @@ class BuktiSetorController extends Controller
 
     public function statistik()
     {
-        //
+        $currentMonth = Carbon::now()->format('m');
+
+        $sum = DataRekeningKoran::sumBuktiSetor($currentMonth);
+        $count = DataRekeningKoran::countBuktiSetor($currentMonth);
+        $sumCurrent = DataRekeningKoran::sumBuktiSetorCurrent($currentMonth);
+        $countCurrent = DataRekeningKoran::countBuktiSetorCurrent($currentMonth);
+
+        return response()->json([
+            'sum' => $sum,
+            'count' => $count,
+            'sum_current' => $sumCurrent,
+            'count_current' => $countCurrent,
+        ]);
     }
 }

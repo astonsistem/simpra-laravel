@@ -89,15 +89,23 @@ class SyncApiController extends Controller
 
     public function store(SyncApiRequest $request)
     {
-        $data = $request->validated();
+        try {
+            $data = $request->validated();
 
-        $sync = MasterSinkronisasi::create($data);
+            $sync = MasterSinkronisasi::create($data);
 
-        return response()->json([
-            'status' => 200,
-            'message' => 'Berhasil menambahkan data sync',
-            'data' => new SyncApiResource($sync),
-        ], 200);
+            return response()->json([
+                'status' => 200,
+                'message' => 'Berhasil menambahkan data sync',
+                'data' => new SyncApiResource($sync),
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => 500,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+                'data'    => null
+            ], 500);
+        }
     }
 
     public function update(SyncApiRequest $request, $id)
