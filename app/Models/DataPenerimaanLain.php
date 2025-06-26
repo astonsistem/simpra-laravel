@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class DataPenerimaanLain extends Model
 {
@@ -51,6 +51,16 @@ class DataPenerimaanLain extends Model
     protected $casts = [
         'id' => 'string',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::creating(function ($model) {
+            if (empty($model->id)) {
+                $model->id = Str::uuid();
+            }
+        });
+    }
 
     public function masterAkun()
     {

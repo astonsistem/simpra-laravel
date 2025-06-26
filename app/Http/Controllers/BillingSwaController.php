@@ -134,16 +134,18 @@ class BillingSwaController extends Controller
 
     public function statistik(Request $request)
     {
-        // sum_penerimaan = get_sum_billing_kasirs(db)
-        // jumlah_penerimaan = count_billing_kasirs(db)
-        // penerimaan_tunai = get_sum_total_by_payment_method(db,"TUNAI")
-        // penerimaan_non_tunai = get_sum_total_by_not_payment_method(db,"TUNAI")       
+        $currentMonth = Carbon::now()->format('m');
+
+        $sumPendapatan = DataPenerimaanLain::sumTotal('BILLING SWA');
+        $sumPendapatanCurrent = DataPenerimaanLain::sumTotal('BILLING SWA', $currentMonth);
+        $sumPendapatan118 = DataPenerimaanLain::sumTotal('BILLING SWA', $currentMonth, "118");
+        $sumPendapatanSwab = DataPenerimaanLain::sumTotal('BILLING SWA', $currentMonth, "SWAB");
 
         return response()->json([
-            'total' => "sumPendapatan",
-            'current' => "sumPendapatanCurrent",
-            'ambulan' => "sumPendapatan",
-            'swab' => "sumPendapatan",
+            'total' => $sumPendapatan,
+            'current' => $sumPendapatanCurrent,
+            'ambulan' => $sumPendapatan118,
+            'swab' => $sumPendapatanSwab,
         ]);
     }
 
@@ -215,7 +217,7 @@ class BillingSwaController extends Controller
     public function validasi(string $id)
     {
         try {
-            $billingSwa = DataPenerimaanLain::where('id', $id)->firstOrFail();
+            $billingSwa = DataPenerimaanLain::where('id', $id)->first();
             $rekeningKoran = [];
             $totalSetor = 0;
             if (!$billingSwa) {
@@ -233,7 +235,7 @@ class BillingSwaController extends Controller
 
             if (in_array($caraPembayaran, ['TUNAI', 'EDC'])) {
                 if (empty($rcId)) {
-                    $totalSetor = intval($billingSwa->total);
+                    $totalSetor = floatval($billingSwa->total);
                     $rekeningKoran = $rekeningKoran->filter(function ($koran) use ($totalSetor) {
                         return $koran->kredit == $totalSetor;
                     });
@@ -247,9 +249,9 @@ class BillingSwaController extends Controller
                     ($billingSwa->selisih ?? 0);
 
                 if (empty($rcId)) {
-                    $totalSetor = intval($billingSwa->total);
+                    $totalSetor = floatval($billingSwa->total);
                 } else {
-                    $totalSetor = intval($jumlahNetto);
+                    $totalSetor = floatval($jumlahNetto);
                 }
 
                 $rekeningKoran = $rekeningKoran->filter(function ($koran) use ($jumlahNetto) {
@@ -277,7 +279,7 @@ class BillingSwaController extends Controller
     public function validasiFilter(string $id)
     {
         try {
-            $billingSwa = DataPenerimaanLain::where('id', $id)->firstOrFail();
+            $billingSwa = DataPenerimaanLain::where('id', $id)->first();
             $rekeningKoran = [];
             $totalSetor = 0;
             if (!$billingSwa) {
@@ -333,7 +335,7 @@ class BillingSwaController extends Controller
         try {
             $uraian = $request->query('uraian');
 
-            $billingSwa = DataPenerimaanLain::where('id', $id)->firstOrFail();
+            $billingSwa = DataPenerimaanLain::where('id', $id)->first();
             $rekeningKoran = [];
             $totalSetor = 0;
             if (!$billingSwa) {
@@ -389,9 +391,10 @@ class BillingSwaController extends Controller
         try {
             $jumlah = $request->query('jumlah');
 
-            $billingSwa = DataPenerimaanLain::where('id', $id)->firstOrFail();
+            $billingSwa = DataPenerimaanLain::where('id', $id)->first();
             $rekeningKoran = [];
             $totalSetor = 0;
+
             if (!$billingSwa) {
                 return response()->json([
                     'message' => 'Not found'

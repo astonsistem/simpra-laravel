@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class ValidasiBillingSwaRequest extends FormRequest
+class ValidasiCancelPenerimaanLainRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -24,8 +24,8 @@ class ValidasiBillingSwaRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'id.required'    => 'ID is required.',
-            'rc_id.required' => 'RC ID is required.',
+            'id.required'       => 'ID penerimaan layanan is required.',
+            'rc_id.required'    => 'RC ID is required.',
         ];
     }
 

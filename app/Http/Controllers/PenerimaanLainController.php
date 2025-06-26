@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PenerimaanLainRequest;
+use App\Http\Requests\ValidasiPenerimaanLainRequest;
+use App\Http\Requests\ValidasiCancelPenerimaanLainRequest;
 use App\Http\Resources\PenerimaanLainCollection;
 use App\Http\Resources\PenerimaanLainResource;
 use App\Models\DataPenerimaanLain;
+use App\Models\DataRekeningKoran;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class PenerimaanLainController extends Controller
@@ -222,7 +227,6 @@ class PenerimaanLainController extends Controller
         }
     }
 
-
     public function statistik(Request $request)
     {
         $currentMonth = Carbon::now()->format('m');
@@ -240,17 +244,250 @@ class PenerimaanLainController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function list(Request $request)
     {
-        //
+        try {
+            $request->validate([
+                'page' => 'nullable|integer|min:1',
+                'size' => 'nullable|integer|min:1',
+                'id' => 'nullable|string',
+                'tgl_awal' => 'required|string',
+                'tgl_akhir' => 'required|string',
+                'bulan_awal' => 'required|string',
+                'bulan_akhir' => 'required|string',
+                'year' => 'required|string',
+                'periode' => 'required|string',
+                'uraian' => 'required|string',
+                'sumber_transaksi' => 'required|string',
+                'akun_id' => 'required|string',
+            ]);
+
+            $page = $request->input('page', 1) ?? 1;
+            $size = $request->input('size', 100) ?? 100;
+            $paramId = $request->input('id');
+            $tglAwal = $request->input('tgl_awal');
+            $tglAkhir = $request->input('tgl_akhir');
+            $bulanAwal = $request->input('bulan_awal');
+            $bulanAkhir = $request->input('bulan_akhir');
+            $year = $request->input('year');
+            $periode = $request->input('periode');
+            $uraian = $request->input('uraian');
+            $sumberTransaksi = $request->input('sumber_transaksi');
+            $akunId = $request->input('akun_id');
+
+            $query = DataPenerimaanLain::query();
+            $query->where('type', '!=', "BILLING SWA");
+            $query->where('akun_id', '!=', 1010101);
+
+            if (!empty($paramId)) {
+                $query->where('id', $paramId);
+            }
+            if (!empty($tglAwal) && !empty($tglAkhir)) {
+                $startDate = Carbon::parse($tglAwal)->startOfDay();
+                $endDate = Carbon::parse($tglAkhir)->endOfDay();
+                $query->whereBetween('tgl_bayar', [$startDate, $endDate]);
+            }
+            if (!empty($bulanAwal) && !empty($bulanAkhir) && $periode === "bulan") {
+                $query->whereMonth('tgl_bayar', '>=', (int)$bulanAwal);
+                $query->whereMonth('tgl_bayar', '<=', (int)$bulanAkhir);
+            }
+            if (!empty($year)) {
+                $query->whereYear('tgl_bayar', (int)$year);
+            }
+            if (!empty($uraian)) {
+                $query->where('uraian', 'ILIKE', "%$uraian%");
+            }
+            if (!empty($sumberTransaksi)) {
+                $query->where('sumber_transaksi', $sumberTransaksi);
+            }
+            if (!empty($akunId)) {
+                $query->where('akun_id', $akunId);
+            }
+
+            $totalItems = $query->count();
+            $items = $query->skip(($page - 1) * $size)->take($size)->orderBy('tgl_bayar', 'desc')->orderBy('no_bayar', 'desc')->with('masterAkun')->get();
+
+            $totalPages = ceil($totalItems / $size);
+
+            return response()->json(
+                new PenerimaanLainCollection($items, $totalItems, $page, $size, $totalPages)
+            );
+        } catch (ValidationException $e) {
+            $errors = [];
+            foreach ($e->errors() as $field => $messages) {
+                foreach ($messages as $message) {
+                    $errors[] = [
+                        'loc' => ['query', $field],
+                        'msg' => $message,
+                        'type' => 'validation',
+                    ];
+                }
+            }
+            return response()->json([
+                'detail' => $errors
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan pada server.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function store(PenerimaanLainRequest $request)
     {
-        //
+        $data = $request->validated();
+
+        $type = "PENERIMAAN LAIN";
+        $countInsert = 0;
+        $countUpdate = 0;
+        $checkData = DataPenerimaanLain::where('no_bayar', $data['no_bayar'])->first();
+
+        if ($checkData) {
+            unset($data['akun_data']);
+
+            DB::beginTransaction();
+            $penerimaanLain = DataPenerimaanLain::firstOrFail($checkData->id);
+            $penerimaanLain->update($data);
+            DB::commit();
+
+            $countUpdate++;
+        } else {
+            if ($data['tgl_bayar']) {
+                $tglBayar = Carbon::createFromFormat('Y-m-d', $data['tgl_bayar'])->addDay()->toDateString();
+            }
+            $total = $data['total'] != null ? floatval($data['total']) : floatval(0);
+            $adminKredit = $data['admin_kredit'] != null ? floatval($data['admin_kredit']) : floatval(0);
+            $selisih = $data['selisih'] != null ? floatval($data['selisih']) : floatval(0);
+            $pendapatan = $data['pendapatan'] != null ? floatval($data['pendapatan']) : floatval(0);
+            $jumlahNetto = $total - $adminKredit + $selisih;
+            $piutang = $total - $adminKredit + $selisih;
+            $bankTujuan = !empty($data['bank_tujuan']) ? $data['bank_tujuan'] : "TUNAI";
+
+            DB::beginTransaction();
+            $penerimaanLain = DataPenerimaanLain::create([
+                ...$data,
+                'tgl_bayar' => $tglBayar,
+                'pendapatan' => $pendapatan,
+                'piutang' => $piutang,
+                'bank_tujuan' => $bankTujuan,
+                'jumlah_netto' => $jumlahNetto,
+                'type' => $type,
+            ]);
+            DB::commit();
+
+            $countInsert++;
+        }
+        return response()->json([
+            'status' => 200,
+            'message' => 'Data berhasil ditambahkan',
+            'data' => [
+                'insert' => $countInsert,
+                'update' => $countUpdate,
+                'data' => $penerimaanLain
+            ],
+        ], 200);
+    }
+
+    public function createData(PenerimaanLainRequest $request)
+    {
+        $data = $request->validated();
+
+        $checkData = DataPenerimaanLain::where('no_bayar', $data['no_bayar'])->first();
+
+        if ($checkData) {
+            return response()->json([
+                'message' => "Data dengan id $checkData->id sudah tersedia."
+            ], 409);
+        }
+
+        $type = "PENERIMAAN LAIN";
+        if ($data['tgl_bayar']) {
+            $tglBayar = Carbon::createFromFormat('Y-m-d', $data['tgl_bayar'])->addDay()->toDateString();
+        }
+        $total = $data['total'] != null ? floatval($data['total']) : floatval(0);
+        $adminKredit = $data['admin_kredit'] != null ? floatval($data['admin_kredit']) : floatval(0);
+        $selisih = $data['selisih'] != null ? floatval($data['selisih']) : floatval(0);
+        $pendapatan = $data['pendapatan'] != null ? floatval($data['pendapatan']) : floatval(0);
+        $jumlahNetto = $total - $adminKredit + $selisih;
+        $piutang = $total - $adminKredit + $selisih;
+        $bankTujuan = !empty($data['bank_tujuan']) ? $data['bank_tujuan'] : "TUNAI";
+
+        DB::beginTransaction();
+        $penerimaanLain = DataPenerimaanLain::create([
+            ...$data,
+            'tgl_bayar' => $tglBayar,
+            'pendapatan' => $pendapatan,
+            'piutang' => $piutang,
+            'bank_tujuan' => $bankTujuan,
+            'jumlah_netto' => $jumlahNetto,
+            'type' => $type,
+        ]);
+        DB::commit();
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Data berhasil ditambahkan',
+            'data' => $penerimaanLain,
+        ], 200);
+    }
+
+    public function update(PenerimaanLainRequest $request, string $id)
+    {
+        try {
+            $data = $request->validated();
+
+            unset($data['akun_data']);
+
+            DB::beginTransaction();
+
+            $penerimaanLain = DataPenerimaanLain::firstOrFail($id);
+            $penerimaanLain->update($data);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Berhasil memperbarui data billing swa',
+                'data' => new PenerimaanLainResource($penerimaanLain),
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status'  => 500,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+                'data'    => null
+            ], 500);
+        }
+    }
+
+    public function updateEditData(PenerimaanLainRequest $request, string $id)
+    {
+        try {
+            $data = $request->validated();
+
+            unset($data['akun_data']);
+
+            DB::beginTransaction();
+
+            $penerimaanLain = DataPenerimaanLain::firstOrFail($id);
+            $penerimaanLain->update($data);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Berhasil memperbarui data billing swa',
+                'data' => new PenerimaanLainResource($penerimaanLain),
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status'  => 500,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+                'data'    => null
+            ], 500);
+        }
     }
 
     public function destroy(string $id)
@@ -289,8 +526,394 @@ class PenerimaanLainController extends Controller
         }
     }
 
-    public function list(Request $request)
+    public function validasi(string $id)
     {
-        //
+        try {
+            if (empty($id)) {
+                return response()->json([
+                    'detail' => [
+                        [
+                            'loc' => ['path', 'id'],
+                            'msg' => 'ID is required.',
+                            'type' => 'validation'
+                        ]
+                    ]
+                ], 422);
+            }
+
+            $penerimaanLain = DataPenerimaanLain::where('id', $id)->first();
+            $rekeningKoran = [];
+            $totalSetor = 0;
+
+            if (!$penerimaanLain) {
+                return response()->json([
+                    'message' => 'Not found'
+                ], 404);
+            }
+
+            $tglBuktiBayar = $penerimaanLain->tgl_bayar;
+            $bankTujuan = $penerimaanLain->bank_tujuan;
+            $rcId = $penerimaanLain->rc_id;
+            $caraPembayaran = $penerimaanLain->cara_pembayaran;
+
+            $rekeningKoran = DataRekeningKoran::getTanggalRc($rcId, $tglBuktiBayar, $bankTujuan);
+
+            if (in_array($caraPembayaran, ['TUNAI', 'EDC'])) {
+                if (empty($rcId)) {
+                    $totalSetor = floatval($penerimaanLain->total);
+                    $rekeningKoran = $rekeningKoran->filter(function ($koran) use ($totalSetor) {
+                        return $koran->kredit == $totalSetor;
+                    });
+                } else {
+                    $totalSetor = DataPenerimaanLain::sumTotalByRcId($rcId);
+                }
+            } elseif (in_array($caraPembayaran, ['QRIS', 'TRANSFER'])) {
+                $jumlahNetto =
+                    ($penerimaanLain->total ?? 0) -
+                    ($penerimaanLain->admin_kredit ?? 0) +
+                    ($penerimaanLain->selisih ?? 0);
+
+                if (empty($rcId)) {
+                    $totalSetor = floatval($penerimaanLain->total);
+                } else {
+                    $totalSetor = floatval($jumlahNetto);
+                }
+
+                $rekeningKoran = $rekeningKoran->filter(function ($koran) use ($jumlahNetto) {
+                    return $koran->kredit == $jumlahNetto;
+                });
+            }
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'success',
+                'data' => [
+                    'penerimaan_lain' => $penerimaanLain,
+                    'rekening_koran' => $rekeningKoran,
+                    'total_setor' => $totalSetor
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error: ' . $e->getMessage(),
+                'data' => null
+            ], 500);
+        }
+    }
+
+    public function validasiFilter(string $id)
+    {
+        try {
+            if (empty($id)) {
+                return response()->json([
+                    'detail' => [
+                        [
+                            'loc' => ['path', 'id'],
+                            'msg' => 'ID is required.',
+                            'type' => 'validation'
+                        ]
+                    ]
+                ], 422);
+            }
+
+            $penerimaanLain = DataPenerimaanLain::where('id', $id)->first();
+            $rekeningKoran = [];
+            $totalSetor = 0;
+
+            if (!$penerimaanLain) {
+                return response()->json([
+                    'message' => 'Not found'
+                ], 404);
+            }
+
+            $tglBayar = $penerimaanLain->tgl_bayar;
+            $bankTujuan = $penerimaanLain->bank_tujuan;
+            $rcId = $penerimaanLain->rc_id;
+            $caraPembayaran = $penerimaanLain->cara_pembayaran;
+
+            $rekeningKoran = DataRekeningKoran::getTanggalRcFilter($tglBayar, $bankTujuan);
+
+            if (in_array($caraPembayaran, ['TUNAI', 'EDC'])) {
+                if (empty($rcId)) {
+                    $totalSetor = floatval($penerimaanLain->total);
+                } else {
+                    $totalSetor = DataPenerimaanLain::sumTotalByRcId($rcId);
+                }
+            } elseif (in_array($caraPembayaran, ['QRIS', 'TRANSFER'])) {
+                if (empty($rcId)) {
+                    $totalSetor = floatval($penerimaanLain->total);
+                } else {
+                    $jumlahNetto =
+                        ($penerimaanLain->total ?? 0) -
+                        ($penerimaanLain->admin_kredit ?? 0) +
+                        ($penerimaanLain->selisih ?? 0);
+                    $totalSetor = $jumlahNetto;
+                }
+            }
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'success',
+                'data' => [
+                    'penerimaan_lain' => $penerimaanLain,
+                    'rekening_koran' => $rekeningKoran,
+                    'total_setor' => $totalSetor
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error: ' . $e->getMessage(),
+                'data' => null
+            ], 500);
+        }
+    }
+
+    public function validasiFilterUraian(Request $request, string $id)
+    {
+        try {
+            if (empty($id)) {
+                return response()->json([
+                    'detail' => [
+                        [
+                            'loc' => ['path', 'id'],
+                            'msg' => 'ID is required.',
+                            'type' => 'validation'
+                        ]
+                    ]
+                ], 422);
+            }
+
+            $uraian = $request->query('uraian');
+
+            $penerimaanLain = DataPenerimaanLain::where('id', $id)->first();
+            $rekeningKoran = [];
+            $totalSetor = 0;
+
+            if (!$penerimaanLain) {
+                return response()->json([
+                    'message' => 'Not found'
+                ], 404);
+            }
+
+            $tglBuktiBayar = $penerimaanLain->tgl_bayar;
+            $bankTujuan = $penerimaanLain->bank_tujuan;
+            $uraian = $penerimaanLain->rc_id;
+            $caraPembayaran = $penerimaanLain->cara_pembayaran;
+
+            $rekeningKoran = DataRekeningKoran::getTanggalRcFilterUraian($tglBuktiBayar, $bankTujuan, $uraian);
+
+            if (in_array($caraPembayaran, ['TUNAI', 'EDC'])) {
+                if (empty($rcId)) {
+                    $totalSetor = floatval($penerimaanLain->total);
+                } else {
+                    $totalSetor = DataPenerimaanLain::sumTotalByRcId($rcId);
+                }
+            } elseif (in_array($caraPembayaran, ['QRIS', 'TRANSFER'])) {
+                if (empty($rcId)) {
+                    $totalSetor = floatval($penerimaanLain->total);
+                } else {
+                    $jumlahNetto =
+                        ($penerimaanLain->total ?? 0) -
+                        ($penerimaanLain->admin_kredit ?? 0) +
+                        ($penerimaanLain->selisih ?? 0);
+                    $totalSetor = $jumlahNetto;
+                }
+            }
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'success',
+                'data' => [
+                    'penerimaan_lain' => $penerimaanLain,
+                    'rekening_koran' => $rekeningKoran,
+                    'total_setor' => $totalSetor
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error: ' . $e->getMessage(),
+                'data' => null
+            ], 500);
+        }
+    }
+
+    public function validasiFilterJumlah(Request $request, string $id)
+    {
+        try {
+            if (empty($id)) {
+                return response()->json([
+                    'detail' => [
+                        [
+                            'loc' => ['path', 'id'],
+                            'msg' => 'ID is required.',
+                            'type' => 'validation'
+                        ]
+                    ]
+                ], 422);
+            }
+
+            $jumlah = $request->query('jumlah');
+
+            $penerimaanLain = DataPenerimaanLain::where('id', $id)->first();
+            $rekeningKoran = [];
+            $totalSetor = 0;
+
+            if (!$penerimaanLain) {
+                return response()->json([
+                    'message' => 'Not found'
+                ], 404);
+            }
+
+            $tglBayar = $penerimaanLain->tgl_bayar;
+            $bankTujuan = $penerimaanLain->bank_tujuan;
+            $caraPembayaran = $penerimaanLain->cara_pembayaran;
+
+            $rekeningKoran = DataRekeningKoran::getTanggalRcFilterJumlah($tglBayar, $bankTujuan, $jumlah);
+
+            if (in_array($caraPembayaran, ['TUNAI', 'EDC'])) {
+                if (empty($rcId)) {
+                    $totalSetor = floatval($penerimaanLain->total);
+                } else {
+                    $totalSetor = DataPenerimaanLain::sumTotalByRcId($rcId);
+                }
+            } elseif (in_array($caraPembayaran, ['QRIS', 'TRANSFER'])) {
+                if (empty($rcId)) {
+                    $totalSetor = floatval($penerimaanLain->total);
+                } else {
+                    $jumlahNetto =
+                        ($penerimaanLain->total ?? 0) -
+                        ($penerimaanLain->admin_kredit ?? 0) +
+                        ($penerimaanLain->selisih ?? 0);
+                    $totalSetor = $jumlahNetto;
+                }
+            }
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'success',
+                'data' => [
+                    'penerimaan_lain' => $penerimaanLain,
+                    'rekening_koran' => $rekeningKoran,
+                    'total_setor' => $totalSetor
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error: ' . $e->getMessage(),
+                'data' => null
+            ], 500);
+        }
+    }
+
+    public function updateValidasi(ValidasiPenerimaanLainRequest $request)
+    {
+        $data = $request->validated();
+        $penerimaanLainId = $data['id'];
+        $rcId = $data['rc_id'];
+        $akunId = $data['akun_id'];
+
+        try {
+            DB::transaction(function () use ($penerimaanLainId, $rcId, $akunId) {
+                $penerimaanLain = DataPenerimaanLain::where('id', $penerimaanLainId)->first();
+
+                if (!$penerimaanLain) {
+                    throw new \Exception('Penerimaan lain tidak ditemukan atau status tidak valid.');
+                }
+
+                $rcIdValue = ($rcId === 0 || $rcId === '0') ? null : $rcId;
+
+                DataPenerimaanLain::where('id', $penerimaanLainId)
+                    ->update([
+                        'rc_id'     => $rcIdValue,
+                    ]);
+
+                $penerimaanLainTableName = (new DataPenerimaanLain())->getTable();
+                $rekeningKoranTableName = (new DataRekeningKoran())->getTable();
+
+                $klarifLainSubquery = DB::table($penerimaanLainTableName)
+                    ->select(DB::raw('SUM(COALESCE(total,0) - COALESCE(admin_kredit,0) + COALESCE(selisih,0))'))
+                    ->where('rc_id', $rcId);
+
+                DB::table($rekeningKoranTableName)
+                    ->where('rc_id', $rcId)
+                    ->update([
+                        'klarif_lain'   => DB::raw('(' . $klarifLainSubquery->toSql() . ')'),
+                        'akun_id'       => $akunId,
+                    ]);
+            });
+
+            return response()->json([
+                'message' => 'Berhasil validasi penerimaan lain',
+                'status'  => 200,
+            ], 200);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Kesalahan validasi.',
+                'errors'  => $e->errors(),
+                'status'  => 422,
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat validasi penerimaan lain.',
+                'error'   => $e->getMessage(),
+                'status'  => 500,
+            ], 500);
+        }
+    }
+
+    public function cancelValidasi(ValidasiCancelPenerimaanLainRequest $request)
+    {
+        $data = $request->validated();
+        $penerimaanLainId = $data['id'];
+        $rcId = $data['rc_id'];
+
+        try {
+            DB::transaction(function () use ($penerimaanLainId, $rcId) {
+                $penerimaanLain = DataPenerimaanLain::where('id', $penerimaanLainId)
+                    ->first();
+
+                if (!$penerimaanLain) {
+                    throw new \Exception('penerimaan lain tidak ditemukan atau status tidak valid.');
+                }
+
+                DataPenerimaanLain::where('id', $penerimaanLainId)
+                    ->update([
+                        'rc_id'     => null,
+                    ]);
+
+                $penerimaanLainTableName = (new DataPenerimaanLain())->getTable();
+                $rekeningKoranTableName = (new DataRekeningKoran())->getTable();
+
+                $klarifLainSubquery = DB::table($penerimaanLainTableName)
+                    ->select(DB::raw('COALESCE(SUM(total - admin_kredit + selisih), 0)'))
+                    ->where('rc_id', $rcId);
+
+                DB::table($rekeningKoranTableName)
+                    ->where('rc_id', $rcId)
+                    ->update([
+                        'klarif_lain' => DB::raw('(' . $klarifLainSubquery->toSql() . ')'),
+                        'akun_id'        => DB::raw(
+                            "CASE WHEN (" . $klarifLainSubquery->toSql() . ") = 0 THEN NULL ELSE akun_id END"
+                        ),
+                    ]);
+            });
+
+            return response()->json([
+                'message' => 'Berhasil membatalkan validasi penerimaan lain',
+                'status'  => 200,
+            ], 200);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Kesalahan validasi.',
+                'errors'  => $e->errors(),
+                'status'  => 422,
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat membatalkan validasi penerimaan lain.',
+                'error'   => $e->getMessage(),
+                'status'  => 500,
+            ], 500);
+        }
     }
 }

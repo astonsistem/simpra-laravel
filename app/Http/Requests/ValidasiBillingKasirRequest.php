@@ -24,8 +24,8 @@ class ValidasiBillingKasirRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'id.required'    => 'ID penerimaan layanan wajib diisi.',
-            'rc_id.required' => 'RC ID wajib diisi.',
+            'id.required'    => 'ID is required.',
+            'rc_id.required' => 'RC ID is required.',
         ];
     }
 
