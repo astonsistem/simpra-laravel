@@ -22,6 +22,12 @@ Update Node Module
 npm install
 ```
 
+Add JWT Secret
+
+```bash
+php artisan jwt:secret
+```
+
 ## Development Server
 
 Start the development server on http://localhost:8000
