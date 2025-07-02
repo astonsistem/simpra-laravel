@@ -306,7 +306,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"mio\",\r\n    \"password\": \"12345\"\r\n}",
+							"raw": "{\r\n    \"username\": \"admin\",\r\n    \"password\": \"12345\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1409,7 +1409,13 @@
 					"name": "Get All Billing kasir",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/billing_kasir?periode=tanggal&page=1&size=100",
 							"host": [
@@ -1500,10 +1506,16 @@
 					"response": []
 				},
 				{
-					"name": "Get All Billing kasir by id",
+					"name": "Get Billing kasir by id",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/billing_kasir/:id",
 							"host": [
@@ -1527,8 +1539,24 @@
 				{
 					"name": "Get Statistik Billing kasir",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/billing_kasir/statistik",
 							"host": [
@@ -1545,8 +1573,24 @@
 				{
 					"name": "Get Validasi Billing kasir",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/billing_kasir/validasi/:id",
 							"host": [
@@ -1560,7 +1604,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "",
+									"value": "606fb110-786d-4795-b934-f14dd5c934cd",
 									"description": "Required | String"
 								}
 							]
@@ -1571,8 +1615,24 @@
 				{
 					"name": "Get Validasi Billing kasir filter",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/billing_kasir/validasi/filter/:id",
 							"host": [
@@ -1587,7 +1647,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "",
+									"value": "606fb110-786d-4795-b934-f14dd5c934cd",
 									"description": "Required | String"
 								}
 							]
@@ -1598,8 +1658,24 @@
 				{
 					"name": "Get Validasi Billing kasir filter uraian",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/billing_kasir/validasi/filteruraian/:id?uraian",
 							"host": [
@@ -1621,7 +1697,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "",
+									"value": "606fb110-786d-4795-b934-f14dd5c934cd",
 									"description": "Required | String"
 								}
 							]
@@ -1632,8 +1708,24 @@
 				{
 					"name": "Get Validasi Billing kasir filter jumlah",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/billing_kasir/validasi/filterjumlah/:id?jumlah",
 							"host": [
@@ -1654,7 +1746,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "",
+									"value": "606fb110-786d-4795-b934-f14dd5c934cd",
 									"description": "Required | String"
 								}
 							]
@@ -1665,8 +1757,24 @@
 				{
 					"name": "Update Billing kasir",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "PUT",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\r\n    \"id\": \"string\",\r\n    \"pendaftaran_id\": 0,\r\n    \"no_pendaftaran\": \"string\",\r\n    \"tgl_pendaftaran\": \"string\",\r\n    \"pasien_id\": 0,\r\n    \"no_rekam_medik\": \"string\",\r\n    \"pasien_nama\": \"string\",\r\n    \"pasien_alamat\": \"string\",\r\n    \"jenis_tagihan\": \"string\",\r\n    \"tgl_krs\": \"string\",\r\n    \"tgl_pelayanan\": \"string\",\r\n    \"carabayar_id\": 0,\r\n    \"carabayar_nama\": \"string\",\r\n    \"penjamin_id\": 0,\r\n    \"penjamin_nama\": \"string\",\r\n    \"instalasi_id\": 0,\r\n    \"instalasi_nama\": \"string\",\r\n    \"metode_bayar\": \"string\",\r\n    \"tandabuktibayar_id\": 0,\r\n    \"no_buktibayar\": \"string\",\r\n    \"tgl_buktibayar\": \"string\",\r\n    \"sep_id\": \"string\",\r\n    \"no_sep\": \"string\",\r\n    \"tgl_sep\": \"string\",\r\n    \"cara_pembayaran\": \"string\",\r\n    \"bank_tujuan\": \"string\",\r\n    \"admin_kredit\": \"string\",\r\n    \"admin_debit\": \"string\",\r\n    \"kartubank_pasien\": \"string\",\r\n    \"no_kartubank_pasien\": \"string\",\r\n    \"closingkasir_id\": \"string\",\r\n    \"tgl_closingkasir\": \"string\",\r\n    \"no_closingkasir\": \"string\",\r\n    \"kasir_id\": 0,\r\n    \"kasir_nama\": \"string\",\r\n    \"loket_id\": 0,\r\n    \"loket_nama\": \"string\",\r\n    \"guna_bayar\": \"string\",\r\n    \"total\": \"string\",\r\n    \"klasifikasi\": \"string\",\r\n    \"status_id\": 0,\r\n    \"bulan_mrs\": \"string\",\r\n    \"bulan_krs\": \"string\",\r\n    \"bulan_pelayanan\": \"string\",\r\n    \"akun_id\": 0,\r\n    \"selisih\": 0,\r\n    \"jumlah_netto\": 0,\r\n    \"rc_id\": 0,\r\n    \"is_web_change\": true\r\n}",
@@ -1699,8 +1807,24 @@
 				{
 					"name": "Update Validasi",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "PUT",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\r\n    \"id\": \"string\",\r\n    \"rc_id\": 0\r\n}",
@@ -1727,8 +1851,24 @@
 				{
 					"name": "Update Cancel Validasi",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "PUT",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\r\n    \"id\": \"string\",\r\n    \"rc_id\": 0\r\n}",
@@ -1755,8 +1895,24 @@
 				{
 					"name": "Delete Akun",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "DELETE",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/billing_kasir/:id",
 							"host": [
@@ -1786,7 +1942,13 @@
 					"name": "Get All Penerimaan lain",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/billing_swa?tgl_awal&tgl_akhir&bulan_awal&bulan_akhir&year&uraian&sumber_transaksi&periode&cara_pembayar&page=1&size=100",
 							"host": [
@@ -1857,10 +2019,57 @@
 					"response": []
 				},
 				{
-					"name": "Get Statistik Penerimaan lain",
+					"name": "Get Penerimaan lain by id",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/billing_swa/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"billing_swa",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "c579d510-4008-4e3f-9078-47076f502719",
+									"description": "Required | String"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Statistik Penerimaan lain",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/billing_swa/statistik",
 							"host": [
@@ -1875,35 +2084,26 @@
 					"response": []
 				},
 				{
-					"name": "Get All Penerimaan lain by id",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/billing_swa",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"billing_swa"
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "Get Validasi Billing swa",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/billing_swa/validasi",
+							"raw": "{{base_url}}/billing_swa/validasi/:id",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"billing_swa",
-								"validasi"
+								"validasi",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ee35a00e-c800-40a8-bec0-35f3f023daa2",
+									"description": "Required | String"
+								}
 							]
 						}
 					},
@@ -1912,17 +2112,41 @@
 				{
 					"name": "Get Validasi Billing swa filter",
 					"request": {
-						"method": "PUT",
-						"header": [],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "{{base_url}}/billing_swa/validasi/filter",
+							"raw": "{{base_url}}/billing_swa/validasi/filter/:id",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"billing_swa",
 								"validasi",
-								"filter"
+								"filter",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ee35a00e-c800-40a8-bec0-35f3f023daa2",
+									"description": "Required | String"
+								}
 							]
 						}
 					},
@@ -1931,17 +2155,47 @@
 				{
 					"name": "Get Validasi Billing swa filter uraian",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "{{base_url}}/billing_swa/validasi/filteruraian",
+							"raw": "{{base_url}}/billing_swa/validasi/filteruraian/:id?uraian",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"billing_swa",
 								"validasi",
-								"filteruraian"
+								"filteruraian",
+								":id"
+							],
+							"query": [
+								{
+									"key": "uraian",
+									"value": null
+								}
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ee35a00e-c800-40a8-bec0-35f3f023daa2",
+									"description": "Required | String"
+								}
 							]
 						}
 					},
@@ -1950,17 +2204,47 @@
 				{
 					"name": "Get Validasi Billing swa filter jumlah",
 					"request": {
-						"method": "PUT",
-						"header": [],
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "{{base_url}}/billing_swa/validasi/filterjumlah",
+							"raw": "{{base_url}}/billing_swa/validasi/filterjumlah/:id?jumlah",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"billing_swa",
 								"validasi",
-								"filterjumlah"
+								"filterjumlah",
+								":id"
+							],
+							"query": [
+								{
+									"key": "jumlah",
+									"value": null
+								}
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ee35a00e-c800-40a8-bec0-35f3f023daa2",
+									"description": "Required | String"
+								}
 							]
 						}
 					},
@@ -1969,15 +2253,47 @@
 				{
 					"name": "Update Billing swa",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "PUT",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"string\",\r\n    \"no_dokumen\": \"string\",\r\n    \"tgl_dokumen\": \"string\",\r\n    \"akun_id\": \"string\",\r\n    \"pihak3\": \"string\",\r\n    \"pihak3_alamat\": \"string\",\r\n    \"pihak3_telp\": \"string\",\r\n    \"uraian\": \"string\",\r\n    \"tgl_bayar\": \"string\",\r\n    \"no_bayar\": \"string\",\r\n    \"sumber_transaksi\": \"string\",\r\n    \"transaksi_id\": \"string\",\r\n    \"metode_pembayaran\": \"string\",\r\n    \"total\": \"string\",\r\n    \"pendapatan\": \"string\",\r\n    \"pdd\": \"string\",\r\n    \"piutang\": \"string\",\r\n    \"cara_pembayaran\": \"string\",\r\n    \"bank_tujuan\": \"string\",\r\n    \"admin_kredit\": \"string\",\r\n    \"admin_debit\": \"string\",\r\n    \"kartubank\": \"string\",\r\n    \"no_kartubank\": \"string\",\r\n    \"rc_id\": 0,\r\n    \"selisih\": 0,\r\n    \"jumlah_netto\": 0,\r\n    \"desc_piutang_pelayanan\": \"string\",\r\n    \"desc_piutang_lain\": \"string\",\r\n    \"piutang_id\": \"string\",\r\n    \"piutanglain_id\": \"string\",\r\n    \"akun_data\": {\r\n        \"akun_id\": \"string\",\r\n        \"akun_kode\": \"string\",\r\n        \"akun_nama\": \"string\"\r\n    },\r\n    \"is_web_change\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "{{base_url}}/billing_swa",
+							"raw": "{{base_url}}/billing_swa/:id",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"billing_swa"
+								"billing_swa",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
 							]
 						}
 					},
@@ -1986,8 +2302,33 @@
 				{
 					"name": "Update Validasi",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "PUT",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"string\",\r\n    \"rc_id\": 0\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
 							"raw": "{{base_url}}/billing_swa/validasi/penerimaan_lain",
 							"host": [
@@ -2005,8 +2346,33 @@
 				{
 					"name": "Update Cancel Validasi",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "PUT",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"string\",\r\n    \"rc_id\": 0\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
 							"raw": "{{base_url}}/billing_swa/cancel_validasi/penerimaan_lain",
 							"host": [
@@ -2024,15 +2390,39 @@
 				{
 					"name": "Delete Akun",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "DELETE",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "{{base_url}}/billing_swa",
+							"raw": "{{base_url}}/billing_swa/:id",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"billing_swa"
+								"billing_swa",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "",
+									"description": "Required | String"
+								}
 							]
 						}
 					},
@@ -2046,15 +2436,83 @@
 				{
 					"name": "Get All Potensi pelayanan",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "{{base_url}}/potensi_pelayanan",
+							"raw": "{{base_url}}/potensi_pelayanan?id&tgl_awal&tgl_akhir&jenis_pelayanan&penjamin&instalasi&status&cara_bayar&page=1&size=100",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"potensi_pelayanan"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "tgl_awal",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "tgl_akhir",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "jenis_pelayanan",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "penjamin",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "instalasi",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "status",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "cara_bayar",
+									"value": null,
+									"description": "String"
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Integer"
+								},
+								{
+									"key": "size",
+									"value": "100",
+									"description": "Integer"
+								}
 							]
 						}
 					},
@@ -2084,12 +2542,19 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/potensi_pelayanan",
+							"raw": "{{base_url}}/potensi_pelayanan/:id",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"potensi_pelayanan"
+								"potensi_pelayanan",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
 							]
 						}
 					},
@@ -2442,8 +2907,24 @@
 				{
 					"name": "Get All Penerimaan lain",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/penerimaan_lain?id&tgl_awal&tgl_akhir&bulan_awal&bulan_akhir&year&uraian&sumber_transaksi&periode&akun_id&page&size",
 							"host": [
@@ -2511,8 +2992,24 @@
 				{
 					"name": "Get All Penerimaan lain get data",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/penerimaan_lain/getdata?id&tgl_awal&tgl_akhir&bulan_awal&bulan_akhir&year&uraian&sumber_transaksi&periode&akun_id&page=1&size=50",
 							"host": [
@@ -2589,8 +3086,24 @@
 				{
 					"name": "Get Penerimaan lain by id",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/penerimaan_lain/:id",
 							"host": [
@@ -2603,7 +3116,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "",
+									"value": "dfc73ea6-8a46-4f6d-b88f-18904ca68112",
 									"description": "Required | String"
 								}
 							]
@@ -2614,8 +3127,24 @@
 				{
 					"name": "Get Statistik Penerimaan lain",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/penerimaan_lain/statistik",
 							"host": [
@@ -2632,16 +3161,40 @@
 				{
 					"name": "Get Validasi Billing swa",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "{{base_url}}/penerimaan_lain/validasi",
+							"raw": "{{base_url}}/penerimaan_lain/validasi/:id",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"penerimaan_lain",
-								"validasi"
+								"validasi",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "3729ee58-cbcd-4132-bdb6-046032bb886b",
+									"description": "Required | String"
+								}
 							]
 						}
 					},
@@ -2650,17 +3203,41 @@
 				{
 					"name": "Get Validasi Billing swa filter",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "{{base_url}}/penerimaan_lain/validasi/filter",
+							"raw": "{{base_url}}/penerimaan_lain/validasi/filter/:id",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"penerimaan_lain",
 								"validasi",
-								"filter"
+								"filter",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "3729ee58-cbcd-4132-bdb6-046032bb886b",
+									"description": "Required | String"
+								}
 							]
 						}
 					},
@@ -2669,17 +3246,48 @@
 				{
 					"name": "Get Validasi Billing swa filter uraian",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "{{base_url}}/penerimaan_lain/validasi/filteruraian",
+							"raw": "{{base_url}}/penerimaan_lain/validasi/filteruraian/:id?Uraian",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"penerimaan_lain",
 								"validasi",
-								"filteruraian"
+								"filteruraian",
+								":id"
+							],
+							"query": [
+								{
+									"key": "Uraian",
+									"value": null,
+									"description": "String"
+								}
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "3729ee58-cbcd-4132-bdb6-046032bb886b",
+									"description": "Required | String"
+								}
 							]
 						}
 					},
@@ -2688,17 +3296,48 @@
 				{
 					"name": "Get Validasi Billing swa filter jumlah",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "{{base_url}}/penerimaan_lain/validasi/filterjumlah",
+							"raw": "{{base_url}}/penerimaan_lain/validasi/filterjumlah/:id?jumlah",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"penerimaan_lain",
 								"validasi",
-								"filterjumlah"
+								"filterjumlah",
+								":id"
+							],
+							"query": [
+								{
+									"key": "jumlah",
+									"value": null,
+									"description": "String"
+								}
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "3729ee58-cbcd-4132-bdb6-046032bb886b",
+									"description": "Required | String"
+								}
 							]
 						}
 					},
@@ -2707,11 +3346,27 @@
 				{
 					"name": "Create Penerimaan lain",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"id\": \"string\",\r\n    \"no_dokumen\": \"string\",\r\n    \"tgl_dokumen\": \"string\",\r\n    \"akun_id\": \"string\",\r\n    \"pihak3\": \"string\",\r\n    \"pihak3_alamat\": \"string\",\r\n    \"pihak3_telp\": \"string\",\r\n    \"uraian\": \"string\",\r\n    \"tgl_bayar\": \"string\",\r\n    \"no_bayar\": \"string\",\r\n    \"sumber_transaksi\": \"string\",\r\n    \"transaksi_id\": \"string\",\r\n    \"metode_pembayaran\": \"string\",\r\n    \"total\": \"string\",\r\n    \"pendapatan\": \"string\",\r\n    \"pdd\": \"string\",\r\n    \"piutang\": \"string\",\r\n    \"cara_pembayaran\": \"string\",\r\n    \"bank_tujuan\": \"string\",\r\n    \"admin_kredit\": \"string\",\r\n    \"admin_debit\": \"string\",\r\n    \"kartubank\": \"string\",\r\n    \"no_kartubank\": \"string\",\r\n    \"rc_id\": 0,\r\n    \"selisih\": 0,\r\n    \"jumlah_netto\": 0,\r\n    \"desc_piutang_pelayanan\": \"string\",\r\n    \"desc_piutang_lain\": \"string\",\r\n    \"piutang_id\": \"string\",\r\n    \"piutanglain_id\": \"string\",\r\n    \"akun_data\": {\r\n        \"akun_id\": \"string\",\r\n        \"akun_kode\": \"string\",\r\n        \"akun_nama\": \"string\"\r\n    },\r\n    \"is_web_change\": true\r\n}",
+							"raw": "{    \r\n    \"no_dokumen\": \"string\",\r\n    \"tgl_dokumen\": \"string\",\r\n    \"akun_id\": \"string\",\r\n    \"pihak3\": \"string\",\r\n    \"pihak3_alamat\": \"string\",\r\n    \"pihak3_telp\": \"string\",\r\n    \"uraian\": \"string\",\r\n    \"tgl_bayar\": \"string\",\r\n    \"no_bayar\": \"string\",\r\n    \"sumber_transaksi\": \"string\",\r\n    \"transaksi_id\": \"string\",\r\n    \"metode_pembayaran\": \"string\",\r\n    \"total\": \"string\",\r\n    \"pendapatan\": \"string\",\r\n    \"pdd\": \"string\",\r\n    \"piutang\": \"string\",\r\n    \"cara_pembayaran\": \"string\",\r\n    \"bank_tujuan\": \"string\",\r\n    \"admin_kredit\": \"string\",\r\n    \"admin_debit\": \"string\",\r\n    \"kartubank\": \"string\",\r\n    \"no_kartubank\": \"string\",\r\n    \"rc_id\": 0,\r\n    \"selisih\": 0,\r\n    \"jumlah_netto\": 0,\r\n    \"desc_piutang_pelayanan\": \"string\",\r\n    \"desc_piutang_lain\": \"string\",\r\n    \"piutang_id\": \"string\",\r\n    \"piutanglain_id\": \"string\",\r\n    \"akun_data\": {\r\n        \"akun_id\": \"string\",\r\n        \"akun_kode\": \"string\",\r\n        \"akun_nama\": \"string\"\r\n    },\r\n    \"is_web_change\": true\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2733,8 +3388,24 @@
 				{
 					"name": "Get All Penerimaan lain",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\r\n    \"tgl_awal\": \"string\",\r\n    \"tgl_akhir\": \"string\",\r\n    \"bulan_awal\": \"string\",\r\n    \"bulan_akhir\": \"string\",\r\n    \"year\": \"string\",\r\n    \"uraian\": \"string\",\r\n    \"sumber_transaksi\": \"string\",\r\n    \"periode\": \"string\",\r\n    \"akun_id\": \"string\"\r\n}",
@@ -2772,11 +3443,27 @@
 				{
 					"name": "Create Penerimaan lain API",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"id\": \"string\",\r\n    \"no_dokumen\": \"string\",\r\n    \"tgl_dokumen\": \"string\",\r\n    \"akun_id\": \"string\",\r\n    \"pihak3\": \"string\",\r\n    \"pihak3_alamat\": \"string\",\r\n    \"pihak3_telp\": \"string\",\r\n    \"uraian\": \"string\",\r\n    \"tgl_bayar\": \"string\",\r\n    \"no_bayar\": \"string\",\r\n    \"sumber_transaksi\": \"string\",\r\n    \"transaksi_id\": \"string\",\r\n    \"metode_pembayaran\": \"string\",\r\n    \"total\": \"string\",\r\n    \"pendapatan\": \"string\",\r\n    \"pdd\": \"string\",\r\n    \"piutang\": \"string\",\r\n    \"cara_pembayaran\": \"string\",\r\n    \"bank_tujuan\": \"string\",\r\n    \"admin_kredit\": \"string\",\r\n    \"admin_debit\": \"string\",\r\n    \"kartubank\": \"string\",\r\n    \"no_kartubank\": \"string\",\r\n    \"rc_id\": 0,\r\n    \"selisih\": 0,\r\n    \"jumlah_netto\": 0,\r\n    \"desc_piutang_pelayanan\": \"string\",\r\n    \"desc_piutang_lain\": \"string\",\r\n    \"piutang_id\": \"string\",\r\n    \"piutanglain_id\": \"string\",\r\n    \"akun_data\": {\r\n        \"akun_id\": \"string\",\r\n        \"akun_kode\": \"string\",\r\n        \"akun_nama\": \"string\"\r\n    },\r\n    \"is_web_change\": true\r\n}",
+							"raw": "{    \r\n    \"no_dokumen\": \"string\",\r\n    \"tgl_dokumen\": \"string\",\r\n    \"akun_id\": \"string\",\r\n    \"pihak3\": \"string\",\r\n    \"pihak3_alamat\": \"string\",\r\n    \"pihak3_telp\": \"string\",\r\n    \"uraian\": \"string\",\r\n    \"tgl_bayar\": \"string\",\r\n    \"no_bayar\": \"string\",\r\n    \"sumber_transaksi\": \"string\",\r\n    \"transaksi_id\": \"string\",\r\n    \"metode_pembayaran\": \"string\",\r\n    \"total\": \"string\",\r\n    \"pendapatan\": \"string\",\r\n    \"pdd\": \"string\",\r\n    \"piutang\": \"string\",\r\n    \"cara_pembayaran\": \"string\",\r\n    \"bank_tujuan\": \"string\",\r\n    \"admin_kredit\": \"string\",\r\n    \"admin_debit\": \"string\",\r\n    \"kartubank\": \"string\",\r\n    \"no_kartubank\": \"string\",\r\n    \"rc_id\": 0,\r\n    \"selisih\": 0,\r\n    \"jumlah_netto\": 0,\r\n    \"desc_piutang_pelayanan\": \"string\",\r\n    \"desc_piutang_lain\": \"string\",\r\n    \"piutang_id\": \"string\",\r\n    \"piutanglain_id\": \"string\",\r\n    \"akun_data\": {\r\n        \"akun_id\": \"string\",\r\n        \"akun_kode\": \"string\",\r\n        \"akun_nama\": \"string\"\r\n    },\r\n    \"is_web_change\": true\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2799,6 +3486,16 @@
 				{
 					"name": "Update Penerimaan lain",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "PUT",
 						"header": [],
 						"body": {
@@ -2868,8 +3565,24 @@
 				{
 					"name": "Update Validasi",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "PUT",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\r\n    \"id\": \"string\",\r\n    \"rc_id\": 0,\r\n    \"akun_id\": 0\r\n}",
@@ -2896,8 +3609,24 @@
 				{
 					"name": "Update Cancel Validasi",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "PUT",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\r\n    \"id\": \"string\",\r\n    \"rc_id\": 0\r\n}",
@@ -2924,8 +3653,24 @@
 				{
 					"name": "Delete Akun",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "DELETE",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/penerimaan_lain/:id",
 							"host": [
@@ -3006,8 +3751,33 @@
 				{
 					"name": "Create Potensi lain",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{    \r\n    \"tgl\": \"string\",\r\n    \"ket\": \"string\",\r\n    \"no_dokumen\": \"string\",\r\n    \"tgl_dokumen\": \"string\",\r\n    \"akun_id\": 0,\r\n    \"pihak3\": \"string\",\r\n    \"pihak3_alamat\": \"string\",\r\n    \"pihak3_telp\": \"string\",\r\n    \"uraian\": \"string\",\r\n    \"tgl_berlaku\": \"string\",\r\n    \"tgl_akhir\": \"string\",\r\n    \"jatuh_tempo\": 0,\r\n    \"besaran_per_satuan\": 0,\r\n    \"total\": 0,\r\n    \"total_pdd\": 0,\r\n    \"total_piutang\": 0,\r\n    \"reklas_pdd\": 0,\r\n    \"pembayaran_piutang\": 0,\r\n    \"monev_id\": 0,\r\n    \"terbayar\": \"string\",\r\n    \"is_web_change\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
 							"raw": "{{base_url}}/potensi_lain",
 							"host": [
@@ -3041,15 +3811,48 @@
 				{
 					"name": "Update Potensi lain",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "PUT",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{    \r\n    \"tgl\": \"string\",\r\n    \"ket\": \"string\",\r\n    \"no_dokumen\": \"string\",\r\n    \"tgl_dokumen\": \"string\",\r\n    \"akun_id\": 0,\r\n    \"pihak3\": \"string\",\r\n    \"pihak3_alamat\": \"string\",\r\n    \"pihak3_telp\": \"string\",\r\n    \"uraian\": \"string\",\r\n    \"tgl_berlaku\": \"string\",\r\n    \"tgl_akhir\": \"string\",\r\n    \"jatuh_tempo\": 0,\r\n    \"besaran_per_satuan\": 0,\r\n    \"total\": 0,\r\n    \"total_pdd\": 0,\r\n    \"total_piutang\": 0,\r\n    \"reklas_pdd\": 0,\r\n    \"pembayaran_piutang\": 0,\r\n    \"monev_id\": 0,\r\n    \"terbayar\": \"string\",\r\n    \"is_web_change\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "{{base_url}}/potensi_lain",
+							"raw": "{{base_url}}/potensi_lain/:id",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"potensi_lain"
+								"potensi_lain",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "",
+									"description": "Required | String"
+								}
 							]
 						}
 					},
@@ -3058,15 +3861,39 @@
 				{
 					"name": "Delete Potensi lain",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "DELETE",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "{{base_url}}/potensi_lain",
+							"raw": "{{base_url}}/potensi_lain/:id",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"potensi_lain"
+								"potensi_lain",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "",
+									"description": "Required | String"
+								}
 							]
 						}
 					},
@@ -3080,8 +3907,24 @@
 				{
 					"name": "Get Data closing",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/data_closing?closing_id=&tgl_closing_start&tgl_closing_end&rc_id&kasir_id&kasir_nama&penyetor_id&penyetor_nama&is_web_change&page=1&size=50",
 							"host": [
@@ -3180,8 +4023,24 @@
 				{
 					"name": "Get All Data closing",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{}",
@@ -3745,8 +4604,24 @@
 				{
 					"name": "Get Statistik Bukti setor",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/bukti_setor/statistik",
 							"host": [
