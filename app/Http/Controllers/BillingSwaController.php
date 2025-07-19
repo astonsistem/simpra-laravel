@@ -21,52 +21,87 @@ class BillingSwaController extends Controller
             $request->validate([
                 'page' => 'nullable|integer|min:1',
                 'size' => 'nullable|integer|min:1',
-                'tgl_awal' => 'nullable|string',
-                'tgl_akhir' => 'nullable|string',
-                'bulan_awal' => 'nullable|string',
-                'bulan_akhir' => 'nullable|string',
-                'year' => 'nullable|string',
-                'periode' => 'nullable|string',
+                'tahunPeriode' => 'nullable|string',
+                'tglAwal' => 'nullable|string',
+                'tglAkhir' => 'nullable|string',
+                'noBayar' => 'nullable|string',
+                'tglBayar' => 'nullable|string',
                 'uraian' => 'nullable|string',
-                'sumber_transaksi' => 'nullable|string',
-                'cara_pembayaran' => 'nullable|string',
+                'noDokumen' => 'nullable|string',
+                'tglDokumen' => 'nullable|string',
+                'sumberTransaksi' => 'nullable|string',
+                'instalasi' => 'nullable|string',
+                'metodeBayar' => 'nullable|string',
+                'caraBayar' => 'nullable|string',
+                'rekeningDpa' => 'nullable|string',
+                'bank' => 'nullable|string',
+                'jumlahBruto' => 'nullable|string',
             ]);
 
             $page = $request->input('page', 1) ?? 1;
             $size = $request->input('size', 100) ?? 100;
-            $tglAwal = $request->input('tgl_awal');
-            $tglAkhir = $request->input('tgl_akhir');
-            $bulanAwal = $request->input('bulan_awal');
-            $bulanAkhir = $request->input('bulan_akhir');
-            $year = $request->input('year');
-            $periode = $request->input('periode');
+            $tahunPeriode = $request->input('tahunPeriode');
+            $tglAwal = $request->input('tglAwal');
+            $tglAkhir = $request->input('tglAkhir');
+            $noBayar = $request->input('noBayar');
+            $tglBayar = $request->input('tglBayar');
             $uraian = $request->input('uraian');
-            $sumberTransaksi = $request->input('sumber_transaksi');
-            $caraPembayaran = $request->input('cara_pembayaran');
+            $noDokumen = $request->input('noDokumen');
+            $tglDokumen = $request->input('tglDokumen');
+            $sumberTransaksi = $request->input('sumberTransaksi');
+            $instalasi = $request->input('instalasi');
+            $metodeBayar = $request->input('metodeBayar');
+            $caraBayar = $request->input('caraBayar');
+            $rekeningDpa = $request->input('rekeningDpa');
+            $bank = $request->input('bank');
+            $jumlahNetto = $request->input('jumlahNetto');
 
             $query = DataPenerimaanLain::query();
             $query->where('type', "BILLING SWA");
 
+            if (!empty($tahunPeriode)) {
+                $query->whereYear('tgl_bayar', (int)$tahunPeriode);
+            }
             if (!empty($tglAwal) && !empty($tglAkhir)) {
                 $startDate = Carbon::parse($tglAwal)->startOfDay();
                 $endDate = Carbon::parse($tglAkhir)->endOfDay();
                 $query->whereBetween('tgl_bayar', [$startDate, $endDate]);
             }
-            if (!empty($bulanAwal) && !empty($bulanAkhir) && $periode === "bulan") {
-                $query->whereMonth('tgl_bayar', '>=', (int)$bulanAwal);
-                $query->whereMonth('tgl_bayar', '<=', (int)$bulanAkhir);
+            if (!empty($noBayar)) {
+                $query->where('no_bayar', 'ILIKE', $noBayar);
             }
-            if (!empty($year)) {
-                $query->whereYear('tgl_bayar', (int)$year);
+            if (!empty($tglBayar)) {
+                $query->where('tgl_bayar', $tglBayar);
             }
             if (!empty($uraian)) {
                 $query->where('uraian', 'ILIKE', "%$uraian%");
             }
+            if (!empty($noDokumen)) {
+                $query->where('no_dokumen', 'ILIKE', $noDokumen);
+            }
+            if (!empty($tglDokumen)) {
+                $query->where('tgl_dokumen', $tglDokumen);
+            }
             if (!empty($sumberTransaksi)) {
                 $query->where('sumber_transaksi', $sumberTransaksi);
             }
-            if (!empty($caraPembayaran)) {
-                $query->where('cara_pembayaran', $caraPembayaran);
+            if (!empty($instalasi)) {
+                $query->where('instalasi_nama', 'ILIKE', $instalasi);
+            }
+            if (!empty($metodeBayar)) {
+                $query->where('metode_pembayaran', $metodeBayar);
+            }
+            if (!empty($caraBayar)) {
+                $query->where('cara_pembayaran', $caraBayar);
+            }
+            if (!empty($rekeningDpa)) {
+                $query->where('rekening_dpa', $rekeningDpa);
+            }
+            if (!empty($bank)) {
+                $query->where('bank_tujuan', 'ILIKE', "%$bank%");
+            }
+            if (!empty($jumlahNetto)) {
+                $query->where('jumlah_netto', 'LIKE', "%$jumlahNetto%");
             }
 
             $totalItems = $query->count();

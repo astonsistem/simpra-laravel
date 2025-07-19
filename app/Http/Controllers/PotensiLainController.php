@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Requests\PotensiLainRequest;
 use App\Http\Resources\PotensiLainCollection;
 use App\Http\Resources\PotensiLainResource;
+use App\Models\DataPenerimaanLain;
 use App\Models\DokumenNonlayanan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -40,7 +42,21 @@ class PotensiLainController extends Controller
             $uraian = $request->input('uraian');
             $pihak3 = $request->input('pihak3');
 
-            $query = DokumenNonlayanan::query();
+            $dokumenNonlayananTable = (new DokumenNonlayanan())->getTable();
+            $dataPenerimaanLainTable = (new DataPenerimaanLain())->getTable();
+
+            $query = DokumenNonlayanan::query()
+                ->select(
+                    "{$dokumenNonlayananTable}.*",
+                    DB::raw("COALESCE(SUM({$dataPenerimaanLainTable}.jumlah_netto), 0) as terbayar")
+                )
+                ->leftJoin(
+                    $dataPenerimaanLainTable,
+                    function ($join) use ($dokumenNonlayananTable, $dataPenerimaanLainTable) {
+                        $join->on(DB::raw("CAST({$dokumenNonlayananTable}.id AS VARCHAR)"), '=', "{$dataPenerimaanLainTable}.piutanglain_id");
+                    }
+                )
+                ->groupBy("{$dokumenNonlayananTable}.id");
 
             if (!empty($tglAwal) && !empty($tglAkhir) && $periode == "tanggal") {
                 $startDate = Carbon::parse($tglAwal)->startOfDay();
@@ -90,7 +106,39 @@ class PotensiLainController extends Controller
 
     public function show(string $id)
     {
-        //
+        try {
+            $validator = Validator::make(['id' => $id], [
+                'id' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'detail' => [
+                        [
+                            'loc' => ['path', 'id'],
+                            'msg' => 'ID is required.',
+                            'type' => 'validation'
+                        ]
+                    ]
+                ], 422);
+            }
+
+            $potensiLain = DokumenNonlayanan::where('transaksi_id', $id)->first();
+
+            if (!$potensiLain) {
+                return response()->json([
+                    'message' => 'Not found.'
+                ], 404);
+            }
+            return response()->json(
+                new PotensiLainResource($potensiLain)
+            );
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan pada server.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function statistik()
@@ -172,7 +220,7 @@ class PotensiLainController extends Controller
         }
     }
 
-    public function destroy($id)
+    public function destroy(string $id)
     {
         try {
             if (empty($id)) {
@@ -212,5 +260,10 @@ class PotensiLainController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function terima(string $id)
+    {
+        //
     }
 }

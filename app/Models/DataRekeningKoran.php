@@ -224,4 +224,42 @@ class DataRekeningKoran extends Model
 
         return $result?->total ?? 0;
     }
+
+    public static function sumDebit(?string $currentMonth = null, ?string $bank = null)
+    {
+        $query = self::query();
+        $query->selectRaw('SUM(debit) as total');
+
+        if (!is_null($currentMonth)) {
+            $query->whereRaw('EXTRACT(MONTH FROM tgl_rc) = ?', $currentMonth);
+        }
+
+        if (!is_null($bank)) {
+            $bank = strtolower($bank);
+            $query->where('bank', $bank);
+        }
+
+        $result = $query->first();
+
+        return $result?->total ?? 0;
+    }
+
+    public static function sumKredit(?string $currentMonth = null, ?string $bank = null)
+    {
+        $query = self::query();
+        $query->selectRaw('SUM(kredit) as total');
+
+        if (!is_null($currentMonth)) {
+            $query->whereRaw('EXTRACT(MONTH FROM tgl_rc) = ?', $currentMonth);
+        }
+
+        if (!is_null($bank)) {
+            $bank = strtolower($bank);
+            $query->where('bank', $bank);
+        }
+
+        $result = $query->first();
+
+        return $result?->total ?? 0;
+    }
 }

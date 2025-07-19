@@ -242,49 +242,48 @@ class RekeningKoranController extends Controller
 
     public function statistik()
     {
-        // currentMonth = datetime.now().month
+        $currentMonth = Carbon::now()->format('m');
 
-        // debit_mutasi_all = get_sum_debit(db)
-        // kredit_mutasi_all = get_sum_kredit(db)
+        $debitMutasiAll = DataRekeningKoran::sumDebit();
+        $kreditMutasiAll = DataRekeningKoran::sumKredit();
 
+        $debitMutasiNow = DataRekeningKoran::sumDebit($currentMonth);
+        $kreditMutasiNow = DataRekeningKoran::sumKredit($currentMonth);
 
-        // debit_mutasi_now = get_sum_debit(db, currentMonth)
-        // kredit_mutasi_now = get_sum_kredit(db, currentMonth)
+        $debitMutasiMandiri = DataRekeningKoran::sumDebit($currentMonth, 'MANDIRI');
+        $kreditMutasiMandiri = DataRekeningKoran::sumKredit($currentMonth, 'MANDIRI');
 
-        // debit_mutasi_mandiri = get_sum_debit(db, currentMonth, "MANDIRI")
-        // kredit_mutasi_mandiri = get_sum_kredit(db, currentMonth, "MANDIRI")
+        $debitMutasiBca = DataRekeningKoran::sumDebit($currentMonth, 'BCA');
+        $kreditMutasiBca = DataRekeningKoran::sumKredit($currentMonth, 'BCA');
 
-        // debit_mutasi_bca = get_sum_debit(db, currentMonth, "BCA")
-        // kredit_mutasi_bca = get_sum_kredit(db, currentMonth, "BCA")
-
-        // debit_mutasi_jatim = get_sum_debit(db, currentMonth, "JATIM")
-        // kredit_mutasi_jatim = get_sum_kredit(db, currentMonth, "JATIM")
+        $debitMutasiJatim = DataRekeningKoran::sumDebit($currentMonth, "JATIM");
+        $kreditMutasiJatim = DataRekeningKoran::sumKredit($currentMonth, "JATIM");
 
         return response()->json([
             "all" => [
-                "debit" => 'debit_mutasi_all.total',
-                "kredit" => 'kredit_mutasi_all.total',
-                "selisih" => 'debit_mutasi_all.total - kredit_mutasi_all.total',
+                "debit" => $debitMutasiAll,
+                "kredit" => $kreditMutasiAll,
+                "selisih" => $debitMutasiAll - $kreditMutasiAll,
             ],
             "now" => [
-                "debit" => 'debit_mutasi_now.total',
-                "kredit" => 'kredit_mutasi_now.total',
-                "selisih" => 'debit_mutasi_now.total - kredit_mutasi_now.total',
+                "debit" => $debitMutasiNow,
+                "kredit" => $kreditMutasiNow,
+                "selisih" => $debitMutasiNow - $kreditMutasiNow,
             ],
             "mandiri" => [
-                "debit" => 'debit_mutasi_mandiri.total',
-                "kredit" => 'kredit_mutasi_mandiri.total',
-                "selisih" => 'debit_mutasi_mandiri.total - kredit_mutasi_mandiri.total',
+                "debit" => $debitMutasiMandiri,
+                "kredit" => $kreditMutasiMandiri,
+                "selisih" => $debitMutasiMandiri - $kreditMutasiMandiri,
             ],
             "bca" => [
-                "debit" => 'debit_mutasi_bca.total',
-                "kredit" => 'kredit_mutasi_bca.total',
-                "selisih" => 'debit_mutasi_bca.total - kredit_mutasi_bca.total',
+                "debit" =>  $debitMutasiBca,
+                "kredit" => $kreditMutasiBca,
+                "selisih" => $debitMutasiBca - $kreditMutasiBca,
             ],
             "jatim" => [
-                "debit" => 'debit_mutasi_jatim.total',
-                "kredit" => 'kredit_mutasi_jatim.total',
-                "selisih" => 'debit_mutasi_jatim.total - kredit_mutasi_jatim.total',
+                "debit" => $debitMutasiJatim,
+                "kredit" => $kreditMutasiJatim,
+                "selisih" => $debitMutasiJatim - $kreditMutasiJatim,
             ],
         ], 200);
     }

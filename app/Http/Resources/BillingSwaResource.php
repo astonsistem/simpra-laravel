@@ -13,47 +13,23 @@ class BillingSwaResource extends JsonResource
     {
         return [
             'id' => (string) $this->id,
-            'no_dokumen' => (string) $this->no_dokumen,
-            'tgl_dokumen' => (string) $this->tgl_dokumen,
-            'akun_id' => (string) $this->akun_id,
-            'pihak3' => (string) $this->pihak3,
-            'pihak3_alamat' => (string) $this->pihak3_alamat,
-            'pihak3_telp' => (string) $this->pihak3_telp,
+            'noBayar' => (string) $this->no_bayar,
+            'tglBayar' => (string) $this->tgl_bayar,
+            'pasien' => (string) $this->pasien_nama,
             'uraian' => (string) $this->uraian,
-            'tgl_bayar' => (string) $this->tgl_bayar,
-            'no_bayar' => (string) $this->no_bayar,
-            'sumber_transaksi' => (string) $this->sumber_transaksi,
-            'transaksi_id' => (string) $this->transaksi_id,
-            'metode_pembayaran' => (string) $this->metode_pembayaran,
-            'total' => (string) $this->total,
-            'pendapatan' => (string) $this->pendapatan,
-            'pdd' => (string) $this->pdd,
-            'piutang' => (string) $this->piutang,
-            'cara_pembayaran' => (string) $this->cara_pembayaran,
-            'bank_tujuan' => (string) $this->bank_tujuan,
-            'admin_kredit' => (string) $this->admin_kredit,
-            'admin_debit' => (string) $this->admin_debit,
-            'kartubank' => (string) $this->kartubank,
-            'no_kartubank' => (string) $this->no_kartubank,
-            'rc_id' => (int) $this->rc_id,
-            'selisih' => (int) $this->selisih,
-            'jumlah_netto' => (int) $this->jumlah_netto,
-            'desc_piutang_pelayanan' => (string) $this->desc_piutang_pelayanan,
-            'desc_piutang_lain' => (string) $this->desc_piutang_lain,
-            'piutang_id' => (string) $this->piutang_id,
-            'piutanglain_id' => (string) $this->piutanglain_id,
-            'akun_data' => [
-                'akun_id' => $this->whenLoaded('masterAkun', function () {
-                    return $this->masterAkun->akun_id;
-                }),
-                'akun_kode' => $this->whenLoaded('masterAkun', function () {
-                    return $this->masterAkun->akun_kode;
-                }),
-                'akun_nama' => $this->whenLoaded('masterAkun', function () {
-                    return $this->masterAkun->akun_nama;
-                }),
-            ],
-            'is_web_change' => (bool) $this->is_web_change,
+            'noDokumen' => (string) $this->no_dokumen,
+            'tglDokumen' => (string) $this->tgl_dokumen,
+            'sumberTransaksi' => (string) $this->sumber_transaksi,
+            'instalasi' => (string) $this->instalasi_nama,
+            'metodeBayar' => (string) $this->metode_pembayaran,
+            'caraBayar' => (string) $this->cara_pembayaran,
+            'rekeningDpa' => (string) $this->rekening_dpa,
+            'bank' => (string) $this->bank_tujuan,
+            'jumlahBruto' => (string) $this->total,
+            'biayaAdminEdc' => (string) $this->admin_kredit,
+            'biayaAdminQris' => (string) $this->admin_debit,
+            'selisih' => (string) $this->selisih,
+            'jumlahNetto' => (int) $this->jumlah_netto,
         ];
     }
 }
