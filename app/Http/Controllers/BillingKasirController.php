@@ -69,7 +69,7 @@ class BillingKasirController extends Controller
                 $query->whereBetween('tgl_pelayanan', [$startDate, $endDate]);
             }
             if (!empty($noBayar)) {
-                $query->where('no_buktibayar', 'ILIKE', $noBayar);
+                $query->where('no_buktibayar', 'ILIKE', "%$noBayar%");
             }
             if (!empty($tglBayar)) {
                 $query->where('tgl_buktibayar', $tglBayar);
@@ -78,7 +78,7 @@ class BillingKasirController extends Controller
                 $query->where('uraian', 'ILIKE', "%$uraian%");
             }
             if (!empty($noDokumen)) {
-                $query->where('no_dokumen', 'ILIKE', $noDokumen);
+                $query->where('no_dokumen', 'ILIKE', "%$noDokumen%");
             }
             if (!empty($tglDokumen)) {
                 $query->where('tgl_pelayanan', $tglDokumen);
@@ -87,16 +87,16 @@ class BillingKasirController extends Controller
                 $query->where('jenis_tagihan', $sumberTransaksi);
             }
             if (!empty($instalasi)) {
-                $query->where('instalasi_nama', 'ILIKE', $instalasi);
+                $query->where('instalasi_nama', 'ILIKE', "%$instalasi%");
             }
             if (!empty($metodeBayar)) {
-                $query->where('metode_bayar', $metodeBayar);
+                $query->where('metode_bayar', 'ILIKE', "%$metodeBayar%");
             }
             if (!empty($caraBayar)) {
-                $query->where('carabayar_nama', $caraBayar);
+                $query->where('carabayar_nama', 'ILIKE', "%$caraBayar%");
             }
             if (!empty($rekeningDpa)) {
-                $query->where('rekening_dpa', $rekeningDpa);
+                $query->where('rek_dpa', 'ILIKE', "%$rekeningDpa%");
             }
             if (!empty($bank)) {
                 $query->where('bank_tujuan', 'ILIKE', "%$bank%");
@@ -168,27 +168,29 @@ class BillingKasirController extends Controller
         }
     }
 
-    public function statistik(Request $request)
+    public function statistik()
     {
-        // sum_penerimaan = get_sum_billing_kasirs(db)
-        // jumlah_penerimaan = count_billing_kasirs(db)
-        // penerimaan_tunai = get_sum_total_by_payment_method(db,"TUNAI")
-        // penerimaan_non_tunai = get_sum_total_by_not_payment_method(db,"TUNAI")
-        // pendapatan_tersetor = get_sum_total_by_status(db,['5','6'])
-        // kas_on_hand = get_sum_total_by_not_status(db,['5','6'], "TUNAI")
+        $sumPenerimaan = DataPenerimaanLayanan::sumTotal();
+        $jumlahPenerimaan = DataPenerimaanLayanan::countTotal();
+        $penerimaanTunai = DataPenerimaanLayanan::sumTotalByPaymentMethod("TUNAI");
+        $jumlahPenerimaanTunai = DataPenerimaanLayanan::countTotalByPaymentMethod("TUNAI");
+        $penerimaanNonTunai = DataPenerimaanLayanan::sumTotalByNotPaymentMethod("TUNAI");
+        $jumlahPenerimaanNonTunai = DataPenerimaanLayanan::countTotalByNotPaymentMethod("TUNAI");
+        $pendapatanTersetor = DataPenerimaanLayanan::sumTotalByStatus(['5', '6']);
+        $kasOnHand = DataPenerimaanLayanan::sumTotalByNotStatus(['5', '6'], "TUNAI");
 
 
         return response()->json([
-            'penerimaan' => "sum_penerimaan.total",
-            'jumlah_penerimaan' => "jumlah_penerimaan",
-            'penerimaan_tunai' => "penerimaan_tunai.total",
-            'jumlah_penerimaan_tunai' => "penerimaan_tunai.count_total",
-            'penerimaan_non_tunai' => "penerimaan_non_tunai.total",
-            'jumlah_penerimaan_non_tunai' => "penerimaan_non_tunai.count_total",
-            'kas_on_hand' => "kas_on_hand.total",
-            'jumlah_kas_on_hand' => "kas_on_hand.count_total",
-            'pendapatan_tersetor' => "pendapatan_tersetor.total",
-            'jumlah_pendapatan_tersetor' => "pendapatan_tersetor.count_total"
+            'penerimaan' => $sumPenerimaan,
+            'jumlah_penerimaan' => $jumlahPenerimaan,
+            'penerimaan_tunai' => $penerimaanTunai,
+            'jumlah_penerimaan_tunai' => $jumlahPenerimaanTunai,
+            'penerimaan_non_tunai' => $penerimaanNonTunai,
+            'jumlah_penerimaan_non_tunai' => $jumlahPenerimaanNonTunai,
+            'kas_on_hand' => $kasOnHand->total,
+            'jumlah_kas_on_hand' => $kasOnHand->count_total,
+            'pendapatan_tersetor' => $pendapatanTersetor->total,
+            'jumlah_pendapatan_tersetor' => $pendapatanTersetor->count_total
         ]);
     }
 

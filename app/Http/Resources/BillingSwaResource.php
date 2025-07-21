@@ -23,7 +23,7 @@ class BillingSwaResource extends JsonResource
             'instalasi' => (string) $this->instalasi_nama,
             'metodeBayar' => (string) $this->metode_pembayaran,
             'caraBayar' => (string) $this->cara_pembayaran,
-            'rekeningDpa' => (string) $this->rekening_dpa,
+            'rekeningDpa' => (string) $this->rek_dpa,
             'bank' => (string) $this->bank_tujuan,
             'jumlahBruto' => (string) $this->total,
             'biayaAdminEdc' => (string) $this->admin_kredit,

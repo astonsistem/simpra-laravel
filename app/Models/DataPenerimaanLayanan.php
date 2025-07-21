@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class DataPenerimaanLayanan extends Model
 {
@@ -66,6 +67,15 @@ class DataPenerimaanLayanan extends Model
         'id' => 'string',
     ];
 
+    public static function sumTotal(): float
+    {
+        $result = self::query()
+            ->selectRaw('SUM(COALESCE(total,0)) as total')
+            ->first();
+
+        return $result?->total ?? 0;
+    }
+
     public static function sumTotalSetor(?string $noClosing = null, ?string $caraPembayaran = null): float
     {
         $query = self::query()
@@ -77,6 +87,111 @@ class DataPenerimaanLayanan extends Model
 
         if (!empty($caraPembayaran)) {
             $query->where('cara_pembayaran', $caraPembayaran);
+        }
+
+        $result = $query->first();
+
+        return $result?->total ?? 0;
+    }
+
+    public static function sumTotalByPaymentMethod(?string $metodeBayar = null): float
+    {
+        $currentYear = Carbon::now()->format('Y');
+        $query = self::query()
+            ->selectRaw('SUM(COALESCE(total, 0)) as total');
+
+        if (!empty($metodeBayar)) {
+            $query->where('metode_bayar', $metodeBayar);
+        }
+
+        $query->whereRaw('EXTRACT(YEAR FROM tgl_pelayanan) = ?', $currentYear);
+
+        $result = $query->first();
+
+        return $result?->total ?? 0;
+    }
+
+    public static function sumTotalByNotPaymentMethod(?string $metodeBayar = null): float
+    {
+        $query = self::query()
+            ->selectRaw('SUM(COALESCE(total, 0)) as total');
+
+        if (!empty($metodeBayar)) {
+            $query->where('metode_bayar', '!=', $metodeBayar);
+        }
+
+        $result = $query->first();
+
+        return $result?->total ?? 0;
+    }
+
+    public static function sumTotalByStatus(array $status)
+    {
+        if (empty($status)) {
+            return (object)['total' => 0, 'count_total' => 0];
+        }
+
+        $result = self::query()
+            ->selectRaw('SUM(COALESCE(total, 0)) as total, COUNT(total) as count_total')
+            ->whereIn('status_id', $status)
+            ->first();
+
+        return (object)[
+            'total'       => $result->total ?? 0,
+            'count_total' => $result->count_total ?? 0,
+        ];
+    }
+
+    public static function sumTotalByNotStatus(array $status, string $caraBayar)
+    {
+        if (empty($status) || empty($caraBayar)) {
+            return (object)['total' => 0, 'count_total' => 0];
+        }
+
+        $result = self::query()
+            ->selectRaw('SUM(COALESCE(total, 0)) as total, COUNT(total) as count_total')
+            ->whereNotIn('status_id', $status)
+            ->where('cara_pembayaran', $caraBayar)
+            ->first();
+
+        return (object)[
+            'total'       => $result->total ?? 0,
+            'count_total' => $result->count_total ?? 0,
+        ];
+    }
+
+    public static function countTotal(): float
+    {
+        $result = self::query()
+            ->count();
+
+        return $result ?? 0;
+    }
+
+    public static function countTotalByPaymentMethod(?string $metodeBayar = null): float
+    {
+        $currentYear = Carbon::now()->format('Y');
+        $query = self::query()
+            ->selectRaw('COUNT(id) as total');
+
+        if (!empty($metodeBayar)) {
+            $query->where('metode_bayar', $metodeBayar);
+        }
+
+        $query->whereRaw('EXTRACT(YEAR FROM tgl_pelayanan) = ?', $currentYear);
+
+        $result = $query->first();
+
+        return $result?->total ?? 0;
+    }
+
+    public static function countTotalByNotPaymentMethod(?string $metodeBayar = null): float
+    {
+        $query = self::query()
+            ->selectRaw('count(id) as total');
+
+        if (!empty($metodeBayar)) {
+            $query->where('metode_bayar', '!=', $metodeBayar);
         }
 
         $result = $query->first();

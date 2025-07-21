@@ -68,7 +68,7 @@ class BillingSwaController extends Controller
                 $query->whereBetween('tgl_bayar', [$startDate, $endDate]);
             }
             if (!empty($noBayar)) {
-                $query->where('no_bayar', 'ILIKE', $noBayar);
+                $query->where('no_bayar', 'ILIKE', "%$noBayar%");
             }
             if (!empty($tglBayar)) {
                 $query->where('tgl_bayar', $tglBayar);
@@ -77,7 +77,7 @@ class BillingSwaController extends Controller
                 $query->where('uraian', 'ILIKE', "%$uraian%");
             }
             if (!empty($noDokumen)) {
-                $query->where('no_dokumen', 'ILIKE', $noDokumen);
+                $query->where('no_dokumen', 'ILIKE', "%$noDokumen%");
             }
             if (!empty($tglDokumen)) {
                 $query->where('tgl_dokumen', $tglDokumen);
@@ -86,16 +86,16 @@ class BillingSwaController extends Controller
                 $query->where('sumber_transaksi', $sumberTransaksi);
             }
             if (!empty($instalasi)) {
-                $query->where('instalasi_nama', 'ILIKE', $instalasi);
+                $query->where('instalasi_nama', 'ILIKE', "%$instalasi%");
             }
             if (!empty($metodeBayar)) {
-                $query->where('metode_pembayaran', $metodeBayar);
+                $query->where('metode_pembayaran', 'ILIKE', "%$metodeBayar%");
             }
             if (!empty($caraBayar)) {
-                $query->where('cara_pembayaran', $caraBayar);
+                $query->where('cara_pembayaran', 'ILIKE', "%$caraBayar%");
             }
             if (!empty($rekeningDpa)) {
-                $query->where('rekening_dpa', $rekeningDpa);
+                $query->where('rek_dpa', 'ILIKE', "%$rekeningDpa%");
             }
             if (!empty($bank)) {
                 $query->where('bank_tujuan', 'ILIKE', "%$bank%");
