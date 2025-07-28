@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class DokumenNonlayanan extends Model
 {
     protected $table = "dokumen_nonlayanan";
+    public $timestamps = false;
 
     protected $fillable = [
         'id',
