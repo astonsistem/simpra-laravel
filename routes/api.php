@@ -25,6 +25,7 @@ use App\Http\Controllers\SinkronisasiController;
 use App\Http\Controllers\StatistikController;
 use App\Http\Controllers\SyncApiController;
 use App\Http\Controllers\TempPenerimaanSwaController;
+use App\Http\Controllers\LaporanController;
 
 Route::post('auth/login_token', [AuthController::class, 'login']);
 Route::post('auth/logintoken', [AuthController::class, 'loginToken']);
@@ -208,3 +209,8 @@ Route::get('rekap/pasien_rawat_inap_bpjs', [RekapController::class, 'pasienRanap
 Route::get('pasienbpjs', [PasienBpjsController::class, 'index']);
 Route::get('pasienbpjs/tarik', [PasienBpjsController::class, 'tarik']);
 Route::get('pasienbpjs/tarik/tarik', [PasienBpjsController::class, 'tarik']);
+
+Route::get('laporan-list', [LaporanController::class, 'list']);
+Route::get('laporan/{slug}', [LaporanController::class, 'show']);
+Route::post('/laporan-generate/{id}', [LaporanController::class, 'generate']);
+Route::delete('/laporan-delete/{filename}', [LaporanController::class, 'deleteTemp']);
