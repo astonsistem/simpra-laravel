@@ -25,8 +25,10 @@ class PenerimaanLainController extends Controller
                 'tahunPeriode' => 'nullable|string',
                 'tglAwal' => 'nullable|string',
                 'tglAkhir' => 'nullable|string',
+                'periode' => 'nullable|string',
                 'noBayar' => 'nullable|string',
                 'tglBayar' => 'nullable|string',
+                'pasien' => 'nullable|string',
                 'uraian' => 'nullable|string',
                 'noDokumen' => 'nullable|string',
                 'tglDokumen' => 'nullable|string',
@@ -44,8 +46,10 @@ class PenerimaanLainController extends Controller
             $tahunPeriode = $request->input('tahunPeriode');
             $tglAwal = $request->input('tglAwal');
             $tglAkhir = $request->input('tglAkhir');
+            $periode = $request->input('periode');
             $noBayar = $request->input('noBayar');
             $tglBayar = $request->input('tglBayar');
+            $pasien = $request->input('pasien');
             $uraian = $request->input('uraian');
             $noDokumen = $request->input('noDokumen');
             $tglDokumen = $request->input('tglDokumen');
@@ -64,16 +68,24 @@ class PenerimaanLainController extends Controller
             if (!empty($tahunPeriode)) {
                 $query->whereYear('tgl_bayar', (int)$tahunPeriode);
             }
-            if (!empty($tglAwal) && !empty($tglAkhir)) {
+            if (!empty($tglAwal) && !empty($tglAkhir) && $periode == "tanggal") {
                 $startDate = Carbon::parse($tglAwal)->startOfDay();
                 $endDate = Carbon::parse($tglAkhir)->endOfDay();
                 $query->whereBetween('tgl_bayar', [$startDate, $endDate]);
+            }
+            if (!empty($tglAwal) && !empty($tglAkhir) && $periode === "bulan") {
+                $startMonth = Carbon::parse($tglAwal)->format('m');
+                $endMonth = Carbon::parse($tglAkhir)->format('m');
+                $query->whereBetween('tgl_bayar', [$startMonth, $endMonth]);
             }
             if (!empty($noBayar)) {
                 $query->where('no_bayar', 'ILIKE', "%$noBayar%");
             }
             if (!empty($tglBayar)) {
                 $query->where('tgl_bayar', $tglBayar);
+            }
+            if (!empty($pasien)) {
+                $query->where('pasien_nama', 'ILIKE', "%$pasien%");
             }
             if (!empty($uraian)) {
                 $query->where('uraian', 'ILIKE', "%$uraian%");

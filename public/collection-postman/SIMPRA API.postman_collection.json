@@ -1408,6 +1408,16 @@
 				{
 					"name": "Get All Billing kasir",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [
 							{
@@ -1417,7 +1427,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/billing_kasir?periode=tanggal&page=1&size=100",
+							"raw": "{{base_url}}/billing_kasir?page=1&size=100",
 							"host": [
 								"{{base_url}}"
 							],
@@ -1426,48 +1436,83 @@
 							],
 							"query": [
 								{
-									"key": "tgl_awal",
+									"key": "tahunPeriode",
 									"value": "2023-10-26",
 									"description": "String",
 									"disabled": true
 								},
 								{
-									"key": "tgl_akhir",
+									"key": "tglAwal",
 									"value": "2023-11-01",
 									"description": "String",
 									"disabled": true
 								},
 								{
-									"key": "bulan_awal",
+									"key": "tglAkhir",
 									"value": "",
 									"description": "String",
 									"disabled": true
 								},
 								{
-									"key": "bulan_akhir",
+									"key": "noBayar",
 									"value": "",
 									"description": "String",
 									"disabled": true
 								},
 								{
-									"key": "periode",
+									"key": "tglBayar",
 									"value": "tanggal",
-									"description": "String"
+									"description": "String",
+									"disabled": true
 								},
 								{
-									"key": "year",
+									"key": "noDokumen",
 									"value": "",
 									"description": "String",
 									"disabled": true
 								},
 								{
-									"key": "loket",
+									"key": "tglDokumen",
 									"value": "",
 									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "pasien",
+									"value": "",
 									"disabled": true
 								},
 								{
 									"key": "uraian",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "sumberTransaksi",
+									"value": "",
+									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "instalasi",
+									"value": "",
+									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "metodeBayar",
+									"value": "",
+									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "caraBayar",
+									"value": "",
+									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "rekeningDpa",
 									"value": "",
 									"description": "String",
 									"disabled": true
@@ -1479,14 +1524,14 @@
 									"disabled": true
 								},
 								{
-									"key": "cara_pembayaran",
+									"key": "jumlahBruto",
 									"value": "",
 									"description": "String",
 									"disabled": true
 								},
 								{
-									"key": "no_closingkasir",
-									"value": "",
+									"key": "periode",
+									"value": null,
 									"description": "String",
 									"disabled": true
 								},
@@ -1604,7 +1649,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "606fb110-786d-4795-b934-f14dd5c934cd",
+									"value": "39cb3fde-9101-4207-806b-0fc840f13473",
 									"description": "Required | String"
 								}
 							]
@@ -1950,7 +1995,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/billing_swa?tgl_awal&tgl_akhir&bulan_awal&bulan_akhir&year&uraian&sumber_transaksi&periode&cara_pembayar&page=1&size=100",
+							"raw": "{{base_url}}/billing_swa?page=1&size=100",
 							"host": [
 								"{{base_url}}"
 							],
@@ -1959,49 +2004,100 @@
 							],
 							"query": [
 								{
-									"key": "tgl_awal",
-									"value": null,
-									"description": "String"
+									"key": "tahunPeriode",
+									"value": "",
+									"description": "String",
+									"disabled": true
 								},
 								{
-									"key": "tgl_akhir",
-									"value": null,
-									"description": "String"
+									"key": "tglAwal",
+									"value": "",
+									"description": "String",
+									"disabled": true
 								},
 								{
-									"key": "bulan_awal",
-									"value": null,
-									"description": "String"
+									"key": "tglAkhir",
+									"value": "",
+									"description": "String",
+									"disabled": true
 								},
 								{
-									"key": "bulan_akhir",
-									"value": null,
-									"description": "String"
+									"key": "noBayar",
+									"value": "",
+									"description": "String",
+									"disabled": true
 								},
 								{
-									"key": "year",
-									"value": null,
-									"description": "String"
+									"key": "tglBayar",
+									"value": "",
+									"description": "String",
+									"disabled": true
 								},
 								{
 									"key": "uraian",
-									"value": null,
-									"description": "String"
+									"value": "",
+									"description": "String",
+									"disabled": true
 								},
 								{
-									"key": "sumber_transaksi",
-									"value": null,
-									"description": "String"
+									"key": "noDokumen",
+									"value": "",
+									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "tglDokumen",
+									"value": "",
+									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "sumberTransaksi",
+									"value": "",
+									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "instalasi",
+									"value": "",
+									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "metodeBayar",
+									"value": "",
+									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "caraBayar",
+									"value": "",
+									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "rekeningDpa",
+									"value": "",
+									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "bank",
+									"value": "",
+									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "jumlahBruto",
+									"value": "",
+									"description": "String",
+									"disabled": true
 								},
 								{
 									"key": "periode",
 									"value": null,
-									"description": "String"
-								},
-								{
-									"key": "cara_pembayar",
-									"value": null,
-									"description": "String"
+									"description": "String",
+									"disabled": true
 								},
 								{
 									"key": "page",
@@ -2926,7 +3022,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/penerimaan_lain?id&tgl_awal&tgl_akhir&bulan_awal&bulan_akhir&year&uraian&sumber_transaksi&periode&akun_id&page&size",
+							"raw": "{{base_url}}/penerimaan_lain?page=1&size=100",
 							"host": [
 								"{{base_url}}"
 							],
@@ -2935,53 +3031,109 @@
 							],
 							"query": [
 								{
-									"key": "id",
-									"value": null
+									"key": "tahunPeriode",
+									"value": "",
+									"description": "String",
+									"disabled": true
 								},
 								{
-									"key": "tgl_awal",
-									"value": null
+									"key": "tglAwal",
+									"value": "",
+									"description": "String",
+									"disabled": true
 								},
 								{
-									"key": "tgl_akhir",
-									"value": null
+									"key": "tglAkhir",
+									"value": "",
+									"description": "String",
+									"disabled": true
 								},
 								{
-									"key": "bulan_awal",
-									"value": null
+									"key": "noBayar",
+									"value": "",
+									"description": "String",
+									"disabled": true
 								},
 								{
-									"key": "bulan_akhir",
-									"value": null
-								},
-								{
-									"key": "year",
-									"value": null
+									"key": "tglBayar",
+									"value": "",
+									"description": "String",
+									"disabled": true
 								},
 								{
 									"key": "uraian",
-									"value": null
+									"value": "",
+									"description": "String",
+									"disabled": true
 								},
 								{
-									"key": "sumber_transaksi",
-									"value": null
+									"key": "noDokumen",
+									"value": "",
+									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "tglDokumen",
+									"value": "",
+									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "sumberTransaksi",
+									"value": "",
+									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "instalasi",
+									"value": "",
+									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "metodeBayar",
+									"value": "",
+									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "caraBayar",
+									"value": "",
+									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "rekeningDpa",
+									"value": "",
+									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "bank",
+									"value": "",
+									"description": "String",
+									"disabled": true
+								},
+								{
+									"key": "jumlahBruto",
+									"value": "",
+									"description": "String",
+									"disabled": true
 								},
 								{
 									"key": "periode",
-									"value": null
-								},
-								{
-									"key": "akun_id",
-									"value": null
+									"value": null,
+									"description": "String",
+									"disabled": true
 								},
 								{
 									"key": "page",
-									"value": null,
+									"value": "1",
 									"description": "Integer"
 								},
 								{
 									"key": "size",
-									"value": null,
+									"value": "100",
 									"description": "Integer"
 								}
 							]
