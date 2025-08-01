@@ -8,6 +8,7 @@ class DataBillingKasir extends Model
 {
     protected $table = "data_billing_kasir";
     protected $keyType = 'string';
+    public $timestamps = false;
 
     protected $fillable = [
         'id',

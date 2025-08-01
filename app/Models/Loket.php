@@ -9,6 +9,7 @@ class Loket extends Model
     protected $table = "master_loket";
     protected $keyType = 'string';
     public $incrementing = false;
+    public $timestamps = false;
 
     protected $fillable = [
         'id',

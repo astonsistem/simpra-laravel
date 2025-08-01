@@ -4,20 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Kasir extends Model
+class MasterCaraPembayaran extends Model
 {
-    protected $table = "master_kasir";
+    protected $table = "master_carapembayaran";
     protected $keyType = 'string';
     public $incrementing = false;
     public $timestamps = false;
 
     protected $fillable = [
-        'id',
-        'kasir_id',
-        'kasir_nama',
+        'bayar_id',
+        'bayar_nama',
+        'is_aktif',
     ];
 
     protected $casts = [
-        'id' => 'string',
+        'bayar_id' => 'string',
     ];
 }

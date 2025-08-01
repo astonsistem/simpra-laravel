@@ -9,6 +9,7 @@ class DataAnggaranPendapatan extends Model
     protected $table = "data_anggaran_pendapatan";
     protected $keyType = 'string';
     public $incrementing = false;
+    public $timestamps = false;
 
     protected $fillable = [
         'id',

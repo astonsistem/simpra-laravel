@@ -9,6 +9,7 @@ class DataRekeningKoran extends Model
 {
     protected $table = "data_rekening_koran";
     protected $primaryKey = "rc_id";
+    public $timestamps = false;
 
     protected $fillable = [
         'rc_id',

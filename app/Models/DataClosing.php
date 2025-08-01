@@ -8,6 +8,7 @@ class DataClosing extends Model
 {
     protected $table = 'data_closing';
     protected $primaryKey = "closing_id";
+    public $timestamps = false;
 
     protected $fillable = [
         'closing_id',

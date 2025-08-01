@@ -9,6 +9,7 @@ class MasterStatus extends Model
     protected $table = "master_status";
     protected $keyType = 'string';
     public $incrementing = false;
+    public $timestamps = false;
 
     protected $fillable = [
         'id',

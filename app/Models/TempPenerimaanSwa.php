@@ -8,6 +8,7 @@ class TempPenerimaanSwa extends Model
 {
     protected $table = "temp_penerimaan_swa";
     protected $primaryKey = "transaksi_id";
+    public $timestamps = false;
 
     protected $fillable = [
         'transaksi_id',

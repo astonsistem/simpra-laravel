@@ -8,6 +8,7 @@ class StatusPasienBpjs extends Model
 {
     protected $table = "infostatuspasienbpjs_v";
     protected $primaryKey = "pendaftaran_id";
+    public $timestamps = false;
 
     protected $fillable = [
         'pendaftaran_id',

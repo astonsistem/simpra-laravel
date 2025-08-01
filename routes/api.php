@@ -4,14 +4,17 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AkunController;
+use App\Http\Controllers\BankController;
 use App\Http\Controllers\BillingKasirController;
 use App\Http\Controllers\BillingSwaController;
 use App\Http\Controllers\BkuController;
 use App\Http\Controllers\BuktiSetorController;
 use App\Http\Controllers\CaraBayarController;
+use App\Http\Controllers\CaraPembayaranController;
 use App\Http\Controllers\DataClosingController;
 use App\Http\Controllers\InstalasiController;
 use App\Http\Controllers\KasirController;
+use App\Http\Controllers\KurangBayarController;
 use App\Http\Controllers\LoketController;
 use App\Http\Controllers\PasienBpjsController;
 use App\Http\Controllers\PendapatanPelayananController;
@@ -26,6 +29,7 @@ use App\Http\Controllers\StatistikController;
 use App\Http\Controllers\SyncApiController;
 use App\Http\Controllers\TempPenerimaanSwaController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\SumberTransaksiController;
 
 Route::post('auth/login_token', [AuthController::class, 'login']);
 Route::post('auth/logintoken', [AuthController::class, 'loginToken']);
@@ -214,3 +218,14 @@ Route::get('laporan-list', [LaporanController::class, 'list']);
 Route::get('laporan/{slug}', [LaporanController::class, 'show']);
 Route::post('/laporan-generate/{id}', [LaporanController::class, 'generate']);
 Route::delete('/laporan-delete/{filename}', [LaporanController::class, 'deleteTemp']);
+
+Route::get('bank', [BankController::class, 'index']);
+Route::get('bank/list', [BankController::class, 'list']);
+
+Route::get('carapembayaran', [CaraPembayaranController::class, 'index']);
+Route::get('carapembayaran/list', [CaraPembayaranController::class, 'list']);
+
+Route::get('sumbertransaksi', [SumberTransaksiController::class, 'index']);
+Route::get('sumbertransaksi/list', [SumberTransaksiController::class, 'list']);
+
+Route::get('kurangbayar', [KurangBayarController::class, 'index']);

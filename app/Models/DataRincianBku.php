@@ -8,7 +8,9 @@ class DataRincianBku extends Model
 {
     protected $table = "data_rincian_bku";
     protected $keyType = 'string';
+    protected $primaryKey = 'rincian_id';
     public $incrementing = false;
+    public $timestamps = false;
 
     protected $fillable = [
         'rincian_id',

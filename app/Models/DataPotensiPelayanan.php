@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class DataPotensiPelayanan extends Model
 {
     protected $table = "data_potensi_pelayanan";
+    public $timestamps = false;
 
     protected $fillable = [
         'id',

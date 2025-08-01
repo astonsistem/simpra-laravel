@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class RekapStatusrawatinapbpjsView extends Model
 {
     protected $table = 'rekap_statusrawatinapbpjs_v';
+    protected $primaryKey = null;
     public $incrementing = false;
     public $timestamps = false;
 
