@@ -14,7 +14,6 @@ use App\Http\Controllers\CaraPembayaranController;
 use App\Http\Controllers\DataClosingController;
 use App\Http\Controllers\InstalasiController;
 use App\Http\Controllers\KasirController;
-use App\Http\Controllers\KurangBayarController;
 use App\Http\Controllers\LoketController;
 use App\Http\Controllers\PasienBpjsController;
 use App\Http\Controllers\PendapatanPelayananController;
@@ -29,6 +28,7 @@ use App\Http\Controllers\StatistikController;
 use App\Http\Controllers\SyncApiController;
 use App\Http\Controllers\TempPenerimaanSwaController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\PenerimaanSelisihController;
 use App\Http\Controllers\SumberTransaksiController;
 
 Route::post('auth/login_token', [AuthController::class, 'login']);
@@ -228,4 +228,4 @@ Route::get('carapembayaran/list', [CaraPembayaranController::class, 'list']);
 Route::get('sumbertransaksi', [SumberTransaksiController::class, 'index']);
 Route::get('sumbertransaksi/list', [SumberTransaksiController::class, 'list']);
 
-Route::get('kurangbayar', [KurangBayarController::class, 'index']);
+Route::get('kurangbayar/penerimaan_selisih', [PenerimaanSelisihController::class, 'index']);
