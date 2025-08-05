@@ -10,6 +10,7 @@ class Instalasi extends Model
     protected $table = "master_instalasi";
     protected $keyType = 'string';
     public $incrementing = false;
+    public $timestamps = false;
 
     protected $fillable = [
         'id',

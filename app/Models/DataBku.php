@@ -8,6 +8,7 @@ class DataBku extends Model
 {
     protected $table = "data_bku";
     protected $primaryKey = "bku_id";
+    public $timestamps = false;
 
     protected $fillable = [
         'bku_id',

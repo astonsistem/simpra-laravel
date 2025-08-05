@@ -9,8 +9,8 @@ class MasterSinkronisasi extends Model
 {
     protected $table = "master_sinkronisasi";
     protected $keyType = 'string';
-    public $timestamps = false;
     public $incrementing = false;
+    public $timestamps = false;
 
     protected $fillable = [
         'id',

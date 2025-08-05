@@ -10,6 +10,7 @@ class SyncPendapatanPelayanan extends Model
     protected $table = "data_pendapatan_pelayanan";
     protected $keyType = 'string';
     public $incrementing = false;
+    public $timestamps = false;
 
     protected $fillable = [
         'id',

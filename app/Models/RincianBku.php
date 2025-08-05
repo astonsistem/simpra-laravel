@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class RincianBku extends Model
 {
     protected $table = "rincian_bku";
+    protected $primaryKey = 'rincian_id';
+    protected $keyType = 'string';
+    public $incrementing = false;
+    public $timestamps = false;
 
     protected $fillable = [
         'rincian_id',

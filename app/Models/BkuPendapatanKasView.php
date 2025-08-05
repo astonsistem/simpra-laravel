@@ -4,9 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class MasterRekeningView extends Model
+class BkuPendapatanKasView extends Model
 {
-    protected $table = 'master_rekening_v';
+    protected $table = "bku_pendapatankas_v";
+    protected $primaryKey = null;
     public $incrementing = false;
     public $timestamps = false;
 }
