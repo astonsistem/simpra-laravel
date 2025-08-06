@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\DataSelisihCollection;
+use App\Http\Resources\DataSelisihResource;
 use App\Models\DataSelisihView;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
 
@@ -101,7 +103,7 @@ class DataSelisihController extends Controller
             $totalPages = ceil($totalItems / $size);
 
             return response()->json(
-                new PenerimaanSelisihCollection($items, $totalItems, $page, $size, $totalPages)
+                new DataSelisihCollection($items, $totalItems, $page, $size, $totalPages)
             );
         } catch (ValidationException $e) {
             $errors = [];
@@ -117,6 +119,43 @@ class DataSelisihController extends Controller
             return response()->json([
                 'detail' => $errors
             ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan pada server.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function show(string $id)
+    {
+        try {
+            $validator = Validator::make(['id' => $id], [
+                'id' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'detail' => [
+                        [
+                            'loc' => ['path', 'id'],
+                            'msg' => 'ID is required.',
+                            'type' => 'validation'
+                        ]
+                    ]
+                ], 422);
+            }
+
+            $dataSelisih = DataSelisihView::where('id', $id)->first();
+
+            if (!$dataSelisih) {
+                return response()->json([
+                    'message' => 'Not found.'
+                ], 404);
+            }
+            return response()->json(
+                new DataSelisihResource($dataSelisih)
+            );
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Terjadi kesalahan pada server.',

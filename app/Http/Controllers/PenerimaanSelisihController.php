@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\PenerimaanSelisihCollection;
+use App\Http\Resources\PenerimaanSelisihResource;
 use App\Models\DataPenerimaanSelisih;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
 
@@ -117,6 +119,43 @@ class PenerimaanSelisihController extends Controller
             return response()->json([
                 'detail' => $errors
             ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan pada server.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function show(string $id)
+    {
+        try {
+            $validator = Validator::make(['id' => $id], [
+                'id' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'detail' => [
+                        [
+                            'loc' => ['path', 'id'],
+                            'msg' => 'ID is required.',
+                            'type' => 'validation'
+                        ]
+                    ]
+                ], 422);
+            }
+
+            $penerimaanSelisih = DataPenerimaanSelisih::where('id', $id)->first();
+
+            if (!$penerimaanSelisih) {
+                return response()->json([
+                    'message' => 'Not found.'
+                ], 404);
+            }
+            return response()->json(
+                new PenerimaanSelisihResource($penerimaanSelisih)
+            );
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Terjadi kesalahan pada server.',

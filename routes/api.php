@@ -12,6 +12,7 @@ use App\Http\Controllers\BuktiSetorController;
 use App\Http\Controllers\CaraBayarController;
 use App\Http\Controllers\CaraPembayaranController;
 use App\Http\Controllers\DataClosingController;
+use App\Http\Controllers\DataSelisihController;
 use App\Http\Controllers\InstalasiController;
 use App\Http\Controllers\KasirController;
 use App\Http\Controllers\LoketController;
@@ -229,3 +230,7 @@ Route::get('sumbertransaksi', [SumberTransaksiController::class, 'index']);
 Route::get('sumbertransaksi/list', [SumberTransaksiController::class, 'list']);
 
 Route::get('kurangbayar/penerimaan_selisih', [PenerimaanSelisihController::class, 'index']);
+Route::get('kurangbayar/penerimaan_selisih/{id}', [PenerimaanSelisihController::class, 'show']);
+
+Route::get('kurangbayar/data_selisih', [DataSelisihController::class, 'index']);
+Route::get('kurangbayar/data_selisih/{id}', [DataSelisihController::class, 'show']);
