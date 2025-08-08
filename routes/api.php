@@ -229,3 +229,9 @@ Route::get('sumbertransaksi', [SumberTransaksiController::class, 'index']);
 Route::get('sumbertransaksi/list', [SumberTransaksiController::class, 'list']);
 
 Route::get('kurangbayar', [KurangBayarController::class, 'index']);
+
+
+Route::get('bank/{id}', [BankController::class, 'show']);
+Route::post('bank', [BankController::class, 'store']);
+Route::put('bank/{id}', [BankController::class, 'update']);
+Route::delete('bank/{id}', [BankController::class, 'destroy']);
