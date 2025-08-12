@@ -12,9 +12,9 @@ use App\Http\Controllers\BuktiSetorController;
 use App\Http\Controllers\CaraBayarController;
 use App\Http\Controllers\CaraPembayaranController;
 use App\Http\Controllers\DataClosingController;
+use App\Http\Controllers\DataSelisihController;
 use App\Http\Controllers\InstalasiController;
 use App\Http\Controllers\KasirController;
-use App\Http\Controllers\KurangBayarController;
 use App\Http\Controllers\LoketController;
 use App\Http\Controllers\PasienBpjsController;
 use App\Http\Controllers\PendapatanPelayananController;
@@ -29,6 +29,7 @@ use App\Http\Controllers\StatistikController;
 use App\Http\Controllers\SyncApiController;
 use App\Http\Controllers\TempPenerimaanSwaController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\PenerimaanSelisihController;
 use App\Http\Controllers\SumberTransaksiController;
 use App\Http\Controllers\SelisihKasController;
 use App\Http\Controllers\DataPenerimaanSelisihController;
@@ -230,7 +231,11 @@ Route::get('carapembayaran/list', [CaraPembayaranController::class, 'list']);
 Route::get('sumbertransaksi', [SumberTransaksiController::class, 'index']);
 Route::get('sumbertransaksi/list', [SumberTransaksiController::class, 'list']);
 
-Route::get('kurangbayar', [KurangBayarController::class, 'index']);
+Route::get('kurangbayar/penerimaan_selisih', [PenerimaanSelisihController::class, 'index']);
+Route::get('kurangbayar/penerimaan_selisih/{id}', [PenerimaanSelisihController::class, 'show']);
+
+Route::get('kurangbayar/data_selisih', [DataSelisihController::class, 'index']);
+Route::get('kurangbayar/data_selisih/{id}', [DataSelisihController::class, 'show']);
 
 
 Route::get('bank/{id}', [BankController::class, 'show']);
@@ -238,16 +243,14 @@ Route::post('bank', [BankController::class, 'store']);
 Route::put('bank/{id}', [BankController::class, 'update']);
 Route::delete('bank/{id}', [BankController::class, 'destroy']);
 
-Route::prefix('selisih-kas')->group(function () {
-    Route::get('/', [SelisihKasController::class, 'index']);
-    Route::post('/', [SelisihKasController::class, 'store']);
-    Route::put('/{id}', [SelisihKasController::class, 'update']);
-    Route::get('/{id}', [SelisihKasController::class, 'getBYId']);
-    Route::delete('/{id}', [SelisihKasController::class, 'destroy']);
+Route::get('selisih-kas', [SelisihKasController::class, 'index']);
+Route::get('selisih-kas/{id}', [SelisihKasController::class, 'getBYId']);
+Route::post('selisih-kas', [SelisihKasController::class, 'store']);
+Route::put('selisih-kas/{id}', [SelisihKasController::class, 'update']);
+Route::delete('selisih-kas/{id}', [SelisihKasController::class, 'destroy']);
 
-});
 
-Route::get('/data-penerimaan-selisih', [DataPenerimaanSelisihController::class, 'index']);
-Route::post('/data-penerimaan-selisih', [DataPenerimaanSelisihController::class, 'store']);
-Route::get('/data-penerimaan-selisih/{id}', [DataPenerimaanSelisihController::class, 'show']);
-Route::delete('/data-penerimaan-selisih/{id}', [DataPenerimaanSelisihController::class, 'destroy']);
+Route::get('data-penerimaan-selisih', [DataPenerimaanSelisihController::class, 'index']);
+Route::post('data-penerimaan-selisih', [DataPenerimaanSelisihController::class, 'store']);
+Route::get('data-penerimaan-selisih/{id}', [DataPenerimaanSelisihController::class, 'show']);
+Route::delete('data-penerimaan-selisih/{id}', [DataPenerimaanSelisihController::class, 'destroy']);
