@@ -61,7 +61,11 @@ class BillingSwaController extends Controller
             $jumlahNetto = $request->input('jumlahNetto');
 
             $query = DataPenerimaanLain::query();
-            $query->where('type', "BILLING SWA");
+            $query->whereIn('sumber_transaksi', function ($sub) {
+                $sub->select('sumber_id')
+                    ->from('master_sumbertransaksi')
+                    ->where('sumber_jenis', 'Billing 118');
+            });
 
             if (!empty($tahunPeriode)) {
                 $query->whereYear('tgl_bayar', (int)$tahunPeriode);
