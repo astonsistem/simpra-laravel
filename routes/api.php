@@ -31,6 +31,8 @@ use App\Http\Controllers\TempPenerimaanSwaController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\PenerimaanSelisihController;
 use App\Http\Controllers\SumberTransaksiController;
+use App\Http\Controllers\SelisihKasController;
+use App\Http\Controllers\DataPenerimaanSelisihController;
 
 Route::post('auth/login_token', [AuthController::class, 'login']);
 Route::post('auth/logintoken', [AuthController::class, 'loginToken']);
@@ -234,3 +236,21 @@ Route::get('kurangbayar/penerimaan_selisih/{id}', [PenerimaanSelisihController::
 
 Route::get('kurangbayar/data_selisih', [DataSelisihController::class, 'index']);
 Route::get('kurangbayar/data_selisih/{id}', [DataSelisihController::class, 'show']);
+
+
+Route::get('bank/{id}', [BankController::class, 'show']);
+Route::post('bank', [BankController::class, 'store']);
+Route::put('bank/{id}', [BankController::class, 'update']);
+Route::delete('bank/{id}', [BankController::class, 'destroy']);
+
+Route::get('selisih-kas', [SelisihKasController::class, 'index']);
+Route::get('selisih-kas/{id}', [SelisihKasController::class, 'getBYId']);
+Route::post('selisih-kas', [SelisihKasController::class, 'store']);
+Route::put('selisih-kas/{id}', [SelisihKasController::class, 'update']);
+Route::delete('selisih-kas/{id}', [SelisihKasController::class, 'destroy']);
+
+
+Route::get('data-penerimaan-selisih', [DataPenerimaanSelisihController::class, 'index']);
+Route::post('data-penerimaan-selisih', [DataPenerimaanSelisihController::class, 'store']);
+Route::get('data-penerimaan-selisih/{id}', [DataPenerimaanSelisihController::class, 'show']);
+Route::delete('data-penerimaan-selisih/{id}', [DataPenerimaanSelisihController::class, 'destroy']);
