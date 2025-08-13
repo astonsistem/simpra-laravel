@@ -62,8 +62,11 @@ class PenerimaanLainController extends Controller
             $jumlahNetto = $request->input('jumlahNetto');
 
             $query = DataPenerimaanLain::query();
-            $query->where('type', '!=', "BILLING SWA");
-            $query->where('akun_id', '!=', 1010101);
+            $query->whereIn('sumber_transaksi', function ($sub) {
+                $sub->select('sumber_id')
+                    ->from('master_sumbertransaksi')
+                    ->where('sumber_jenis', 'Lainnya');
+            });
 
             if (!empty($tahunPeriode)) {
                 $query->whereYear('tgl_bayar', (int)$tahunPeriode);

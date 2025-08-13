@@ -224,31 +224,40 @@ Route::delete('/laporan-delete/{filename}', [LaporanController::class, 'deleteTe
 
 Route::get('bank', [BankController::class, 'index']);
 Route::get('bank/list', [BankController::class, 'list']);
-
-Route::get('carapembayaran', [CaraPembayaranController::class, 'index']);
-Route::get('carapembayaran/list', [CaraPembayaranController::class, 'list']);
-
-Route::get('sumbertransaksi', [SumberTransaksiController::class, 'index']);
-Route::get('sumbertransaksi/list', [SumberTransaksiController::class, 'list']);
-
-Route::get('kurangbayar/penerimaan_selisih', [PenerimaanSelisihController::class, 'index']);
-Route::get('kurangbayar/penerimaan_selisih/{id}', [PenerimaanSelisihController::class, 'show']);
-
-Route::get('kurangbayar/data_selisih', [DataSelisihController::class, 'index']);
-Route::get('kurangbayar/data_selisih/{id}', [DataSelisihController::class, 'show']);
-
-
 Route::get('bank/{id}', [BankController::class, 'show']);
 Route::post('bank', [BankController::class, 'store']);
 Route::put('bank/{id}', [BankController::class, 'update']);
 Route::delete('bank/{id}', [BankController::class, 'destroy']);
+
+Route::get('carapembayaran', [CaraPembayaranController::class, 'index']);
+Route::get('carapembayaran/list', [CaraPembayaranController::class, 'list']);
+Route::get('carapembayaran/{id}', [CaraPembayaranController::class, 'show']);
+Route::post('carapembayaran', [CaraPembayaranController::class, 'store']);
+Route::put('carapembayaran/{id}', [CaraPembayaranController::class, 'update']);
+Route::delete('carapembayaran/{id}', [CaraPembayaranController::class, 'destroy']);
+
+Route::get('sumbertransaksi', [SumberTransaksiController::class, 'index']);
+Route::get('sumbertransaksi/list', [SumberTransaksiController::class, 'list']);
+Route::get('sumbertransaksi/{id}', [SumberTransaksiController::class, 'show']);
+Route::post('sumbertransaksi', [SumberTransaksiController::class, 'store']);
+Route::put('sumbertransaksi/{id}', [SumberTransaksiController::class, 'update']);
+Route::delete('sumbertransaksi/{id}', [SumberTransaksiController::class, 'destroy']);
+
+Route::get('kurangbayar/penerimaan_selisih', [PenerimaanSelisihController::class, 'index']);
+Route::get('kurangbayar/penerimaan_selisih/list', [PenerimaanSelisihController::class, 'list']);
+Route::get('kurangbayar/penerimaan_selisih/{id}', [PenerimaanSelisihController::class, 'show']);
+Route::post('kurangbayar/penerimaan_selisih', [PenerimaanSelisihController::class, 'store']);
+Route::put('kurangbayar/penerimaan_selisih/{id}', [PenerimaanSelisihController::class, 'update']);
+Route::delete('kurangbayar/penerimaan_selisih/{id}', [PenerimaanSelisihController::class, 'destroy']);
+
+Route::get('kurangbayar/data_selisih', [DataSelisihController::class, 'index']);
+Route::get('kurangbayar/data_selisih/{id}', [DataSelisihController::class, 'show']);
 
 Route::get('selisih-kas', [SelisihKasController::class, 'index']);
 Route::get('selisih-kas/{id}', [SelisihKasController::class, 'getBYId']);
 Route::post('selisih-kas', [SelisihKasController::class, 'store']);
 Route::put('selisih-kas/{id}', [SelisihKasController::class, 'update']);
 Route::delete('selisih-kas/{id}', [SelisihKasController::class, 'destroy']);
-
 
 Route::get('data-penerimaan-selisih', [DataPenerimaanSelisihController::class, 'index']);
 Route::post('data-penerimaan-selisih', [DataPenerimaanSelisihController::class, 'store']);
