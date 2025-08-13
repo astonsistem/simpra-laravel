@@ -244,7 +244,11 @@ Route::put('sumbertransaksi/{id}', [SumberTransaksiController::class, 'update'])
 Route::delete('sumbertransaksi/{id}', [SumberTransaksiController::class, 'destroy']);
 
 Route::get('kurangbayar/penerimaan_selisih', [PenerimaanSelisihController::class, 'index']);
+Route::get('kurangbayar/penerimaan_selisih/list', [PenerimaanSelisihController::class, 'list']);
 Route::get('kurangbayar/penerimaan_selisih/{id}', [PenerimaanSelisihController::class, 'show']);
+Route::post('kurangbayar/penerimaan_selisih', [PenerimaanSelisihController::class, 'store']);
+Route::put('kurangbayar/penerimaan_selisih/{id}', [PenerimaanSelisihController::class, 'update']);
+Route::delete('kurangbayar/penerimaan_selisih/{id}', [PenerimaanSelisihController::class, 'destroy']);
 
 Route::get('kurangbayar/data_selisih', [DataSelisihController::class, 'index']);
 Route::get('kurangbayar/data_selisih/{id}', [DataSelisihController::class, 'show']);
@@ -254,7 +258,6 @@ Route::get('selisih-kas/{id}', [SelisihKasController::class, 'getBYId']);
 Route::post('selisih-kas', [SelisihKasController::class, 'store']);
 Route::put('selisih-kas/{id}', [SelisihKasController::class, 'update']);
 Route::delete('selisih-kas/{id}', [SelisihKasController::class, 'destroy']);
-
 
 Route::get('data-penerimaan-selisih', [DataPenerimaanSelisihController::class, 'index']);
 Route::post('data-penerimaan-selisih', [DataPenerimaanSelisihController::class, 'store']);
