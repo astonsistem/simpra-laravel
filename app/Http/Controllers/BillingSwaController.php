@@ -70,12 +70,12 @@ class BillingSwaController extends Controller
             if (!empty($tahunPeriode)) {
                 $query->whereYear('tgl_bayar', (int)$tahunPeriode);
             }
-            if (!empty($tglAwal) && !empty($tglAkhir) && $periode == "tanggal") {
+            if (!empty($tglAwal) && !empty($tglAkhir) && $periode == "TANGGAL") {
                 $startDate = Carbon::parse($tglAwal)->startOfDay();
                 $endDate = Carbon::parse($tglAkhir)->endOfDay();
                 $query->whereBetween('tgl_bayar', [$startDate, $endDate]);
             }
-            if (!empty($tglAwal) && !empty($tglAkhir) && $periode === "bulan") {
+            if (!empty($tglAwal) && !empty($tglAkhir) && $periode === "BULANAN") {
                 $startMonth = Carbon::parse($tglAwal)->format('m');
                 $endMonth = Carbon::parse($tglAkhir)->format('m');
                 $query->whereBetween('tgl_bayar', [$startMonth, $endMonth]);

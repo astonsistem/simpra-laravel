@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CreateDataSelisihRequest;
 use App\Http\Resources\DataSelisihCollection;
 use App\Http\Resources\DataSelisihResource;
+use App\Models\DataPenerimaanSelisih;
 use App\Models\DataSelisihView;
+use App\Models\Kasir;
+use App\Models\Loket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -56,12 +60,12 @@ class DataSelisihController extends Controller
             if (!empty($tahunPeriode)) {
                 $query->whereYear('tgl_bayar', (int)$tahunPeriode);
             }
-            if (!empty($tglAwal) && !empty($tglAkhir) && $periode == "tanggal") {
+            if (!empty($tglAwal) && !empty($tglAkhir) && $periode == "TANGGAL") {
                 $startDate = Carbon::parse($tglAwal)->startOfDay();
                 $endDate = Carbon::parse($tglAkhir)->endOfDay();
                 $query->whereBetween('tgl_setor', [$startDate, $endDate]);
             }
-            if (!empty($tglAwal) && !empty($tglAkhir) && $periode === "bulan") {
+            if (!empty($tglAwal) && !empty($tglAkhir) && $periode === "BULANAN") {
                 $startMonth = Carbon::parse($tglAwal)->format('m');
                 $endMonth = Carbon::parse($tglAkhir)->format('m');
                 $query->whereBetween('tgl_setor', [$startMonth, $endMonth]);
@@ -156,6 +160,73 @@ class DataSelisihController extends Controller
             return response()->json(
                 new DataSelisihResource($dataSelisih)
             );
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan pada server.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function store(CreateDataSelisihRequest $request, string $id)
+    {
+        try {
+            $validator = Validator::make(['id' => $id], [
+                'id' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'detail' => [
+                        [
+                            'loc' => ['path', 'id'],
+                            'msg' => 'ID is required.',
+                            'type' => 'validation'
+                        ]
+                    ]
+                ], 422);
+            }
+
+            $dataSelisih = DataPenerimaanSelisih::find($id);
+
+            if (!$dataSelisih) {
+                return response()->json([
+                    'message' => 'Not found.'
+                ], 404);
+            }
+
+            $data = $request->validated();
+
+            $kasir = null;
+            $loket = null;
+            if ($request->has('kasir_id')) {
+                $kasir = Kasir::find($request->input('kasir_id'));
+                $data['kasir_nama'] = $kasir ? $kasir->nama : null;
+            }
+            if ($request->has('loket_id')) {
+                $loket = Loket::find($request->input('loket_id'));
+                $data['loket_nama'] = $loket ? $loket->nama : null;
+            }
+
+            $dataSelisih->create($data);
+
+            return response()->json(
+                new DataSelisihResource($dataSelisih)
+            );
+        } catch (ValidationException $e) {
+            $errors = [];
+            foreach ($e->errors() as $field => $messages) {
+                foreach ($messages as $message) {
+                    $errors[] = [
+                        'loc' => ['body', $field],
+                        'msg' => $message,
+                        'type' => 'validation',
+                    ];
+                }
+            }
+            return response()->json([
+                'detail' => $errors
+            ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Terjadi kesalahan pada server.',

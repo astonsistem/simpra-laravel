@@ -7,7 +7,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
 
-class CreatePenerimaanSelisihRequest extends FormRequest
+class UpdatePenerimaanSelisihRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -28,6 +28,11 @@ class CreatePenerimaanSelisihRequest extends FormRequest
             "rek_id" => 'required|string',
             "sumber_transaksi"  => 'required|string',
             "klasifikasi"  => 'required|string',
+            "tgl_buktibayar"  => 'required|string',
+            "no_buktibayar"  => 'required|string',
+            "nilai"  => 'required|string',
+            "kasir_nama"  => 'required|string',
+            "loket_nama"  => 'required|string',
         ];
 
         return $rules;
@@ -46,7 +51,12 @@ class CreatePenerimaanSelisihRequest extends FormRequest
             'penyetor.required' => 'Penyetor is required',
             'rek_id.required' => 'Rek ID is required',
             'sumber_transaksi.required' => 'Sumber Transaksi is required',
-            'klasifikasi.required' => 'Klasifikasi is required'
+            'klasifikasi.required' => 'Klasifikasi is required',
+            'tgl_buktibayar.required' => 'Tanggal Bukti Bayar is required',
+            'no_buktibayar.required' => 'Nomor Bukti Bayar is required',
+            'nilai.required' => 'Nilai is required',
+            'kasir_nama.required' => 'Nama Kasir is required',
+            'loket_nama.required' => 'Nama Loket is required'
         ];
     }
 
