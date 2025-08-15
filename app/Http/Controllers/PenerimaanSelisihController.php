@@ -3,10 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreatePenerimaanSelisihRequest;
+use App\Http\Requests\UpdatePenerimaanSelisihRequest;
+use App\Http\Requests\ValidasiPenerimaanSelisihRequest;
 use App\Http\Resources\PenerimaanSelisihCollection;
 use App\Http\Resources\PenerimaanSelisihResource;
 use App\Models\DataPenerimaanSelisih;
+use App\Models\DataRekeningKoran;
+use App\Models\Kasir;
+use App\Models\Loket;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
@@ -57,12 +63,12 @@ class PenerimaanSelisihController extends Controller
             if (!empty($tahunPeriode)) {
                 $query->whereYear('tgl_bayar', (int)$tahunPeriode);
             }
-            if (!empty($tglAwal) && !empty($tglAkhir) && $periode == "tanggal") {
+            if (!empty($tglAwal) && !empty($tglAkhir) && $periode == "TANGGAL") {
                 $startDate = Carbon::parse($tglAwal)->startOfDay();
                 $endDate = Carbon::parse($tglAkhir)->endOfDay();
                 $query->whereBetween('tgl_setor', [$startDate, $endDate]);
             }
-            if (!empty($tglAwal) && !empty($tglAkhir) && $periode === "bulan") {
+            if (!empty($tglAwal) && !empty($tglAkhir) && $periode === "BULANAN") {
                 $startMonth = Carbon::parse($tglAwal)->format('m');
                 $endMonth = Carbon::parse($tglAkhir)->format('m');
                 $query->whereBetween('tgl_setor', [$startMonth, $endMonth]);
@@ -172,7 +178,7 @@ class PenerimaanSelisihController extends Controller
 
             $penerimaanSelisih = DataPenerimaanSelisih::create([
                 ...$data,
-                'total' => $data['jumlah'] - $data['admin_kredit'],
+                'jumlah_netto' => $data['jumlah'] - $data['admin_kredit'],
             ]);
 
             return response()->json(
@@ -201,7 +207,7 @@ class PenerimaanSelisihController extends Controller
         }
     }
 
-    public function update(Request $request, string $id)
+    public function update(UpdatePenerimaanSelisihRequest $request, string $id)
     {
         try {
             $validator = Validator::make(['id' => $id], [
@@ -228,20 +234,20 @@ class PenerimaanSelisihController extends Controller
                 ], 404);
             }
 
-            $request->validate([
-                'no_buktibayar' => 'required|string|max:255',
-                'tgl_buktibayar' => 'required|date',
-                'tgl_setor' => 'required|date',
-                'no_setor' => 'required|string|max:255',
-                'jumlah' => 'required|numeric',
-                'rek_id' => 'required|string|max:255',
-                'loket_nama' => 'required|string|max:255',
-                'cara_pembayaran' => 'required|string|max:50',
-                'bank_tujuan' => 'nullable|string|max:255',
-                'jenis' => 'nullable|string|max:50',
-            ]);
+            $data = $request->validated();
 
-            $penerimaanSelisih->update($request->all());
+            $kasir = null;
+            $loket = null;
+            if ($request->has('kasir_id')) {
+                $kasir = Kasir::find($request->input('kasir_id'));
+                $data['kasir_nama'] = $kasir ? $kasir->nama : null;
+            }
+            if ($request->has('loket_id')) {
+                $loket = Loket::find($request->input('loket_id'));
+                $data['loket_nama'] = $loket ? $loket->nama : null;
+            }
+
+            $penerimaanSelisih->update($data);
 
             return response()->json(
                 new PenerimaanSelisihResource($penerimaanSelisih)
@@ -402,9 +408,173 @@ class PenerimaanSelisihController extends Controller
         }
     }
 
-    public function validasi() {}
+    public function validasi(string $id)
+    {
+        try {
+            $penerimaanSelisih = DataPenerimaanSelisih::where('id', $id)->firstOrFail();
+            $rekeningKoran = [];
+            $totalSetor = 0;
+            if (!$penerimaanSelisih) {
+                return response()->json([
+                    'message' => 'Not found'
+                ], 404);
+            }
 
-    public function cancelValidasi() {}
+            $tglBuktiBayar = $penerimaanSelisih->tgl_buktibayar;
+            $bankTujuan = $penerimaanSelisih->bank_tujuan;
+            $rcId = $penerimaanSelisih->rc_id;
+
+            $rekeningKoran = DataRekeningKoran::getTanggalRc($rcId, $tglBuktiBayar, $bankTujuan);
+
+            $noClosing = $penerimaanSelisih->no_closingkasir;
+            $caraPembayaran = $penerimaanSelisih->cara_pembayaran;
+
+            if (in_array($caraPembayaran, ['TUNAI', 'EDC'])) {
+                $totalSetor =  DataPenerimaanSelisih::sumTotalSetor($noClosing, $caraPembayaran);
+
+                $rekeningKoran = $rekeningKoran->filter(function ($koran) use ($totalSetor) {
+                    return $koran->kredit == $totalSetor;
+                });
+            } elseif (in_array($caraPembayaran, ['QRIS', 'TRANSFER'])) {
+                $jumlahNetto =
+                    ($penerimaanSelisih->total ?? 0) -
+                    ($penerimaanSelisih->admin_kredit ?? 0) +
+                    ($penerimaanSelisih->selisih ?? 0);
+
+                $rekeningKoran = $rekeningKoran->filter(function ($koran) use ($jumlahNetto) {
+                    return $koran->kredit == $jumlahNetto;
+                });
+
+                $totalSetor = $jumlahNetto;
+            }
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'success',
+                'data' => [
+                    'penerimaan_selisih' => $penerimaanSelisih,
+                    'rekening_koran' => $rekeningKoran,
+                    'total_setor' => $totalSetor
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error: ' . $e->getMessage(),
+                'data' => null
+            ], 500);
+        }
+    }
+
+    public function updateValidasi(ValidasiPenerimaanSelisihRequest $request)
+    {
+        $data = $request->validated();
+        $penerimaanSelisihId = $data['id'];
+        $rcId = $data['rc_id'];
+
+        try {
+            DB::transaction(function () use ($penerimaanSelisihId, $rcId) {
+                $penerimaanSelisih = DataPenerimaanSelisih::where('id', $penerimaanSelisihId)
+                    ->first();
+
+                if (!$penerimaanSelisih) {
+                    throw new \Exception('Penerimaan selisih tidak ditemukan atau status tidak valid.');
+                }
+
+                $rcIdValue = ($rcId === 0 || $rcId === '0') ? null : $rcId;
+
+                DataPenerimaanSelisih::where('id', $penerimaanSelisihId)
+                    ->update([
+                        'rc_id'     => $rcIdValue,
+                    ]);
+
+                $penerimaanSelisihTableName = (new DataPenerimaanSelisih())->getTable();
+                $rekeningKoranTableName = (new DataRekeningKoran())->getTable();
+
+                $klarifLayananSubquery = DB::table($penerimaanSelisihTableName)
+                    ->select(DB::raw('SUM(COALESCE(total,0) - COALESCE(admin_kredit,0) + COALESCE(selisih,0))'))
+                    ->where('rc_id', $rcId);
+
+                DB::table($rekeningKoranTableName)
+                    ->where('rc_id', $rcId)
+                    ->update([
+                        'klarif_layanan' => DB::raw('(' . $klarifLayananSubquery->toSql() . ')'),
+                        'akun_id'        => '1010102',
+                    ]);
+            });
+
+            return response()->json([
+                'message' => 'Berhasil validasi Penerimaan selisih',
+                'status'  => 200,
+            ], 200);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Kesalahan validasi.',
+                'errors'  => $e->errors(),
+                'status'  => 422,
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat validasi Penerimaan selisih.',
+                'error'   => $e->getMessage(),
+                'status'  => 500,
+            ], 500);
+        }
+    }
+
+    public function cancelValidasi(ValidasiPenerimaanSelisihRequest $request)
+    {
+        $data = $request->validated();
+        $penerimaanSelisihId = $data['id'];
+        $rcId = $data['rc_id'];
+
+        try {
+            DB::transaction(function () use ($penerimaanSelisihId, $rcId) {
+                $penerimaanSelisih = DataPenerimaanSelisih::where('id', $penerimaanSelisihId)->first();
+
+                if (!$penerimaanSelisih) {
+                    throw new \Exception('Penerimaan selisih tidak ditemukan atau status tidak valid.');
+                }
+
+                DataPenerimaanSelisih::where('id', $penerimaanSelisihId)
+                    ->update([
+                        'rc_id'     => null,
+                    ]);
+
+                $penerimaanSelisihTableName = (new DataPenerimaanSelisih())->getTable();
+                $rekeningKoranTableName = (new DataRekeningKoran())->getTable();
+
+                $klarifLayananSubquery = DB::table($penerimaanSelisihTableName)
+                    ->select(DB::raw('COALESCE(SUM(total - admin_kredit + selisih), 0)'))
+                    ->where('rc_id', $rcId);
+
+                DB::table($rekeningKoranTableName)
+                    ->where('rc_id', $rcId)
+                    ->update([
+                        'klarif_layanan' => DB::raw('(' . $klarifLayananSubquery->toSql() . ')'),
+                        'akun_id'        => DB::raw(
+                            "CASE WHEN (" . $klarifLayananSubquery->toSql() . ") = 0 THEN NULL ELSE akun_id END"
+                        ),
+                    ]);
+            });
+
+            return response()->json([
+                'message' => 'Berhasil membatalkan validasi Penerimaan selisih',
+                'status'  => 200,
+            ], 200);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Kesalahan validasi.',
+                'errors'  => $e->errors(),
+                'status'  => 422,
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat membatalkan validasi Penerimaan selisih.',
+                'error'   => $e->getMessage(),
+                'status'  => 500,
+            ], 500);
+        }
+    }
 
     public function setor() {}
 }

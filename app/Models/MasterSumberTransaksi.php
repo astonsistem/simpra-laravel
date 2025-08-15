@@ -8,6 +8,7 @@ class MasterSumberTransaksi extends Model
 {
     protected $table = "master_sumbertransaksi";
     protected $keyType = 'string';
+    protected $primaryKey = 'sumber_id';
     public $incrementing = false;
     public $timestamps = false;
 

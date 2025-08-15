@@ -8,6 +8,7 @@ class MasterCaraPembayaran extends Model
 {
     protected $table = "master_carapembayaran";
     protected $keyType = 'string';
+    protected $primaryKey = 'bayar_id';
     public $incrementing = false;
     public $timestamps = false;
 
