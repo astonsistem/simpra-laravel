@@ -248,7 +248,11 @@ Route::get('kurangbayar/penerimaan_selisih/list', [PenerimaanSelisihController::
 Route::get('kurangbayar/penerimaan_selisih/{id}', [PenerimaanSelisihController::class, 'show']);
 Route::post('kurangbayar/penerimaan_selisih', [PenerimaanSelisihController::class, 'store']);
 Route::put('kurangbayar/penerimaan_selisih/{id}', [PenerimaanSelisihController::class, 'update']);
+Route::get('kurangbayar/penerimaan_selisih/validasi/{id}', [PenerimaanSelisihController::class, 'validasi']);
+Route::put('kurangbayar/penerimaan_selisih/validasi', [PenerimaanSelisihController::class, 'updateValidasi']);
+Route::put('kurangbayar/penerimaan_selisih/cancel_validasi', [PenerimaanSelisihController::class, 'cancelValidasi']);
 Route::delete('kurangbayar/penerimaan_selisih/{id}', [PenerimaanSelisihController::class, 'destroy']);
+
 
 Route::get('kurangbayar/data_selisih', [DataSelisihController::class, 'index']);
 Route::get('kurangbayar/data_selisih/{id}', [DataSelisihController::class, 'show']);
