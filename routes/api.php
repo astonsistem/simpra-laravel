@@ -91,6 +91,8 @@ Route::post('sinkronisasi/request/kasir', [SinkronisasiController::class, 'pasie
 Route::post('sinkronisasi/request/penerimaanumum', [SinkronisasiController::class, 'pasien_bpjs']);
 Route::post('sinkronisasi/request/rincianpendapatan', [SinkronisasiController::class, 'pasien_bpjs']);
 Route::post('sinkronisasi/save', [SinkronisasiController::class, 'pasien_bpjs']);
+// Tambahkan rute ini untuk menangani request dengan ID kasir
+Route::post('sinkronisasi/request/kasir/{kasirId}', [SinkronisasiController::class, 'requestKasir']);
 
 Route::get('pendapatan_pelayanan', [PendapatanPelayananController::class, 'index']);
 Route::get('pendapatan_pelayanan/statistik', [PendapatanPelayananController::class, 'statistik']);
