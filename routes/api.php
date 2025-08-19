@@ -255,6 +255,7 @@ Route::delete('kurangbayar/penerimaan_selisih/{id}', [PenerimaanSelisihControlle
 Route::get('kurangbayar/data_selisih', [DataSelisihController::class, 'index']);
 Route::get('kurangbayar/data_selisih/{id}', [DataSelisihController::class, 'show']);
 
+Route::get('kurangbayar/penerimaan_transaksi', [DataPenerimaanSelisihController::class, 'getTransaksi']);
 Route::get('selisih-kas', [SelisihKasController::class, 'index']);
 Route::get('selisih-kas/{id}', [SelisihKasController::class, 'getBYId']);
 Route::post('selisih-kas', [SelisihKasController::class, 'store']);
