@@ -11,10 +11,12 @@ class DataPenerimaanSelisihController extends Controller
     {
         return response()->json(DataPenerimaanSelisih::all());
     }
+
     public function show($id)
     {
         return response()->json(DataPenerimaanSelisih::findOrFail($id));
     }
+
     public function store(Request $request)
     {
         // Validasi sesuai field yang ada di form
@@ -37,5 +39,19 @@ class DataPenerimaanSelisihController extends Controller
             'message' => 'Data Selisih Kurang Bayar/Setor berhasil disimpan',
             'data' => $data
         ], 201);
+    }
+
+    /**
+     * Method baru untuk endpoint 'kurangbayar/penerimaan_transaksi' (Data Transaksi).
+     * Mengambil semua data dari tabel data_penerimaan_selisih.
+     */
+    public function getTransaksi()
+    {
+        $data = DataPenerimaanSelisih::all(); // Mengambil semua data dari tabel
+
+        return response()->json([
+            'message' => 'Data transaksi berhasil diambil.',
+            'data' => $data
+        ]);
     }
 }
