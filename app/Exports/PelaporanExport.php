@@ -8,7 +8,7 @@ use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 
-class LaporanExport implements FromView, WithEvents, WithColumnFormatting
+class PelaporanExport implements FromView, WithEvents, WithColumnFormatting
 {
     protected $laporanName, $laporanTitle, $laporanData;
 

@@ -13,29 +13,50 @@ class BillingKasirRequest extends FormRequest
         return true;
     }
 
-   public function rules(): array
-{
-    return [
-        'id' => 'required|string',
-        'noBayar' => 'required|string',
-        'tglBayar' => 'required|string',
-        'pasien' => 'required|string',
-        'uraian' => 'required|string',
-        'noDokumen' => 'required|string',
-        'tglDokumen' => 'required|string',
-        'sumberTransaksi' => 'required|string',
-        'instalasi' => 'required|string',
-        'metodeBayar' => 'required|string',
-        'caraBayar' => 'required|string',
-        'rekeningDpa' => 'required|string',
-        'bank' => 'required|string',
-        'jumlahBruto' => 'required|string',
-        'biayaAdminEdc' => 'required|string',
-        'biayaAdminQris' => 'required|string',
-        'selisih' => 'required|string',
-        'jumlahNetto' => 'required|numeric',
-    ];
-}
+    protected function prepareForValidation()
+    {
+        $map = [
+            'no_bayar'         => 'no_buktibayar',
+            'tgl_bayar'        => 'tgl_buktibayar',
+            'pasien'           => 'pasien_nama',
+            'no_dokumen'       => 'no_pendaftaran',
+            'tgl_dokumen'      => 'tgl_pelayanan',
+            'cara_bayar_id'    => 'carabayar_id',
+            'jumlah_bruto'     => 'total',
+            'biaya_admin_edc'  => 'admin_kredit',
+            'biaya_admin_qris' => 'admin_debit',
+        ];
+
+        $data = $this->all();
+
+        foreach ($map as $feKey => $beKey) {
+            if (isset($data[$feKey])) {
+                $data[$beKey] = $data[$feKey];
+                unset($data[$feKey]);
+            }
+        }
+
+        $this->replace($data);
+    }
+
+    public function rules(): array
+    {
+        return [
+            'no_buktibayar'  => 'required|string',
+            'tgl_buktibayar' => 'required|string',
+            'pasien_nama'    => 'required|string',
+            'no_pendaftaran' => 'required|string',
+            'tgl_pelayanan'  => 'required|string',
+            // 'uraian'         => 'required|string',
+            'carabayar_id'   => 'required|string',
+            'total'          => 'required|int',
+            'admin_kredit'   => 'required|int',
+            'admin_debit'    => 'required|int',
+            'jumlah_netto'   => 'required|int',
+        ];
+    }
+
+
     public function messages(): array
     {
         return [];
