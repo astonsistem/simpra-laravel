@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SumberTransaksiRequest;
 use App\Http\Resources\SumberTransaksiCollection;
+use App\Http\Resources\SumberTransaksiResource;
 use App\Models\MasterSumberTransaksi;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -51,24 +53,19 @@ class SumberTransaksiController extends Controller
             ], 500);
         }
     }
+
     public function show($id)
     {
         try {
-            $bank = MasterBank::findOrFail($id);
-
-            return response()->json([
-                'status' => "200",
-                'message' => "success",
-                'data' => [
-                    'bank_id' => $bank->bank_id,
-                    'bank_nama' => $bank->bank_nama,
-                    'is_aktif' => $bank->is_aktif,
-                ]
-            ], 200);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
-                'message' => 'Bank not found.'
-            ], 404);
+            $sumberTransaksi = MasterSumberTransaksi::findOrFail($id);
+            if (!$sumberTransaksi) {
+                return response()->json([
+                    'message' => 'Not found.'
+                ], 404);
+            }
+            return response()->json(
+                new SumberTransaksiResource($sumberTransaksi)
+            );
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Terjadi kesalahan pada server.',
@@ -76,104 +73,55 @@ class SumberTransaksiController extends Controller
             ], 500);
         }
     }
-    public function store(Request $request)
+
+    public function store(SumberTransaksiRequest $request)
+    {
+        $data = $request->validated();
+
+        $sumberTransaksi = MasterSumberTransaksi::create($data);
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Data berhasil ditambahkan',
+            'data' => $sumberTransaksi,
+        ], 200);
+    }
+
+    public function update(SumberTransaksiRequest $request, $id)
     {
         try {
-            $request->validate([
-                'bank_id' => 'required|string|max:255',
-                'bank_nama' => 'required|string|max:255',
-                'is_aktif' => 'required|boolean',
-            ]);
+            $data = $request->validated();
 
-            $bank = MasterBank::create($request->all());
-
-            return response()->json([
-                'status' => "201",
-                'message' => "Bank created successfully.",
-                'data' => [
-                    'bank_id' => $bank->bank_id,
-                    'bank_nama' => $bank->bank_nama,
-                    'is_aktif' => $bank->is_aktif,
-                ]
-            ], 201);
-        } catch (ValidationException $e) {
-            $errors = [];
-            foreach ($e->errors() as $field => $messages) {
-                foreach ($messages as $message) {
-                    $errors[] = [
-                        'loc' => ['body', $field],
-                        'msg' => $message,
-                        'type' => 'validation',
-                    ];
-                }
+            $sumberTransaksi = MasterSumberTransaksi::findOrFail($id);
+            if (!$sumberTransaksi) {
+                return response()->json([
+                    'message' => 'Not found'
+                ], 404);
             }
-            return response()->json([
-                'detail' => $errors
-            ], 422);
+            $sumberTransaksi->update($data);
+
+            return response()->json(new SumberTransaksiResource($sumberTransaksi), 200);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Terjadi kesalahan pada server.',
-                'error' => $e->getMessage()
+                'status'  => 500,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+                'data'    => null
             ], 500);
         }
     }
-    public function update(Request $request, $id)
-    {
-        try {
-            $request->validate([
-                'bank_nama' => 'sometimes|required|string|max:255',
-                'is_aktif' => 'sometimes|required|boolean',
-            ]);
 
-            $bank = MasterBank::findOrFail($id);
-            $bank->update($request->all());
-
-            return response()->json([
-                'status' => "200",
-                'message' => "Bank updated successfully.",
-                'data' => [
-                    'bank_id' => $bank->bank_id,
-                    'bank_nama' => $bank->bank_nama,
-                    'is_aktif' => $bank->is_aktif,
-                ]
-            ], 200);
-        } catch (ValidationException $e) {
-            $errors = [];
-            foreach ($e->errors() as $field => $messages) {
-                foreach ($messages as $message) {
-                    $errors[] = [
-                        'loc' => ['body', $field],
-                        'msg' => $message,
-                        'type' => 'validation',
-                    ];
-                }
-            }
-            return response()->json([
-                'detail' => $errors
-            ], 422);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
-                'message' => 'Bank not found.'
-            ], 404);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Terjadi kesalahan pada server.',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
     public function destroy($id)
     {
         try {
-            $bank = MasterBank::findOrFail($id);
-            $bank->delete();
+            $sumberTransaksi = MasterSumberTransaksi::findOrFail($id);
+            $sumberTransaksi->delete();
             return response()->json([
                 'status' => "200",
-                'message' => "Bank deleted successfully."
+                'message' => "Sumber Transaksi deleted successfully."
             ], 200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
-                'message' => 'Bank not found.'
+                'message' => 'Sumber Transaksi not found.'
             ], 404);
         } catch (\Exception $e) {
             return response()->json([
@@ -182,6 +130,7 @@ class SumberTransaksiController extends Controller
             ], 500);
         }
     }
+
     public function list()
     {
         try {

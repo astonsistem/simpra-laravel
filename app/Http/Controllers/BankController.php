@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\BankRequest;
 use App\Http\Resources\BankCollection;
+use App\Http\Resources\BankResource;
 use App\Models\MasterBank;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -21,6 +23,7 @@ class BankController extends Controller
             $size = $request->input('size', 100);
 
             $query = MasterBank::query();
+            $query->where('is_aktif', 't');
 
             $totalItems = $query->count();
             $items = $query->skip(($page - 1) * $size)->take($size)->get();
@@ -51,24 +54,20 @@ class BankController extends Controller
             ], 500);
         }
     }
+
     public function show($id)
     {
         try {
-            $bank = MasterBank::findOrFail($id);
+            $bank = MasterBank::where('bank_id', $id);
 
-            return response()->json([
-                'status' => "200",
-                'message' => "success",
-                'data' => [
-                    'bank_id' => $bank->bank_id,
-                    'bank_nama' => $bank->bank_nama,
-                    'is_aktif' => $bank->is_aktif,
-                ]
-            ], 200);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
-                'message' => 'Bank not found.'
-            ], 404);
+            if (!$bank) {
+                return response()->json([
+                    'message' => 'Not found.'
+                ], 404);
+            }
+            return response()->json(
+                new BankResource($bank)
+            );
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Terjadi kesalahan pada server.',
@@ -76,92 +75,43 @@ class BankController extends Controller
             ], 500);
         }
     }
-    public function store(Request $request)
+
+    public function store(BankRequest $request)
+    {
+        $data = $request->validated();
+
+        $bank = MasterBank::create($data);
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Data berhasil ditambahkan',
+            'data' => $bank,
+        ], 200);
+    }
+
+    public function update(BankRequest $request, $id)
     {
         try {
-            $request->validate([
-                'bank_id' => 'required|string|max:255',
-                'bank_nama' => 'required|string|max:255',
-                'is_aktif' => 'required|boolean',
-            ]);
-
-            $bank = MasterBank::create($request->all());
-
-            return response()->json([
-                'status' => "201",
-                'message' => "Bank created successfully.",
-                'data' => [
-                    'bank_id' => $bank->bank_id,
-                    'bank_nama' => $bank->bank_nama,
-                    'is_aktif' => $bank->is_aktif,
-                ]
-            ], 201);
-        } catch (ValidationException $e) {
-            $errors = [];
-            foreach ($e->errors() as $field => $messages) {
-                foreach ($messages as $message) {
-                    $errors[] = [
-                        'loc' => ['body', $field],
-                        'msg' => $message,
-                        'type' => 'validation',
-                    ];
-                }
-            }
-            return response()->json([
-                'detail' => $errors
-            ], 422);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Terjadi kesalahan pada server.',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-    public function update(Request $request, $id)
-    {
-        try {
-            $request->validate([
-                'bank_nama' => 'sometimes|required|string|max:255',
-                'is_aktif' => 'sometimes|required|boolean',
-            ]);
+            $data = $request->validated();
 
             $bank = MasterBank::findOrFail($id);
-            $bank->update($request->all());
-
-            return response()->json([
-                'status' => "200",
-                'message' => "Bank updated successfully.",
-                'data' => [
-                    'bank_id' => $bank->bank_id,
-                    'bank_nama' => $bank->bank_nama,
-                    'is_aktif' => $bank->is_aktif,
-                ]
-            ], 200);
-        } catch (ValidationException $e) {
-            $errors = [];
-            foreach ($e->errors() as $field => $messages) {
-                foreach ($messages as $message) {
-                    $errors[] = [
-                        'loc' => ['body', $field],
-                        'msg' => $message,
-                        'type' => 'validation',
-                    ];
-                }
+            if (!$bank) {
+                return response()->json([
+                    'message' => 'Not found'
+                ], 404);
             }
-            return response()->json([
-                'detail' => $errors
-            ], 422);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
-                'message' => 'Bank not found.'
-            ], 404);
+            $bank->update($data);
+
+            return response()->json(new BankResource($bank), 200);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Terjadi kesalahan pada server.',
-                'error' => $e->getMessage()
+                'status'  => 500,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+                'data'    => null
             ], 500);
         }
     }
+
     public function destroy($id)
     {
         try {
@@ -182,6 +132,7 @@ class BankController extends Controller
             ], 500);
         }
     }
+
     public function list()
     {
         try {

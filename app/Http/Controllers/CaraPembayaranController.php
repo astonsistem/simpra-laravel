@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CaraPembayaranRequest;
 use App\Http\Resources\CaraPembayaranCollection;
+use App\Http\Resources\CaraPembayaranResource;
 use App\Models\MasterCaraPembayaran;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -21,6 +23,7 @@ class CaraPembayaranController extends Controller
             $size = $request->input('size', 100);
 
             $query = MasterCaraPembayaran::query();
+            $query->where('is_aktif', 't');
 
             $totalItems = $query->count();
             $items = $query->skip(($page - 1) * $size)->take($size)->get();
@@ -51,24 +54,20 @@ class CaraPembayaranController extends Controller
             ], 500);
         }
     }
+
     public function show($id)
     {
         try {
-            $bank = MasterBank::findOrFail($id);
+            $caraPembayaran = MasterCaraPembayaran::where('bayar_id', $id);
 
-            return response()->json([
-                'status' => "200",
-                'message' => "success",
-                'data' => [
-                    'bank_id' => $bank->bank_id,
-                    'bank_nama' => $bank->bank_nama,
-                    'is_aktif' => $bank->is_aktif,
-                ]
-            ], 200);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
-                'message' => 'Bank not found.'
-            ], 404);
+            if (!$caraPembayaran) {
+                return response()->json([
+                    'message' => 'Not found.'
+                ], 404);
+            }
+            return response()->json(
+                new CaraPembayaranResource($caraPembayaran)
+            );
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Terjadi kesalahan pada server.',
@@ -76,104 +75,55 @@ class CaraPembayaranController extends Controller
             ], 500);
         }
     }
-    public function store(Request $request)
+
+    public function store(CaraPembayaranRequest $request)
+    {
+        $data = $request->validated();
+
+        $caraPembayaran = MasterCaraPembayaran::create($data);
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Data berhasil ditambahkan',
+            'data' => $caraPembayaran,
+        ], 200);
+    }
+
+    public function update(CaraPembayaranRequest $request, $id)
     {
         try {
-            $request->validate([
-                'bank_id' => 'required|string|max:255',
-                'bank_nama' => 'required|string|max:255',
-                'is_aktif' => 'required|boolean',
-            ]);
+            $data = $request->validated();
 
-            $bank = MasterBank::create($request->all());
-
-            return response()->json([
-                'status' => "201",
-                'message' => "Bank created successfully.",
-                'data' => [
-                    'bank_id' => $bank->bank_id,
-                    'bank_nama' => $bank->bank_nama,
-                    'is_aktif' => $bank->is_aktif,
-                ]
-            ], 201);
-        } catch (ValidationException $e) {
-            $errors = [];
-            foreach ($e->errors() as $field => $messages) {
-                foreach ($messages as $message) {
-                    $errors[] = [
-                        'loc' => ['body', $field],
-                        'msg' => $message,
-                        'type' => 'validation',
-                    ];
-                }
+            $caraPembayaran = MasterCaraPembayaran::findOrFail($id);
+            if (!$caraPembayaran) {
+                return response()->json([
+                    'message' => 'Not found'
+                ], 404);
             }
-            return response()->json([
-                'detail' => $errors
-            ], 422);
+            $caraPembayaran->update($data);
+
+            return response()->json(new CaraPembayaranResource($caraPembayaran), 200);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Terjadi kesalahan pada server.',
-                'error' => $e->getMessage()
+                'status'  => 500,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+                'data'    => null
             ], 500);
         }
     }
-    public function update(Request $request, $id)
-    {
-        try {
-            $request->validate([
-                'bank_nama' => 'sometimes|required|string|max:255',
-                'is_aktif' => 'sometimes|required|boolean',
-            ]);
 
-            $bank = MasterBank::findOrFail($id);
-            $bank->update($request->all());
-
-            return response()->json([
-                'status' => "200",
-                'message' => "Bank updated successfully.",
-                'data' => [
-                    'bank_id' => $bank->bank_id,
-                    'bank_nama' => $bank->bank_nama,
-                    'is_aktif' => $bank->is_aktif,
-                ]
-            ], 200);
-        } catch (ValidationException $e) {
-            $errors = [];
-            foreach ($e->errors() as $field => $messages) {
-                foreach ($messages as $message) {
-                    $errors[] = [
-                        'loc' => ['body', $field],
-                        'msg' => $message,
-                        'type' => 'validation',
-                    ];
-                }
-            }
-            return response()->json([
-                'detail' => $errors
-            ], 422);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
-                'message' => 'Bank not found.'
-            ], 404);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Terjadi kesalahan pada server.',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
     public function destroy($id)
     {
         try {
-            $bank = MasterBank::findOrFail($id);
-            $bank->delete();
+            $caraPembayaran = MasterCaraPembayaran::findOrFail($id);
+            $caraPembayaran->delete();
             return response()->json([
                 'status' => "200",
-                'message' => "Bank deleted successfully."
+                'message' => "Cara Pembayaran deleted successfully."
             ], 200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
-                'message' => 'Bank not found.'
+                'message' => 'Cara Pembayaran not found.'
             ], 404);
         } catch (\Exception $e) {
             return response()->json([
@@ -182,6 +132,7 @@ class CaraPembayaranController extends Controller
             ], 500);
         }
     }
+
     public function list()
     {
         try {

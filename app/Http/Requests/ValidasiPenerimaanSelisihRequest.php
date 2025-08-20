@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class BankRequest extends FormRequest
+class ValidasiPenerimaanSelisihRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -16,18 +16,16 @@ class BankRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'bank_id' => 'required|string',
-            'bank_nama' => 'required|string',
-            'is_aktif' => 'required|string',
+            'id'    => 'required|string',
+            'rc_id' => 'required',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'bank_id.required'       => 'bank_id harus diisi.',
-            'bank_nama.required'     => 'bank_nama harus diisi.',
-            'is_aktif.required'     => 'is_aktif harus diisi.',
+            'id.required'    => 'ID is required.',
+            'rc_id.required' => 'RC ID is required.',
         ];
     }
 
