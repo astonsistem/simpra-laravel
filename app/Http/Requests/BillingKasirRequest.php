@@ -13,59 +13,46 @@ class BillingKasirRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation()
+    {
+        $map = [
+            'no_bayar'         => 'no_buktibayar',
+            'tgl_bayar'        => 'tgl_buktibayar',
+            'pasien'           => 'pasien_nama',
+            'no_dokumen'       => 'no_pendaftaran',
+            'tgl_dokumen'      => 'tgl_pelayanan',
+            'cara_bayar_id'    => 'carabayar_id',
+            'jumlah_bruto'     => 'total',
+            'biaya_admin_edc'  => 'admin_kredit',
+            'biaya_admin_qris' => 'admin_debit',
+        ];
+
+        $data = $this->all();
+
+        foreach ($map as $feKey => $beKey) {
+            if (isset($data[$feKey])) {
+                $data[$beKey] = $data[$feKey];
+                unset($data[$feKey]);
+            }
+        }
+
+        $this->replace($data);
+    }
+
     public function rules(): array
     {
         return [
-            'id' => 'required|string',
-            'pendaftaran_id' => 'required|int',
-            'no_pendaftaran' => 'required|string',
-            'tgl_pendaftaran' => 'required|string',
-            'pasien_id' => 'required|int',
-            'no_rekam_medik' => 'required|string',
-            'pasien_nama' => 'required|string',
-            'pasien_alamat' => 'required|string',
-            'jenis_tagihan' => 'required|string',
-            'tgl_krs' => 'required|string',
-            'tgl_pelayanan' => 'required|string',
-            'carabayar_id' => 'required|int',
-            'carabayar_nama' => 'required|string',
-            'penjamin_id' => 'required|int',
-            'penjamin_nama' => 'required|string',
-            'instalasi_id' => 'required|int',
-            'instalasi_nama' => 'required|string',
-            'metode_bayar' => 'required|string',
-            'tandabuktibayar_id' => 'required|int',
-            'no_buktibayar' => 'required|string',
+            'no_buktibayar'  => 'required|string',
             'tgl_buktibayar' => 'required|string',
-            'sep_id' => 'required|string',
-            'no_sep' => 'required|string',
-            'tgl_sep' => 'required|string',
-            'cara_pembayaran' => 'required|string',
-            'bank_tujuan' => 'required|string',
-            'admin_kredit' => 'required|string',
-            'admin_debit' => 'required|string',
-            'kartubank_pasien' => 'required|string',
-            'no_kartubank_pasien' => 'required|string',
-            'closingkasir_id' => 'required|string',
-            'tgl_closingkasir' => 'required|string',
-            'no_closingkasir' => 'required|string',
-            'kasir_id' => 'required|int',
-            'kasir_nama' => 'required|string',
-            'loket_id' => 'required|int',
-            'loket_nama' => 'required|string',
-            'guna_bayar' => 'required|string',
-            'total' => 'required|string',
-            'klasifikasi' => 'required|string',
-            'status_id' => 'required|int',
-            'bulan_mrs' => 'required|string',
-            'bulan_krs' => 'required|string',
-            'bulan_pelayanan' => 'required|string',
-            'akun_id' => 'required|int',
-            'selisih' => 'required|int',
-            'jumlah_netto' => 'required|int',
-            'rc_id' => 'required|int',
-            'is_web_change' => 'required'
-
+            'pasien_nama'    => 'required|string',
+            'no_pendaftaran' => 'required|string',
+            'tgl_pelayanan'  => 'required|string',
+            // 'uraian'         => 'required|string',
+            'carabayar_id'   => 'required|string',
+            'total'          => 'required|int',
+            'admin_kredit'   => 'required|int',
+            'admin_debit'    => 'required|int',
+            'jumlah_netto'   => 'required|int',
         ];
     }
 

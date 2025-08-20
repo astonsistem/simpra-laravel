@@ -5,9 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class MasterLaporan extends Model
+class MasterPelaporan extends Model
 {
-    protected $table = 'master_laporan';
+    protected $table = 'master_pelaporan';
 
     protected $appends = ['slug', 'label', 'to'];
 
@@ -27,7 +27,7 @@ class MasterLaporan extends Model
 
     public function getToAttribute()
     {
-        return '/laporan/' . $this->slug;
+        return '/pelaporan/' . $this->slug;
     }
 
     public function getResolvedParamsAttribute()

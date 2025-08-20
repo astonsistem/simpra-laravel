@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\PendapatanPelayananCollection;
 use App\Http\Resources\PendapatanPelayananResource;
-use App\Models\SyncPendapatanPelayanan;
+use App\Models\DataPendapatanPelayanan;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
@@ -20,9 +20,13 @@ class PendapatanPelayananController extends Controller
                 'tgl_awal' => 'nullable|string',
                 'tgl_akhir' => 'nullable|string',
                 'jenis_pelayanan' => 'nullable|string',
+                'no_pendaftaran' => 'nullable|string',
+                'no_rm' => 'nullable|string',
+                'nama' => 'nullable|string',
+                'cara_bayar' => 'nullable|string',
                 'penjamin' => 'nullable|string',
-                'instalasi' => 'nullable|string',
-                'status' => 'nullable|string',
+                'status' => 'nullable|boolean',
+                'penjamin_lebih_1' => 'nullable|boolean',
             ]);
 
             $page = $request->input('page', 1) ?? 1;
@@ -30,11 +34,15 @@ class PendapatanPelayananController extends Controller
             $tglAwal = $request->input('tgl_awal');
             $tglAkhir = $request->input('tgl_akhir');
             $jenisPelayanan = $request->input('jenis_pelayanan');
+            $noPendaftaran = $request->input('no_pendaftaran');
+            $noRM = $request->input('no_rm');
+            $nama = $request->input('nama');
+            $caraBayar = $request->input('cara_bayar');
             $penjamin = $request->input('penjamin');
-            $instalasi = $request->input('instalasi');
             $status = $request->input('status');
+            $penjaminLebih1 = $request->input('penjamin_lebih_1');
 
-            $query = SyncPendapatanPelayanan::query();
+            $query = DataPendapatanPelayanan::query();
 
             if (!empty($tglAwal) && !empty($tglAkhir)) {
                 $startDate = Carbon::parse($tglAwal)->startOfDay();
@@ -44,14 +52,26 @@ class PendapatanPelayananController extends Controller
             if (!empty($jenisPelayanan)) {
                 $query->where('jenis_tagihan', $jenisPelayanan);
             }
+            if (!empty($noPendaftaran)) {
+                $query->where('no_pendaftaran', 'ILIKE', "%$noPendaftaran%");
+            }
+            if (!empty($noRM)) {
+                $query->where('no_rekam_medik', 'ILIKE', "%$noRM%");
+            }
+            if (!empty($nama)) {
+                $query->where('pasien_nama', 'ILIKE', "%$nama%");
+            }
+            if (!empty($caraBayar)) {
+                $query->where('carabayar_id', $caraBayar);
+            }
             if (!empty($penjamin)) {
                 $query->where('penjamin_id', $penjamin);
             }
-            if (!empty($instalasi)) {
-                $query->where('instalasi_id', $instalasi);
-            }
             if (!empty($status)) {
-                $query->where('status_id', $status);
+                $query->where('is_valid', (bool) $status);
+            }
+            if (!empty($penjaminLebih1)) {
+                $query->where('is_penjaminlebih1', (bool) $status);
             }
 
             $totalItems = $query->count();

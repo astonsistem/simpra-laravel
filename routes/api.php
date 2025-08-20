@@ -28,7 +28,7 @@ use App\Http\Controllers\SinkronisasiController;
 use App\Http\Controllers\StatistikController;
 use App\Http\Controllers\SyncApiController;
 use App\Http\Controllers\TempPenerimaanSwaController;
-use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\PelaporanController;
 use App\Http\Controllers\PenerimaanSelisihController;
 use App\Http\Controllers\SumberTransaksiController;
 use App\Http\Controllers\SelisihKasController;
@@ -94,7 +94,7 @@ Route::post('sinkronisasi/save', [SinkronisasiController::class, 'pasien_bpjs'])
 
 Route::get('pendapatan_pelayanan', [PendapatanPelayananController::class, 'index']);
 Route::get('pendapatan_pelayanan/statistik', [PendapatanPelayananController::class, 'statistik']);
-Route::get('pendapatan_pselayanan/{id}', [PendapatanPelayananController::class, 'show']);
+Route::get('pendapatan_pelayanan/{id}', [PendapatanPelayananController::class, 'show']);
 
 Route::middleware([
     'middleware' => 'api',
@@ -217,10 +217,10 @@ Route::get('pasienbpjs', [PasienBpjsController::class, 'index']);
 Route::get('pasienbpjs/tarik', [PasienBpjsController::class, 'tarik']);
 Route::get('pasienbpjs/tarik/tarik', [PasienBpjsController::class, 'tarik']);
 
-Route::get('laporan-list', [LaporanController::class, 'list']);
-Route::get('laporan/{slug}', [LaporanController::class, 'show']);
-Route::post('/laporan-generate/{id}', [LaporanController::class, 'generate']);
-Route::delete('/laporan-delete/{filename}', [LaporanController::class, 'deleteTemp']);
+Route::get('pelaporan-list', [PelaporanController::class, 'list']);
+Route::get('pelaporan/{slug}', [PelaporanController::class, 'show']);
+Route::post('/pelaporan-generate/{id}', [PelaporanController::class, 'generate']);
+Route::delete('/pelaporan-delete/{filename}', [PelaporanController::class, 'deleteTemp']);
 
 Route::get('bank', [BankController::class, 'index']);
 Route::get('bank/list', [BankController::class, 'list']);

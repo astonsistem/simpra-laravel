@@ -2,27 +2,26 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\InstalasiCollection;
-use App\Http\Resources\MasterLaporanResource;
-use App\Models\MasterLaporan;
+use App\Http\Resources\MasterPelaporanResource;
+use App\Models\MasterPelaporan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\LaporanExport;
+use App\Exports\PelaporanExport;
 use PDF;
 use File;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
-class LaporanController extends Controller
+class PelaporanController extends Controller
 {
     public function show(string $slug)
     {
         try {
             $nama_laporan = ucwords(str_replace('_', ' ', $slug));
-            $laporan = MasterLaporan::where('nama_laporan', $nama_laporan)->firstOrFail();
+            $laporan = MasterPelaporan::where('nama_laporan', $nama_laporan)->firstOrFail();
             $laporan->params = $laporan->resolved_params;
-            return new MasterLaporanResource($laporan);
+            return new MasterPelaporanResource($laporan);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Terjadi kesalahan pada server.',
@@ -34,7 +33,7 @@ class LaporanController extends Controller
     public function list()
     {
         try {
-            $data = MasterLaporan::orderBy('kode_laporan', 'asc')->get()->map(fn($item) => [
+            $data = MasterPelaporan::orderBy('kode_laporan', 'asc')->get()->map(fn($item) => [
                 'label' => $item->label,
                 'to'    => $item->to,
             ]);
@@ -55,7 +54,7 @@ class LaporanController extends Controller
     public function generate(Request $request, $id)
     {
         try {
-            $laporan = MasterLaporan::find($id);
+            $laporan = MasterPelaporan::find($id);
             $params = collect($laporan->params)->map(fn($p) => (object) $p);
 
             // Create dynamic parameters for validator

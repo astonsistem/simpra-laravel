@@ -211,7 +211,7 @@ class BillingKasirController extends Controller
         try {
             $data = $request->validated();
 
-            $billingKasir = DataPenerimaanLayanan::where('tandabuktibayar_id', $id)->firstOrFail();
+            $billingKasir = DataPenerimaanLayanan::where('id', $id)->firstOrFail();
 
             if (!empty($data['loket_id'])) {
                 $loket = Loket::where('id', $data['loket_id'])->first();
