@@ -22,4 +22,28 @@ class MasterStatus extends Model
     protected $casts = [
         'id' => 'string',
     ];
+
+    /**
+     * edit	1	Tagihan
+    edit	2	Klaim
+    edit	3	Verif
+    edit	4	Terima
+    edit	5	Setor
+    edit	6	BKU
+    edit	7	Pending
+    edit	8	Gagal
+    edit	-1	Batal
+     */
+
+    public const STATUS = [
+        '-1' => 'Batal',
+        '1' => 'Tagihan',
+        '2' => 'Klaim',
+        '3' => 'Verif',
+        '4' => 'Terima',
+        '5' => 'Setor',
+        '6' => 'BKU',
+        '7' => 'Pending',
+        '8' => 'Gagal',
+    ];
 }

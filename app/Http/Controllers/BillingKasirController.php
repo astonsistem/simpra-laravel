@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log as FacadesLog;
 
 class BillingKasirController extends Controller
 {
@@ -122,9 +123,7 @@ class BillingKasirController extends Controller
 
             $totalPages = ceil($totalItems / $size);
 
-            return response()->json(
-                new BillingKasirCollection($items, $totalItems, $page, $size, $totalPages)
-            );
+            return new BillingKasirCollection($items, $totalItems, $page, $size, $totalPages);
         } catch (ValidationException $e) {
             $errors = [];
             foreach ($e->errors() as $field => $messages) {
@@ -169,9 +168,7 @@ class BillingKasirController extends Controller
                     'message' => 'Not found.'
                 ], 404);
             }
-            return response()->json(
-                new BillingKasirResource($billingKasir)
-            );
+            return new BillingKasirResource($billingKasir);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Terjadi kesalahan pada server.',
@@ -520,13 +517,14 @@ class BillingKasirController extends Controller
 
                 $klarifLayananSubquery = DB::table($billingKasirTableName)
                     ->select(DB::raw('SUM(COALESCE(total,0) - COALESCE(admin_kredit,0) + COALESCE(selisih,0))'))
-                    ->where('rc_id', $rcId);
+                    ->where('rc_id', $rcId)
+                    ->value('sum');
 
                 DB::table($rekeningKoranTableName)
                     ->where('rc_id', $rcId)
                     ->update([
-                        'klarif_layanan' => DB::raw('(' . $klarifLayananSubquery->toSql() . ')'),
-                        'akun_id'        => '1010102',
+                        'klarif_layanan' => $klarifLayananSubquery,
+                        'akun_id'        => 1010102,
                     ]);
             });
 
@@ -581,17 +579,16 @@ class BillingKasirController extends Controller
                 $billingKasirTableName = (new DataPenerimaanLayanan())->getTable();
                 $rekeningKoranTableName = (new DataRekeningKoran())->getTable();
 
-                $klarifLayananSubquery = DB::table($billingKasirTableName)
-                    ->select(DB::raw('COALESCE(SUM(total - admin_kredit + selisih), 0)'))
-                    ->where('rc_id', $rcId);
+                $klarifLayanan = DB::table($billingKasirTableName)
+                    ->where('rc_id', $rcId)
+                    ->select(DB::raw('COALESCE(SUM(total - admin_kredit + selisih), 0) as sum'))
+                    ->value('sum');
 
                 DB::table($rekeningKoranTableName)
                     ->where('rc_id', $rcId)
                     ->update([
-                        'klarif_layanan' => DB::raw('(' . $klarifLayananSubquery->toSql() . ')'),
-                        'akun_id'        => DB::raw(
-                            "CASE WHEN (" . $klarifLayananSubquery->toSql() . ") = 0 THEN NULL ELSE akun_id END"
-                        ),
+                        'klarif_layanan' => $klarifLayanan,
+                        'akun_id'        => $klarifLayanan == 0 ? null : DB::raw('akun_id'),
                     ]);
             });
 

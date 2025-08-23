@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class DataPenerimaanLayanan extends Model
 {
@@ -66,6 +67,10 @@ class DataPenerimaanLayanan extends Model
 
     protected $casts = [
         'id' => 'string',
+    ];
+
+    protected $appends = [
+        'status_name',
     ];
 
     public static function sumTotal(): float

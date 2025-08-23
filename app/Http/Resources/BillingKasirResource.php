@@ -29,6 +29,9 @@ class BillingKasirResource extends JsonResource
             'biayaAdminQris' => (string) $this->admin_debit,
             'selisih' => (string) $this->selisih,
             'jumlahNetto' => (int) $this->jumlah_netto,
+            'status' => (string) $this->status_name,
+            'statusId' => (string) $this->status_id,
+            'rcId' => (string) $this->rc_id,
         ];
     }
 }
