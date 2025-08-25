@@ -96,7 +96,18 @@ Route::post('sinkronisasi/request/kasir/{kasirId}', [SinkronisasiController::cla
 
 Route::get('pendapatan_pelayanan', [PendapatanPelayananController::class, 'index']);
 Route::get('pendapatan_pelayanan/statistik', [PendapatanPelayananController::class, 'statistik']);
+Route::get('pendapatan_pelayanan/validasi/{id}', [PendapatanPelayananController::class, 'validasi']);
+Route::get('pendapatan_pelayanan/tarik/{id}', [PendapatanPelayananController::class, 'tarik']);
+Route::get('pendapatan_pelayanan/sinkron_fase1/{id}', [PendapatanPelayananController::class, 'sinkron_fase1']);
+Route::get('pendapatan_pelayanan/sinkron_fase2/{id}', [PendapatanPelayananController::class, 'sinkron_fase2']);
 Route::get('pendapatan_pelayanan/{id}', [PendapatanPelayananController::class, 'show']);
+Route::put('pendapatan_pelayanan/{id}', [PendapatanPelayananController::class, 'update']);
+
+Route::get('pendapatan_penjamin1', [PendapatanPenjamin1Controller::class, 'index']);
+Route::post('pendapatan_penjamin1', [PendapatanPenjamin1Controller::class, 'store']);
+Route::get('pendapatan_penjamin1/{id}', [PendapatanPenjamin1Controller::class, 'show']);
+Route::put('pendapatan_penjamin1/{id}', [PendapatanPenjamin1Controller::class, 'update']);
+Route::delete('pendapatan_penjamin1/{id}', [PendapatanPenjamin1Controller::class, 'destroy']);
 
 Route::middleware([
     'middleware' => 'api',
