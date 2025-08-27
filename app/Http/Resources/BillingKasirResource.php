@@ -12,17 +12,16 @@ class BillingKasirResource extends JsonResource
         return [
             'id' => (string) $this->id,
             'noBayar' => (string) $this->no_buktibayar,
-            'tglBayar' => (string) $this->tgl_buktibayar,
+            'tglBayar' => (string) date('d/m/Y', strtotime($this->tgl_buktibayar)),
             'pasien' => (string) $this->pasien_nama,
             'uraian' => (string) $this->uraian,
             'noDokumen' => (string) $this->no_pendaftaran,
-            'tglDokumen' => (string) $this->tgl_pelayanan,
+            'tglDokumen' => (string) date('d/m/Y', strtotime($this->tgl_pelayanan)),
             'sumberTransaksi' => (string) $this->jenis_tagihan,
             'instalasi' => (string) $this->instalasi_nama,
             'metodeBayar' => (string) $this->metode_bayar,
             'caraBayarId' => (string) $this->carabayar_id,
             'caraBayar' => (string) $this->carabayar_nama,
-            'rekeningDpa' => (string) $this->no_rekening_dpa,
             'bank' => (string) $this->bank_tujuan,
             'jumlahBruto' => (string) $this->total,
             'biayaAdminEdc' => (string) $this->admin_kredit,
@@ -38,8 +37,9 @@ class BillingKasirResource extends JsonResource
             'kasirId' => (string) $this->kasir_id,
             'kasir' => (string) $this->kasir_nama,
             'noClosingKasir' => (string) $this->no_closingkasir,
-            'tglClosingKasir' => (string) $this->tgl_closingkasir,
+            'tglClosingKasir' => (string) date('d/m/Y', strtotime($this->tgl_closingkasir)),
             'klasifikasi' => (string) $this->klasifikasi,
+            'rekeningDpa' => $this->rekeningKoran?->no_rc,
         ];
     }
 }

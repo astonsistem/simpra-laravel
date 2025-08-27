@@ -120,6 +120,8 @@ class BillingKasirController extends Controller
                 $query->where('jumlah_netto', 'LIKE', "%$jumlahNetto%");
             }
 
+            $query->with('rekeningKoran');
+
             $totalItems = $query->count();
             $items = $query->skip(($page - 1) * $size)->take($size)->orderBy('tgl_buktibayar', 'desc')->orderBy('no_buktibayar', 'desc')->get();
 
@@ -148,7 +150,7 @@ class BillingKasirController extends Controller
         }
     }
 
-    public function show(string $id)
+    public function show(Request $request, string $id)
     {
         try {
             if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $id)) {
@@ -172,6 +174,10 @@ class BillingKasirController extends Controller
             }
 
             $billingKasir->load('rekeningKoran');
+
+            if($request->has('action') && $request->action === 'validasi') {
+                return new BillingKasirResource($billingKasir);
+            }
 
             return new BillingKasirFormResource($billingKasir);
         } catch (\Exception $e) {

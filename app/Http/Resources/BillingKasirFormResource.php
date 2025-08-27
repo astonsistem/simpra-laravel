@@ -46,7 +46,8 @@ class BillingKasirFormResource extends JsonResource
             'jumlah_netto'      => $this->jumlah_netto,
             'selisih'           => $this->selisih,
             //
-            'rekening_koran'    => $this->rekeningKoran
+            'rekening_koran'    => $this->rekeningKoran,
+            'tervalidasi'      => (bool) $this->tervalidasi,
         ];
     }
 }

@@ -64,7 +64,6 @@ class BillingKasirRequest extends FormRequest
             'status_id'     => 'required',
             'status'     => 'required',
             'klasifikasi'         => 'nullable',
-            'uraian'         => 'nullable',
             //
             'cara_pembayaran' => 'required',
             'metode_bayar' => 'nullable',
@@ -101,7 +100,6 @@ class BillingKasirRequest extends FormRequest
             'tgl_pelayanan'  => 'Tgl Dokumen',
             'status_id'     => 'Status',
             'klasifikasi'    => 'Klasifikasi',
-            'uraian'         => 'Uraian',
             //
             'cara_pembayaran' => 'Cara Pembayaran',
             'bank_tujuan'    => 'Bank',

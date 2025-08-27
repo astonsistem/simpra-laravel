@@ -66,6 +66,10 @@ class DataPenerimaanLayanan extends Model
         'is_web_change'
     ];
 
+    protected $appends = [
+        'tervalidasi'
+    ];
+
     protected $casts = [
         'id' => 'string',
     ];
@@ -73,6 +77,13 @@ class DataPenerimaanLayanan extends Model
     public function rekeningKoran(): BelongsTo
     {
         return $this->belongsTo(DataRekeningKoran::class, 'rc_id', 'rc_id');
+    }
+
+    protected function tervalidasi(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->rc_id !== null || $this->rc_id !== ''
+        );
     }
 
     public static function sumTotal(): float
