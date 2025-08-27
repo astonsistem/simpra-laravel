@@ -22,7 +22,7 @@ class BillingKasirResource extends JsonResource
             'metodeBayar' => (string) $this->metode_bayar,
             'caraBayarId' => (string) $this->carabayar_id,
             'caraBayar' => (string) $this->carabayar_nama,
-            'rekeningDpa' => (string) $this->rekening_dpa,
+            'rekeningDpa' => (string) $this->no_rekening_dpa,
             'bank' => (string) $this->bank_tujuan,
             'jumlahBruto' => (string) $this->total,
             'biayaAdminEdc' => (string) $this->admin_kredit,
@@ -32,6 +32,14 @@ class BillingKasirResource extends JsonResource
             'status' => (string) $this->status_name,
             'statusId' => (string) $this->status_id,
             'rcId' => (string) $this->rc_id,
+            //
+            'loketId' => (string) $this->loket_id,
+            'loket' => (string) $this->loket_nama,
+            'kasirId' => (string) $this->kasir_id,
+            'kasir' => (string) $this->kasir_nama,
+            'noClosingKasir' => (string) $this->no_closingkasir,
+            'tglClosingKasir' => (string) $this->tgl_closingkasir,
+            'klasifikasi' => (string) $this->klasifikasi,
         ];
     }
 }

@@ -171,7 +171,7 @@ Route::delete('data_closing/{id}', [DataClosingController::class, 'destroy']);
 Route::get('temp_penerimaan_swa', [TempPenerimaanSwaController::class, 'index']);
 Route::get('temp_penerimaan_swa/{id}', [TempPenerimaanSwaController::class, 'show']);
 
-Route::get('rekening_koran', [RekeningKoranController::class, 'index'])->middleware('api'); 
+Route::get('rekening_koran', [RekeningKoranController::class, 'index'])->middleware('api');
 Route::get('rekening_koran/statistik', [RekeningKoranController::class, 'statistik']);
 Route::get('rekening_koran/sum_rekening_koran', [RekeningKoranController::class, 'sum']);
 Route::get('rekening_koran/statistik', [RekeningKoranController::class, 'statistik']);

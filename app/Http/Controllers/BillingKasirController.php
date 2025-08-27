@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Http\Requests\BillingKasirRequest;
 use App\Http\Requests\ValidasiBillingKasirRequest;
 use App\Http\Resources\BillingKasirCollection;
+use App\Http\Resources\BillingKasirFormResource;
 use App\Http\Resources\BillingKasirResource;
 use App\Models\DataPenerimaanLayanan;
 use App\Models\DataRekeningKoran;
 use App\Models\Kasir;
 use App\Models\Loket;
+use App\Models\MasterStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -168,7 +170,10 @@ class BillingKasirController extends Controller
                     'message' => 'Not found.'
                 ], 404);
             }
-            return new BillingKasirResource($billingKasir);
+
+            $billingKasir->load('rekeningKoran');
+
+            return new BillingKasirFormResource($billingKasir);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Terjadi kesalahan pada server.',
@@ -210,25 +215,11 @@ class BillingKasirController extends Controller
 
             $billingKasir = DataPenerimaanLayanan::where('id', $id)->firstOrFail();
 
-            if (!empty($data['loket_id'])) {
-                $loket = Loket::where('id', $data['loket_id'])->first();
-                if ($loket) {
-                    $data['loket_nama'] = $loket->loket_nama;
-                }
-            }
-
-            if (!empty($data['kasir_id'])) {
-                $kasir = Kasir::where('id', $data['kasir_id'])->first();
-                if ($kasir) {
-                    $data['kasir_nama'] = $kasir->kasir_nama;
-                }
-            }
-
             $billingKasir->update($data);
 
             return response()->json([
                 'message' => 'Berhasil memperbarui data billing kasir',
-                'data' => new BillingKasirResource($billingKasir),
+                'data' => new BillingKasirFormResource($billingKasir),
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
