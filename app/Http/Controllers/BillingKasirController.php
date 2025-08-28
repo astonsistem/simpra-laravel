@@ -5,15 +5,18 @@ namespace App\Http\Controllers;
 use App\Http\Requests\BillingKasirRequest;
 use App\Http\Requests\ValidasiBillingKasirRequest;
 use App\Http\Resources\BillingKasirCollection;
+use App\Http\Resources\BillingKasirFormResource;
 use App\Http\Resources\BillingKasirResource;
 use App\Models\DataPenerimaanLayanan;
 use App\Models\DataRekeningKoran;
 use App\Models\Kasir;
 use App\Models\Loket;
+use App\Models\MasterStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class BillingKasirController extends Controller
 {
@@ -117,14 +120,14 @@ class BillingKasirController extends Controller
                 $query->where('jumlah_netto', 'LIKE', "%$jumlahNetto%");
             }
 
+            $query->with('rekeningKoran');
+
             $totalItems = $query->count();
             $items = $query->skip(($page - 1) * $size)->take($size)->orderBy('tgl_buktibayar', 'desc')->orderBy('no_buktibayar', 'desc')->get();
 
             $totalPages = ceil($totalItems / $size);
 
-            return response()->json(
-                new BillingKasirCollection($items, $totalItems, $page, $size, $totalPages)
-            );
+            return new BillingKasirCollection($items, $totalItems, $page, $size, $totalPages);
         } catch (ValidationException $e) {
             $errors = [];
             foreach ($e->errors() as $field => $messages) {
@@ -147,7 +150,7 @@ class BillingKasirController extends Controller
         }
     }
 
-    public function show(string $id)
+    public function show(Request $request, string $id)
     {
         try {
             if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $id)) {
@@ -169,9 +172,14 @@ class BillingKasirController extends Controller
                     'message' => 'Not found.'
                 ], 404);
             }
-            return response()->json(
-                new BillingKasirResource($billingKasir)
-            );
+
+            $billingKasir->load('rekeningKoran');
+
+            if($request->has('action') && $request->action === 'validasi') {
+                return new BillingKasirResource($billingKasir);
+            }
+
+            return new BillingKasirFormResource($billingKasir);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Terjadi kesalahan pada server.',
@@ -213,25 +221,11 @@ class BillingKasirController extends Controller
 
             $billingKasir = DataPenerimaanLayanan::where('id', $id)->firstOrFail();
 
-            if (!empty($data['loket_id'])) {
-                $loket = Loket::where('id', $data['loket_id'])->first();
-                if ($loket) {
-                    $data['loket_nama'] = $loket->loket_nama;
-                }
-            }
-
-            if (!empty($data['kasir_id'])) {
-                $kasir = Kasir::where('id', $data['kasir_id'])->first();
-                if ($kasir) {
-                    $data['kasir_nama'] = $kasir->kasir_nama;
-                }
-            }
-
             $billingKasir->update($data);
 
             return response()->json([
                 'message' => 'Berhasil memperbarui data billing kasir',
-                'data' => new BillingKasirResource($billingKasir),
+                'data' => new BillingKasirFormResource($billingKasir),
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
@@ -518,15 +512,18 @@ class BillingKasirController extends Controller
                 $billingKasirTableName = (new DataPenerimaanLayanan())->getTable();
                 $rekeningKoranTableName = (new DataRekeningKoran())->getTable();
 
-                $klarifLayananSubquery = DB::table($billingKasirTableName)
+                $klarifLayanan = DB::table($billingKasirTableName)
                     ->select(DB::raw('SUM(COALESCE(total,0) - COALESCE(admin_kredit,0) + COALESCE(selisih,0))'))
-                    ->where('rc_id', $rcId);
+                    ->where('rc_id', $rcId)
+                    ->value('sum');
+
+                Log::info("Klarif Layanan: " . $klarifLayanan);
 
                 DB::table($rekeningKoranTableName)
                     ->where('rc_id', $rcId)
                     ->update([
-                        'klarif_layanan' => DB::raw('(' . $klarifLayananSubquery->toSql() . ')'),
-                        'akun_id'        => '1010102',
+                        'klarif_layanan' => $klarifLayanan,
+                        'akun_id'        => 1010102,
                     ]);
             });
 
@@ -541,6 +538,7 @@ class BillingKasirController extends Controller
                 'status'  => 422,
             ], 422);
         } catch (\Exception $e) {
+            Log::error('Error in updateValidasi: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Terjadi kesalahan saat validasi penerimaan layanan.',
                 'error'   => $e->getMessage(),
@@ -581,17 +579,17 @@ class BillingKasirController extends Controller
                 $billingKasirTableName = (new DataPenerimaanLayanan())->getTable();
                 $rekeningKoranTableName = (new DataRekeningKoran())->getTable();
 
-                $klarifLayananSubquery = DB::table($billingKasirTableName)
-                    ->select(DB::raw('COALESCE(SUM(total - admin_kredit + selisih), 0)'))
-                    ->where('rc_id', $rcId);
-
-                DB::table($rekeningKoranTableName)
+                $klarifLayanan = DB::table($billingKasirTableName)
                     ->where('rc_id', $rcId)
-                    ->update([
-                        'klarif_layanan' => DB::raw('(' . $klarifLayananSubquery->toSql() . ')'),
-                        'akun_id'        => DB::raw(
-                            "CASE WHEN (" . $klarifLayananSubquery->toSql() . ") = 0 THEN NULL ELSE akun_id END"
-                        ),
+                    ->select(DB::raw('COALESCE(SUM(total - admin_kredit + selisih), 0) as sum'))
+                    ->value('sum');
+
+                $rkQuery = DB::table($rekeningKoranTableName)->where('rc_id', $rcId);
+                $akunId = $rkQuery->value('akun_id');
+
+                $rkQuery->update([
+                        'klarif_layanan' => $klarifLayanan,
+                        'akun_id'        => $klarifLayanan == 0 ? null : $akunId,
                     ]);
             });
 
@@ -606,6 +604,7 @@ class BillingKasirController extends Controller
                 'status'  => 422,
             ], 422);
         } catch (\Exception $e) {
+            Log::error('Error in cancelValidasi: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Terjadi kesalahan saat membatalkan validasi penerimaan layanan.',
                 'error'   => $e->getMessage(),

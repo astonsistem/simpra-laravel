@@ -77,14 +77,24 @@ class RekeningKoranController extends Controller
                 $query->whereNotNull('kredit');
             }
 
+            // search
+            if ($request->has('search') && !empty($request->input('search'))) {
+                $search = $request->input('search');
+                $query->where(function ($q) use ($search) {
+                    $q->where('no_rc', 'LIKE', "%$search%")
+                        ->orWhere('rc_id', 'LIKE', "%$search%")
+                        ->orWhere('rek_dari', 'LIKE', "%$search%")
+                        ->orWhere('nama_dari', 'LIKE', "%$search%")
+                        ->orWhere('bank', 'LIKE', "%$search%");
+                });
+            }
+
             $totalItems = $query->count();
             $items = $query->skip(($page - 1) * $size)->take($size)->orderBy('tgl_rc', 'desc')->orderBy('no_rc', 'asc')->get();
 
             $totalPages = ceil($totalItems / $size);
 
-            return response()->json(
-                new RekeningKoranCollection($items, $totalItems, $page, $size, $totalPages)
-            );
+            return new RekeningKoranCollection($items, $totalItems, $page, $size, $totalPages);
         } catch (ValidationException $e) {
             $errors = [];
             foreach ($e->errors() as $field => $messages) {

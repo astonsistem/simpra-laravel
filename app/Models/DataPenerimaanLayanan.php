@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DataPenerimaanLayanan extends Model
 {
@@ -64,9 +66,25 @@ class DataPenerimaanLayanan extends Model
         'is_web_change'
     ];
 
+    protected $appends = [
+        'tervalidasi'
+    ];
+
     protected $casts = [
         'id' => 'string',
     ];
+
+    public function rekeningKoran(): BelongsTo
+    {
+        return $this->belongsTo(DataRekeningKoran::class, 'rc_id', 'rc_id');
+    }
+
+    protected function tervalidasi(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->rc_id !== null || $this->rc_id !== ''
+        );
+    }
 
     public static function sumTotal(): float
     {
