@@ -178,6 +178,14 @@ class RekeningKoranController extends Controller
                 $query->whereNotNull('kredit');
             }
 
+             // search
+            if ($request->has('search') && !empty($request->input('search'))) {
+                $search = $request->input('search');
+                $query->where(function ($q) use ($search) {
+                    $q->where('no_rc', 'LIKE', "%$search%");
+                });
+            }
+
             $items = $query->orderBy('tgl_rc', 'desc')->orderBy('no_rc', 'asc')->get();
 
             $totalDebit = 0;
