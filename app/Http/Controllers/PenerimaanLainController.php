@@ -28,7 +28,7 @@ class PenerimaanLainController extends Controller
                 'periode' => 'nullable|string',
                 'noBayar' => 'nullable|string',
                 'tglBayar' => 'nullable|string',
-                'pasien' => 'nullable|string',
+                'pihak3' => 'nullable|string',
                 'uraian' => 'nullable|string',
                 'noDokumen' => 'nullable|string',
                 'tglDokumen' => 'nullable|string',
@@ -49,7 +49,7 @@ class PenerimaanLainController extends Controller
             $periode = $request->input('periode');
             $noBayar = $request->input('noBayar');
             $tglBayar = $request->input('tglBayar');
-            $pasien = $request->input('pasien');
+            $pihak3 = $request->input('pihak3');
             $uraian = $request->input('uraian');
             $noDokumen = $request->input('noDokumen');
             $tglDokumen = $request->input('tglDokumen');
@@ -87,8 +87,8 @@ class PenerimaanLainController extends Controller
             if (!empty($tglBayar)) {
                 $query->where('tgl_bayar', $tglBayar);
             }
-            if (!empty($pasien)) {
-                $query->where('pasien_nama', 'ILIKE', "%$pasien%");
+            if (!empty($pihak3)) {
+                $query->where('pihak3', 'ILIKE', "%$pihak3%");
             }
             if (!empty($uraian)) {
                 $query->where('uraian', 'ILIKE', "%$uraian%");
@@ -170,7 +170,7 @@ class PenerimaanLainController extends Controller
                 ], 422);
             }
 
-            $penerimaanLain = DataPenerimaanLain::with('masterAkun')->where('id', $id)->first();
+            $penerimaanLain = DataPenerimaanLain::with('masterAkun')->where('akun_id', $akunId)->first();
 
             if (!$penerimaanLain) {
                 return response()->json([

@@ -13,7 +13,7 @@ class PenerimaanLainResource extends JsonResource
             'id' => (string) $this->id,
             'noBayar' => (string) $this->no_bayar,
             'tglBayar' => (string) $this->tgl_bayar,
-            'pasien' => (string) $this->pasien_nama,
+            'pihak3' => (string) $this->pihak3,
             'uraian' => (string) $this->uraian,
             'noDokumen' => (string) $this->no_dokumen,
             'tglDokumen' => (string) $this->tgl_dokumen,
