@@ -21,7 +21,7 @@ class BillingKasirRequest extends FormRequest
         $this->prepareFromId('penjamin_id', 'penjamin_nama', 'master_penjamin');
 
         // convert format from 'd/m/Y' => 'Y-m-d'
-        foreach(['tgl_closingkasir', 'tgl_buktibayar', 'tgl_pelayanan', 'tgl_pendaftaran'] as $key) {
+        foreach(['tgl_closingkasir', 'tgl_buktibayar', 'tgl_pelayanan', 'tgl_pendaftaran', 'tgl_krs'] as $key) {
             if(request()->has($key) && request($key)) {
                 request()->merge([$key => date('Y-m-d', strtotime( str_replace('/', '-', request($key)) ))]);
             }
@@ -51,72 +51,77 @@ class BillingKasirRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'loket_id'       => 'required',
-            'loket_nama'       => 'required',
-            'kasir_id'       => 'required',
-            'kasir_nama'     => 'required',
-            'no_closingkasir' => 'required',
-            'tgl_closingkasir' => 'required',
-            'no_buktibayar'  => 'required',
-            'tgl_buktibayar' => 'required',
-            'no_pendaftaran'  => 'required',
-            'tgl_pelayanan'  => 'required',
-            'status_id'     => 'required',
-            'status'     => 'required',
-            'klasifikasi'         => 'nullable',
+            'no_buktibayar'         => 'required',
+            'tgl_buktibayar'        => 'required',
+            'total'                 => 'required',
+            'admin_kredit'          => 'required',
+            'admin_debit'           => 'required',
+            'selisih'               => 'nullable',
+            'jumlah_netto'          => 'required',
+            'cara_pembayaran'       => 'required',
+            'bank_tujuan'           => 'required',
+            'no_kartubank_pasien'   => 'required',
+            'kartubank_pasien'      => 'required',
             //
-            'cara_pembayaran' => 'required',
-            'metode_bayar' => 'nullable',
-            'bank_tujuan'    => 'required',
-            'instalasi_id'   => 'required',
-            'instalasi_nama'   => 'required',
-            'jenis_tagihan'  => 'required',
+            'loket_id'              => 'required',
+            'loket_nama'            => 'required',
+            'kasir_id'              => 'required',
+            'kasir_nama'            => 'required',
+            'no_closingkasir'       => 'required',
+            'tgl_closingkasir'      => 'required',
+            'tgl_pendaftaran'       => 'required',
+            'no_pendaftaran'        => 'required',
+            'tgl_krs'               => 'required',
+            'tgl_pelayanan'         => 'required',
+            'pasien_nama'           => 'required',
+            'no_rekam_medik'        => 'required',
+            'pasien_alamat'         => 'required',
             //
-            'pasien_nama'    => 'required',
-            'no_rekam_medik' => 'nullable',
-            'tgl_pendaftaran' => 'nullable',
-            'carabayar_id'   => 'required',
-            'penjamin_id'   => 'nullable',
-            'penjamin_nama'   => 'nullable',
-            //
-            'total'          => 'required|int',
-            'admin_kredit'   => 'required|int',
-            'admin_debit'    => 'required|int',
-            'jumlah_netto'   => 'required|int',
-            'selisih'        => 'nullable|int',
+            'instalasi_id'          => 'nullable',
+            'jenis_tagihan'         => 'nullable',
+            'carabayar_id'          => 'nullable',
+            'penjamin_id'           => 'nullable',
+            'status_id'             => 'nullable',
+            'status'                => 'nullable',
+            'klasifikasi'           => 'nullable',
+            'rek_id'                => 'nullable',
         ];
     }
 
     public function attributes(): array
     {
         return [
-            'loket_id'       => 'Loket',
-            'kasir_id'       => 'Kasir',
-            'no_closingkasir' => 'No Closing Kasir',
-            'tgl_closingkasir' => 'Tgl Closing Kasir',
-            'no_buktibayar'  => 'No Bukti Bayar',
-            'tgl_buktibayar' => 'Tgl Bukti Bayar',
-            'no_pendaftaran'  => 'No Dokumen',
-            'tgl_pelayanan'  => 'Tgl Dokumen',
-            'status_id'     => 'Status',
-            'klasifikasi'    => 'Klasifikasi',
+            'no_buktibayar'         => 'No Kwitansi',
+            'tgl_buktibayar'        => 'Tanggal Kwitansi',
+            'total'                 => 'Jumlah Bayar',
+            'admin_kredit'          => 'Biaya Admin EDC',
+            'admin_debit'           => 'Biaya Admin QRIS',
+            'selisih'               => 'Selisih',
+            'jumlah_netto'          => 'Jumlah Netto',
+            'cara_pembayaran'       => 'Cara Pembayaran',
+            'bank_tujuan'           => 'Bank Tujuan',
+            'no_kartubank_pasien'   => 'No. Kartu Bank',
+            'kartubank_pasien'      => 'Nama Bank',
             //
-            'cara_pembayaran' => 'Cara Pembayaran',
-            'bank_tujuan'    => 'Bank',
-            'instalasi_id'   => 'Instalasi',
-            'jenis_tagihan'  => 'Sumber Transaksi',
+            'loket_id'              => 'Loket',
+            'kasir_id'              => 'Kasir',
+            'no_closingkasir'       => 'No. Closing Kasir',
+            'tgl_closingkasir'      => 'Tgl. Closing Kasir',
+            'tgl_pendaftaran'       => 'Tgl. Pendaftaran',
+            'no_pendaftaran'        => 'No. Pendaftaran',
+            'tgl_krs'               => 'Tgl. KRS',
+            'tgl_pelayanan'         => 'Tgl. Pelayanan',
+            'pasien_nama'           => 'Nama Pasien',
+            'no_rekam_medik'        => 'No. Rekam Medik',
+            'pasien_alamat'         => 'Alamat Pasien',
             //
-            'pasien_nama'    => 'Pasien',
-            'no_rekam_medik' => 'No Rekam Medik',
-            'tgl_pendaftaran' => 'Tgl Pendaftaran',
-            'carabayar_id'   => 'Cara Bayar',
-            'penjamin_id'   => 'Penjamin',
-            //
-            'total'          => 'Jumlah',
-            'admin_kredit'   => 'Biaya Admin EDC',
-            'admin_debit'    => 'Biaya Admin QRIS',
-            'jumlah_netto'   => 'Jumlah Netto',
-            'selisih'        => 'Selisih',
+            'instalasi_id'          => 'Instalasi',
+            'jenis_tagihan'         => 'Jenis Tagihan',
+            'carabayar_id'          => 'Cara Bayar',
+            'penjamin_id'           => 'Penjamin',
+            'status_id'             => 'Status',
+            'klasifikasi'           => 'Klasifikasi',
+            'rek_id'                => 'Rekening DPA',
         ];
     }
 }
