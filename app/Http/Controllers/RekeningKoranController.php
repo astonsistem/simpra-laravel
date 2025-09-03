@@ -120,7 +120,7 @@ class RekeningKoranController extends Controller
     public function sum(Request $request)
     {
         try {
-            $request->validate([
+            $validated =$request->validate([
                 'tgl_awal' => 'nullable|string',
                 'tgl_akhir' => 'nullable|string',
                 'bulan_awal' => 'nullable|string',
@@ -132,19 +132,21 @@ class RekeningKoranController extends Controller
                 'debit' => 'nullable|integer',
                 'kredit' => 'nullable|integer',
                 'kualifikasi' => 'nullable|integer',
+                'nominal' => 'nullable|integer',
             ]);
 
-            $tglAwal = $request->input('tgl_awal');
-            $tglAkhir = $request->input('tgl_akhir');
-            $bulanAwal = $request->input('bulan_awal');
-            $bulanAkhir = $request->input('bulan_akhir');
-            $year = $request->input('year');
-            $periode = $request->input('periode');
-            $uraian = $request->input('uraian');
-            $bank = $request->input('bank');
-            $debit = $request->input('debit');
-            $kredit = $request->input('kredit');
-            $kualifikasi = $request->input('kualifikasi');
+            $tglAwal = $validated['tgl_awal'];
+            $tglAkhir = $validated['tgl_akhir'];
+            $bulanAwal = $validated['bulan_awal'];
+            $bulanAkhir = $validated['bulan_akhir'];
+            $year = $validated['year'];
+            $periode = $validated['periode'];
+            $uraian = $validated['uraian'];
+            $bank = $validated['bank'];
+            $debit = $validated['debit'];
+            $kredit = $validated['kredit'];
+            $kualifikasi = $validated['kualifikasi'];
+            $nominal = $validated['nominal'];
 
             $query = DataRekeningKoran::query();
 
@@ -170,7 +172,13 @@ class RekeningKoranController extends Controller
                 $query->where('debit', $debit);
             }
             if (!empty($kredit)) {
-                $query->where('kredit$kredit', $kredit);
+                $query->where('kredit', $kredit);
+            }
+            if (!empty($nominal)) {
+                $query->where(function($q) use ($nominal) {
+                    $q->where('debit', $nominal)
+                        ->orWhere('kredit', $nominal);
+                });
             }
             if (!empty($kualifikasi) && $kualifikasi == 1) {
                 $query->whereNotNull('debit');
