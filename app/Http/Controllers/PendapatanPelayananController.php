@@ -42,12 +42,12 @@ class PendapatanPelayananController extends Controller
             $tglAkhir = $request->input('tgl_akhir');
             $jenisPelayanan = $request->input('jenis_pelayanan');
             $noPendaftaran = $request->input('no_pendaftaran');
-            $noRM = $request->input('no_rm');
-            $nama = $request->input('nama');
-            $caraBayar = $request->input('cara_bayar');
-            $penjamin = $request->input('penjamin');
-            $status = $request->input('status');
-            $penjaminLebih1 = $request->input('penjamin_lebih_1');
+            $noRM = $request->input('no_rekam_medik');
+            $nama = $request->input('pasien_nama');
+            $caraBayar = $request->input('carabayar_nama');
+            $penjamin = $request->input('penjamin_nama');
+            $status = $request->input('is_valid');
+            $penjaminLebih1 = $request->input('is_penjaminlebih1');
 
             $query = DataPendapatanPelayanan::query();
 
@@ -57,7 +57,7 @@ class PendapatanPelayananController extends Controller
                 $query->whereBetween('tgl_pelayanan', [$startDate, $endDate]);
             }
             if (!empty($jenisPelayanan)) {
-                $query->where('jenis_tagihan', $jenisPelayanan);
+                $query->where('jenis_tagihan', 'ILIKE', "%$jenisPelayanan%");
             }
             if (!empty($noPendaftaran)) {
                 $query->where('no_pendaftaran', 'ILIKE', "%$noPendaftaran%");
@@ -69,10 +69,10 @@ class PendapatanPelayananController extends Controller
                 $query->where('pasien_nama', 'ILIKE', "%$nama%");
             }
             if (!empty($caraBayar)) {
-                $query->where('carabayar_id', $caraBayar);
+                $query->where('carabayar_nama', 'ILIKE', "%$caraBayar%");
             }
             if (!empty($penjamin)) {
-                $query->where('penjamin_id', $penjamin);
+                $query->where('penjamin_nama', 'ILIKE', "%$penjamin%");
             }
             if (!empty($status)) {
                 $query->where('is_valid', (bool) $status);
@@ -80,6 +80,10 @@ class PendapatanPelayananController extends Controller
             if (!empty($penjaminLebih1)) {
                 $query->where('is_penjaminlebih1', (bool) $status);
             }
+
+            $sortField = $request->input('sortField', 'tgl_pendaftaran');
+            $sortOrder = $request->input('sortOrder', 'asc');
+            $query->orderBy($sortField, $sortOrder);
 
             $totalItems = $query->count();
             $items = $query->skip(($page - 1) * $size)->take($size)->get();
@@ -168,7 +172,7 @@ class PendapatanPelayananController extends Controller
         try {
             $data = $request->validated();
 
-            $pendapatanPelayanan = DataPendapatanPelayanan::where('id', $id)->firstOrFail();
+            $pendapatanPelayanan = DataPendapatanPelayanan::where('id', $id)->first();
             if (!$pendapatanPelayanan) {
                 return response()->json([
                     'message' => 'Not found'
@@ -181,35 +185,25 @@ class PendapatanPelayananController extends Controller
                 ], 422);
             }
 
-            if (!empty($data['carabayar_id'])) {
-                $caraBayar = CaraBayar::where('carabayar_id', $data['carabayar_id'])->first();
-                if ($caraBayar) {
-                    $data['carabayar_nama'] = $caraBayar->carabayar_nama;
-                }
+            $caraBayar = CaraBayar::where('carabayar_id', $data['carabayar_id'])->first();
+            if ($caraBayar) {
+                $data['carabayar_nama'] = $caraBayar->carabayar_nama;
             }
-            if (!empty($data['penjamin_id'])) {
-                $penjamin = Penjamin::where('penjamin_id', $data['penjamin_id'])->first();
-                if ($penjamin) {
-                    $data['penjamin_nama'] = $penjamin->penjamin_nama;
-                }
+            $penjamin = Penjamin::where('penjamin_id', $data['penjamin_id'])->first();
+            if ($penjamin) {
+                $data['penjamin_nama'] = $penjamin->penjamin_nama;
             }
-            if (!empty($data['instalasi_id'])) {
-                $instalasi = Instalasi::where('instalasi_id', $data['instalasi_id'])->first();
-                if ($instalasi) {
-                    $data['instalasi_nama'] = $instalasi->instalasi_nama;
-                }
+            $instalasi = Instalasi::where('instalasi_id', $data['instalasi_id'])->first();
+            if ($instalasi) {
+                $data['instalasi_nama'] = $instalasi->instalasi_nama;
             }
-            if (!empty($data['loket_id'])) {
-                $loket = Loket::where('loket_id', $data['loket_id'])->first();
-                if ($loket) {
-                    $data['loket_nama'] = $loket->loket_nama;
-                }
+            $loket = Loket::where('loket_id', $data['loket_id'])->first();
+            if ($loket) {
+                $data['loket_nama'] = $loket->loket_nama;
             }
-            if (!empty($data['kasir_id'])) {
-                $kasir = Kasir::where('kasir_id', $data['kasir_id'])->first();
-                if ($kasir) {
-                    $data['kasir_nama'] = $kasir->kasir_nama;
-                }
+            $kasir = Kasir::where('kasir_id', $data['kasir_id'])->first();
+            if ($kasir) {
+                $data['kasir_nama'] = $kasir->kasir_nama;
             }
 
             $pendapatanPelayanan->update($data);
@@ -231,7 +225,7 @@ class PendapatanPelayananController extends Controller
     public function tarik(string $id)
     {
         try {
-            $pendapatanPelayanan = DataPendapatanPelayanan::where('id', $id)->firstOrFail();
+            $pendapatanPelayanan = DataPendapatanPelayanan::where('id', $id)->first();
             if (!$pendapatanPelayanan) {
                 return response()->json([
                     'message' => 'Not found'
@@ -251,7 +245,7 @@ class PendapatanPelayananController extends Controller
                 $simpraTable = 'simpra_pendapataninap_ft';
             }
 
-            $pendapatanPelayananSiesta = (new DataPendapatanPelayanan)->setTable($simpraTable)->setConnection('pgsql_2')->where('no_pendaftaran', $pendapatanPelayanan->no_pendaftaran)->first();
+            $pendapatanPelayananSiesta = (new DataPendapatanPelayanan)->setTable($simpraTable)->where('pendaftaran_id', $pendapatanPelayanan->pendaftaran_id)->first();
             if (!$pendapatanPelayananSiesta) {
                 return response()->json([
                     'message' => 'Data Pendapatan Pelayanan Siesta Not found.'
@@ -275,7 +269,7 @@ class PendapatanPelayananController extends Controller
     public function sinkron_fase1(string $id)
     {
         try {
-            $pendapatanPelayanan = DataPendapatanPelayanan::where('id', $id)->firstOrFail();
+            $pendapatanPelayanan = DataPendapatanPelayanan::where('id', $id)->first();
             if (!$pendapatanPelayanan) {
                 return response()->json([
                     'message' => 'Not found'
@@ -288,12 +282,24 @@ class PendapatanPelayananController extends Controller
                 ], 422);
             }
 
-            if (($pendapatanPelayanan->total_sharing + $pendapatanPelayanan->total_dijamin) == ($pendapatanPelayanan->pendapatan + $pendapatanPelayanan->pdd + $pendapatanPelayanan->piutang)) {
-                $pendapatanPelayanan->status_fase1 = 'valid';
-            } elseif ($pendapatanPelayanan->total_dijamin == $pendapatanPelayanan->piutang) {
-                $pendapatanPelayanan->status_fase1 = 'Koreksi Tagihan';
+            $total_sharing = $pendapatanPelayanan->total_sharing;
+            $total_dijamin = $pendapatanPelayanan->total_dijamin;
+            $pendapatan    = $pendapatanPelayanan->pendapatan;
+            $pdd           = $pendapatanPelayanan->pdd;
+            $piutang       = $pendapatanPelayanan->piutang;
+
+            if (($total_sharing + $total_dijamin) == ($pendapatan + $pdd + $piutang)) {
+                $pendapatanPelayanan->status_fase1 = 'Valid';
             } else {
-                $pendapatanPelayanan->status_fase1 = 'Koreksi Piutang';
+                if ($total_sharing === ($pendapatan + $pdd)) {
+                    if ($piutang === $total_dijamin) {
+                        $pendapatanPelayanan->status_fase1 = 'Koreksi Pendapatan';
+                    } else {
+                        $pendapatanPelayanan->status_fase1 = 'Koreksi Piutang';
+                    }
+                } else {
+                    $pendapatanPelayanan->status_fase1 = 'Koreksi Tagihan';
+                }
             }
 
             $pendapatanPelayanan->save();
@@ -313,56 +319,50 @@ class PendapatanPelayananController extends Controller
     public function sinkron_fase2(string $id)
     {
         try {
-            $pendapatanPelayanan = DataPendapatanPelayanan::where('id', $id)->firstOrFail();
+            $pendapatanPelayanan = DataPendapatanPelayanan::where('id', $id)->first();
             if (!$pendapatanPelayanan) {
                 return response()->json([
                     'message' => 'Not found'
                 ], 404);
             }
 
-            if (strtolower($pendapatanPelayanan->status_fase1) != 'valid') {
+            if ($pendapatanPelayanan->is_valid == true) {
                 return response()->json([
-                    'message' => 'Data cannot be edited because status_fase1 is not valid.'
-                ], 422);
-            }
-            if ($pendapatanPelayanan->pendapatan == 0) {
-                return response()->json([
-                    'message' => 'Data cannot be edited because pendapatan is 0/null.'
-                ], 422);
-            }
-            if ($pendapatanPelayanan->pdd == 0) {
-                return response()->json([
-                    'message' => 'Data cannot be edited because pdd is 0/null.'
-                ], 422);
-            }
-            if ($pendapatanPelayanan->carabayar_id == 0 && $pendapatanPelayanan->piutang_perorangan == 0) {
-                return response()->json([
-                    'message' => 'Data cannot be edited because carabayar_id and piutang_perorangan is 0/null.'
-                ], 422);
-            }
-            if ($pendapatanPelayanan->carabayar_id == 0 && $pendapatanPelayanan->total_dijamin == 0) {
-                return response()->json([
-                    'message' => 'Data cannot be edited because carabayar_id and piutang_perorangan is 0/null.'
+                    'message' => 'Data cannot be edited because its valid.'
                 ], 422);
             }
 
-            $sumPendapatan = DataPenerimaanLayanan::where('no_pendaftaran', $pendapatanPelayanan->no_pendaftaran)->sum('pendapatan');
-            $sumPdd        = DataPenerimaanLayanan::where('no_pendaftaran', $pendapatanPelayanan->no_pendaftaran)->sum('pdd');
-
-            $statusFase2 = 'Valid';
-            if ($pendapatanPelayanan->pendapatan != $sumPendapatan) {
-                $statusFase2 = 'Koreksi Pendapatan';
-            } elseif ($pendapatanPelayanan->pdd != $sumPdd) {
-                $statusFase2 = 'Koreksi PDD';
-            } elseif ($pendapatanPelayanan->piutang != $pendapatanPelayanan->potensi_nominal) {
-                $statusFase2 = 'Koreksi Piutang';
-            } elseif ($pendapatanPelayanan->pendapatan == $sumPendapatan) {
-                $statusFase2 = 'Valid Pendapatan';
-            } elseif ($pendapatanPelayanan->pdd == $sumPdd) {
-                $statusFase2 = 'Valid PDD';
+            $penerimaanLayanan = DataPenerimaanLayanan::selectRaw("
+                    pendaftaran_id,
+                    SUM(CASE WHEN LOWER(klasifikasi) = 'pendapatan' THEN total ELSE 0 END) as pendapatan,
+                    SUM(CASE WHEN LOWER(klasifikasi) = 'pdd' THEN total ELSE 0 END) as pdd,
+                    SUM(CASE WHEN LOWER(klasifikasi) = 'piutang' THEN total ELSE 0 END) as piutang,
+                    SUM(admin_kredit) as bea_admin,
+                    SUM(total) as total
+                ")
+                ->where('metode_bayar', 'ILIKE', '%langsung%')
+                ->where('pendaftaran_id', $pendapatanPelayanan->pendaftaran_id)
+                ->groupBy('pendaftaran_id')
+                ->first();
+            if (!$penerimaanLayanan) {
+                return response()->json([
+                    'message' => 'Data Penerimaan Layanan not found'
+                ], 404);
             }
 
-            $pendapatanPelayanan->status_fase2 = $statusFase2;
+            if ($pendapatanPelayanan->pendapatan != $penerimaanLayanan->pendapatan || $pendapatanPelayanan->pdd != $penerimaanLayanan->pdd) {
+                $pendapatanPelayanan->status_fase2 = 'Koreksi Pendapatan';
+            } elseif ($pendapatanPelayanan->piutang != $penerimaanLayanan->piutang) {
+                $pendapatanPelayanan->status_fase2 = 'Koreksi Piutang';
+            } else {
+                $pendapatanPelayanan->status_fase2 = 'Valid';
+            }
+
+            $pendapatanPelayanan->biaya_admin = $penerimaanLayanan->bea_admin;
+            if ($penerimaanLayanan->total != 0) {
+                $pendapatanPelayanan->status = 'bayar';
+            }
+
             $pendapatanPelayanan->save();
 
             return response()->json([
@@ -380,17 +380,16 @@ class PendapatanPelayananController extends Controller
     public function validasi(string $id)
     {
         try {
-            $pendapatanPelayanan = DataPendapatanPelayanan::where('id', $id)->firstOrFail();
+            $pendapatanPelayanan = DataPendapatanPelayanan::where('id', $id)->first();
             if (!$pendapatanPelayanan) {
                 return response()->json([
                     'message' => 'Not found'
                 ], 404);
             }
 
-            $pendapatanPelayanan->update(['id_valid' => false]);
-            if (strtolower($pendapatanPelayanan->status_fase1) == 'valid' && strtolower($pendapatanPelayanan->status_fase2) == 'valid') {
-                $pendapatanPelayanan->update(['id_valid' => true]);
-            }
+            $pendapatanPelayanan->update([
+                'is_valid' => strtolower($pendapatanPelayanan->status_fase1) == 'valid' && strtolower($pendapatanPelayanan->status_fase2) == 'valid'
+            ]);
 
             return response()->json([
                 'status' => 200,
