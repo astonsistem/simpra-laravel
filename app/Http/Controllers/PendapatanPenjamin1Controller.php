@@ -6,6 +6,7 @@ use App\Http\Resources\PendapatanPenjamin1Collection;
 use App\Http\Resources\PendapatanPenjamin1Resource;
 use App\Http\Requests\PendapatanPenjamin1Request;
 use App\Models\DataPendapatanPenjamin1;
+use App\Models\DataPendapatanPelayanan;
 use App\Models\CaraBayar;
 use App\Models\Instalasi;
 use App\Models\Kasir;
@@ -14,6 +15,7 @@ use App\Models\Penjamin;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class PendapatanPenjamin1Controller extends Controller
 {
@@ -42,10 +44,10 @@ class PendapatanPenjamin1Controller extends Controller
             $pelayananId = $request->input('pelayanan_id');
             $jenisPelayanan = $request->input('jenis_pelayanan');
             $noPendaftaran = $request->input('no_pendaftaran');
-            $noRM = $request->input('no_rm');
-            $nama = $request->input('nama');
-            $caraBayar = $request->input('cara_bayar');
-            $penjamin = $request->input('penjamin');
+            $noRM = $request->input('no_rekam_medik');
+            $nama = $request->input('pasien_nama');
+            $caraBayar = $request->input('carabayar_nama');
+            $penjamin = $request->input('penjamin_nama');
             $status = $request->input('status');
 
             $query = DataPendapatanPenjamin1::query();
@@ -59,7 +61,7 @@ class PendapatanPenjamin1Controller extends Controller
                 $query->where('pelayanan_id', $pelayananId);
             }
             if (!empty($jenisPelayanan)) {
-                $query->where('jenis_tagihan', $jenisPelayanan);
+                $query->where('jenis_tagihan', 'ILIKE', "%$jenisPelayanan%");
             }
             if (!empty($noPendaftaran)) {
                 $query->where('no_pendaftaran', 'ILIKE', "%$noPendaftaran%");
@@ -71,10 +73,10 @@ class PendapatanPenjamin1Controller extends Controller
                 $query->where('pasien_nama', 'ILIKE', "%$nama%");
             }
             if (!empty($caraBayar)) {
-                $query->where('carabayar_id', $caraBayar);
+                $query->where('carabayar_nama', 'ILIKE', "%$caraBayar%");
             }
             if (!empty($penjamin)) {
-                $query->where('penjamin_id', $penjamin);
+                $query->where('penjamin_nama', 'ILIKE', "%$penjamin%");
             }
             if (!empty($status)) {
                 $query->where('status', 'ILIKE', "%$status%");
@@ -146,10 +148,48 @@ class PendapatanPenjamin1Controller extends Controller
     public function store(PendapatanPenjamin1Request $request)
     {
         $data = $request->validated();
+        
+        $pendapatanPelayanan = DataPendapatanPelayanan::where('id', $data['pelayanan_id'])->first();
+        if (!$pendapatanPelayanan) {
+            return response()->json([
+                'message' => 'Data Pendapatan Pelayanan selected not found'
+            ], 404);
+        }
+
+        if (!$pendapatanPelayanan->is_valid) {
+            return response()->json([
+                'message' => 'Penjamin cannot be added because data pendapatan pelayanan is not valid.'
+            ], 422);
+        }
+
+        $caraBayar = CaraBayar::where('carabayar_id', $data['carabayar_id'])->first();
+        if ($caraBayar) {
+            $data['carabayar_nama'] = $caraBayar->carabayar_nama;
+        }
+        $penjamin = Penjamin::where('penjamin_id', $data['penjamin_id'])->first();
+        if ($penjamin) {
+            $data['penjamin_nama'] = $penjamin->penjamin_nama;
+        }
+        $instalasi = Instalasi::where('instalasi_id', $data['instalasi_id'])->first();
+        if ($instalasi) {
+            $data['instalasi_nama'] = $instalasi->instalasi_nama;
+        }
+        $kasir = Kasir::where('kasir_id', $data['kasir_id'])->first();
+        if ($kasir) {
+            $data['kasir_nama'] = $kasir->kasir_nama;
+        }
+        $loket = Loket::where('loket_id', $data['loket_id'])->first();
+        if ($loket) {
+            $data['loket_nama'] = $loket->loket_nama;
+        }
 
         $akun = DataPendapatanPenjamin1::create([
             'id' => Str::uuid()->toString(),
             ...$data,
+        ]);
+
+        $pendapatanPelayanan->update([
+            'is_penjaminlebih1' => true
         ]);
 
         return response()->json([
@@ -164,7 +204,7 @@ class PendapatanPenjamin1Controller extends Controller
         try {
             $data = $request->validated();
 
-            $pendapatanPenjamin1 = DataPendapatanPenjamin1::where('id', $id)->firstOrFail();
+            $pendapatanPenjamin1 = DataPendapatanPenjamin1::where('id', $id)->first();
             if (!$pendapatanPenjamin1) {
                 return response()->json([
                     'message' => 'Not found'
@@ -177,35 +217,25 @@ class PendapatanPenjamin1Controller extends Controller
                 ], 422);
             }
 
-            if (!empty($data['carabayar_id'])) {
-                $caraBayar = CaraBayar::where('carabayar_id', $data['carabayar_id'])->first();
-                if ($caraBayar) {
-                    $data['carabayar_nama'] = $caraBayar->carabayar_nama;
-                }
+            $caraBayar = CaraBayar::where('carabayar_id', $data['carabayar_id'])->first();
+            if ($caraBayar) {
+                $data['carabayar_nama'] = $caraBayar->carabayar_nama;
             }
-            if (!empty($data['penjamin_id'])) {
-                $penjamin = Penjamin::where('penjamin_id', $data['penjamin_id'])->first();
-                if ($penjamin) {
-                    $data['penjamin_nama'] = $penjamin->penjamin_nama;
-                }
+            $penjamin = Penjamin::where('penjamin_id', $data['penjamin_id'])->first();
+            if ($penjamin) {
+                $data['penjamin_nama'] = $penjamin->penjamin_nama;
             }
-            if (!empty($data['instalasi_id'])) {
-                $instalasi = Instalasi::where('instalasi_id', $data['instalasi_id'])->first();
-                if ($instalasi) {
-                    $data['instalasi_nama'] = $instalasi->instalasi_nama;
-                }
+            $instalasi = Instalasi::where('instalasi_id', $data['instalasi_id'])->first();
+            if ($instalasi) {
+                $data['instalasi_nama'] = $instalasi->instalasi_nama;
             }
-            if (!empty($data['kasir_id'])) {
-                $kasir = Kasir::where('kasir_id', $data['kasir_id'])->first();
-                if ($kasir) {
-                    $data['kasir_nama'] = $kasir->kasir_nama;
-                }
+            $kasir = Kasir::where('kasir_id', $data['kasir_id'])->first();
+            if ($kasir) {
+                $data['kasir_nama'] = $kasir->kasir_nama;
             }
-            if (!empty($data['loket_id'])) {
-                $loket = Loket::where('loket_id', $data['loket_id'])->first();
-                if ($loket) {
-                    $data['loket_nama'] = $loket->loket_nama;
-                }
+            $loket = Loket::where('loket_id', $data['loket_id'])->first();
+            if ($loket) {
+                $data['loket_nama'] = $loket->loket_nama;
             }
 
             $pendapatanPenjamin1->update($data);
@@ -245,7 +275,27 @@ class PendapatanPenjamin1Controller extends Controller
                 ], 404);
             }
 
+            if (strtolower($pendapatanPenjamin1->status) != 'piutang') {
+                return response()->json([
+                    'message' => 'Data cannot be deleted because its status not "piutang".'
+                ], 422);
+            }
+
+            $pelayananId = $pendapatanPenjamin1->pelayanan_id;
+            $pendapatanPelayanan = DataPendapatanPelayanan::where('id', $pelayananId)->first();
+            if (!$pendapatanPelayanan) {
+                return response()->json([
+                    'message' => 'Data Pendapatan Pelayanan of this Penjamin not found'
+                ], 404);
+            }
+
             $pendapatanPenjamin1->delete();
+
+            if (!DataPendapatanPenjamin1::where('pelayanan_id', $pelayananId)->exists()) {
+                $pendapatanPelayanan->update([
+                    'is_penjaminlebih1' => false
+                ]);
+            }
 
             return response()->json([
                 'status'  => 200,

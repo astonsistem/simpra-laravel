@@ -33,6 +33,7 @@ use App\Http\Controllers\PenerimaanSelisihController;
 use App\Http\Controllers\SumberTransaksiController;
 use App\Http\Controllers\SelisihKasController;
 use App\Http\Controllers\DataPenerimaanSelisihController;
+use App\Http\Controllers\PendapatanPenjamin1Controller;
 
 Route::post('auth/login_token', [AuthController::class, 'login']);
 Route::post('auth/logintoken', [AuthController::class, 'loginToken']);

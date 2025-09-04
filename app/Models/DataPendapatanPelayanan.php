@@ -50,6 +50,20 @@ class DataPendapatanPelayanan extends Model
         'pasien_nama',
         'sync_at ',
         'is_web_change ',
+        'koreksi_sharing',
+        'is_valid',
+        'is_naikkelas',
+        'is_penjaminlebih1',
+        'biaya_admin',
+        'hak_kelasrawat',
+        'naik_kelasrawat',
+        'status_fase1',
+        'status_fase2',
+        'status_fase3',
+        'total_sharing',
+        'obat_dijamin',
+        'piutang_perorangan',
+
     ];
 
     protected $casts = [

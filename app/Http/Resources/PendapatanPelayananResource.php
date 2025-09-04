@@ -10,6 +10,7 @@ class PendapatanPelayananResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'id' => (string) $this->id,
             'pendaftaran_id' => (int) $this->pendaftaran_id,
             'tgl_pendaftaran' => (string) $this->tgl_pendaftaran,
             'pasien_id' => (int)$this->pasien_id,
