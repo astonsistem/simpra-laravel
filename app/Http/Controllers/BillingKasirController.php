@@ -120,14 +120,12 @@ class BillingKasirController extends Controller
                 $query->where('jumlah_netto', 'LIKE', "%$jumlahNetto%");
             }
 
-            $query->with('rekeningKoran');
+            $query->with('rekeningKoran')->orderBy('tgl_buktibayar', 'desc')->orderBy('no_buktibayar', 'desc');
 
-            $totalItems = $query->count();
-            $items = $query->skip(($page - 1) * $size)->take($size)->orderBy('tgl_buktibayar', 'desc')->orderBy('no_buktibayar', 'desc')->get();
+            return new BillingKasirCollection(
+                $query->paginate($size)
+            );
 
-            $totalPages = ceil($totalItems / $size);
-
-            return new BillingKasirCollection($items, $totalItems, $page, $size, $totalPages);
         } catch (ValidationException $e) {
             $errors = [];
             foreach ($e->errors() as $field => $messages) {
