@@ -84,6 +84,7 @@ class BillingKasirRequest extends FormRequest
             'status_id'             => 'nullable',
             'status'                => 'nullable',
             'klasifikasi'           => 'nullable',
+            'rc_id'                 => 'nullable',
             'rek_id'                => 'nullable',
         ];
     }

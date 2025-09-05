@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\RekeningKoranCollection;
+use App\Http\Resources\RekeningKoranListResource;
 use App\Http\Resources\RekeningKoranResource;
 use App\Models\DataRekeningKoran;
 use Illuminate\Http\Request;
@@ -109,6 +110,39 @@ class RekeningKoranController extends Controller
             return response()->json([
                 'detail' => $errors
             ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan pada server.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+    public function list(Request $request)
+    {
+        try {
+            $params = $request->validate([
+                'page' => 'nullable|integer|min:1',
+                'per_page' => 'nullable|integer|min:1',
+                'search' => 'nullable|string',
+            ]);
+
+            $query = DataRekeningKoran::query();
+
+            $query->when($request->has('search') && !empty($params['search']), function ($q) use ($params) {
+
+                $search = $params['search'];
+                $q->where(function ($q) use ($search) {
+                    $q->where('no_rc', 'ILIKE', "%$search%")
+                        ->orWhere('rc_id', 'ILIKE', "%$search%")
+                        ->orWhere('uraian', 'ILIKE', "%$search%");
+                });
+            });
+
+            $query->orderBy('no_rc', 'asc');
+
+            return RekeningKoranListResource::collection(
+                $query->paginate( $params['per_page']?? 10)
+            );
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Terjadi kesalahan pada server.',

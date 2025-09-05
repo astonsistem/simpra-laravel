@@ -2,21 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\BillingKasirRequest;
-use App\Http\Requests\ValidasiBillingKasirRequest;
-use App\Http\Resources\BillingKasirCollection;
-use App\Http\Resources\BillingKasirFormResource;
-use App\Http\Resources\BillingKasirResource;
-use App\Models\DataPenerimaanLayanan;
-use App\Models\DataRekeningKoran;
+use Carbon\Carbon;
 use App\Models\Kasir;
 use App\Models\Loket;
 use App\Models\MasterStatus;
 use Illuminate\Http\Request;
+use App\Models\DataRekeningKoran;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use App\Models\DataPenerimaanLayanan;
+use App\Http\Requests\BillingKasirRequest;
+use App\Http\Resources\BillingKasirResource;
+use App\Http\Resources\BillingKasirCollection;
+use Illuminate\Validation\ValidationException;
+use App\Http\Resources\BillingKasirFormResource;
+use App\Actions\BillingKasir\ValidasiBilingKasir;
+use App\Http\Requests\ValidasiBillingKasirRequest;
 
 class BillingKasirController extends Controller
 {
@@ -122,7 +123,7 @@ class BillingKasirController extends Controller
 
             $query->with('rekeningKoran')->orderBy('tgl_buktibayar', 'desc')->orderBy('no_buktibayar', 'desc');
 
-            return new BillingKasirCollection(
+            return BillingKasirResource::collection(
                 $query->paginate($size)
             );
 
@@ -215,23 +216,35 @@ class BillingKasirController extends Controller
     public function update(BillingKasirRequest $request, string $id)
     {
         try {
+            DB::beginTransaction();
+
             $data = $request->validated();
 
             $billingKasir = DataPenerimaanLayanan::where('id', $id)->firstOrFail();
 
             $billingKasir->update($data);
 
+            if($billingKasir->status_id == MasterStatus::BKU_ID && $billingKasir->rc_id) {
+                (new ValidasiBilingKasir())->handle($billingKasir->rc_id);
+            }
+
+            DB::commit();
+
             return response()->json([
                 'message' => 'Berhasil memperbarui data billing kasir',
                 'data' => new BillingKasirFormResource($billingKasir),
             ], 200);
         } catch (\Exception $e) {
+
+            DB::rollBack();
+
             return response()->json([
                 'status'  => 500,
                 'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
                 'data'    => null
             ], 500);
         }
+
     }
 
     public function destroy($id)
@@ -486,7 +499,7 @@ class BillingKasirController extends Controller
             DB::transaction(function () use ($billingKasirId, $rcId, $currentUserId) {
                 $billingKasir = DataPenerimaanLayanan::where('id', $billingKasirId)
                     ->where(function ($query) {
-                        $query->where('status_id', '!=', 6)
+                        $query->where('status_id', '!=', MasterStatus::BKU_ID)
                             ->orWhereNull('status_id');
                     })
                     ->first();
@@ -497,32 +510,14 @@ class BillingKasirController extends Controller
 
                 $rcIdValue = ($rcId === 0 || $rcId === '0') ? null : $rcId;
 
-                DataPenerimaanLayanan::where('id', $billingKasirId)
-                    ->where(function ($query) {
-                        $query->where('status_id', '!=', 6)->orWhereNull('status_id');
-                    })
-                    ->update([
+                $billingKasir->update([
                         'rc_id'     => $rcIdValue,
-                        'status_id' => 5,
+                        'status_id' => MasterStatus::BKU_ID,
+                        'status'    => MasterStatus::BKU,
                         'monev_id'  => $currentUserId,
                     ]);
 
-                $billingKasirTableName = (new DataPenerimaanLayanan())->getTable();
-                $rekeningKoranTableName = (new DataRekeningKoran())->getTable();
-
-                $klarifLayanan = DB::table($billingKasirTableName)
-                    ->select(DB::raw('SUM(COALESCE(total,0) - COALESCE(admin_kredit,0) + COALESCE(selisih,0))'))
-                    ->where('rc_id', $rcId)
-                    ->value('sum');
-
-                Log::info("Klarif Layanan: " . $klarifLayanan);
-
-                DB::table($rekeningKoranTableName)
-                    ->where('rc_id', $rcId)
-                    ->update([
-                        'klarif_layanan' => $klarifLayanan,
-                        'akun_id'        => 1010102,
-                    ]);
+                (new ValidasiBilingKasir )->handle($rcId);
             });
 
             return response()->json([
@@ -554,23 +549,15 @@ class BillingKasirController extends Controller
         try {
             DB::transaction(function () use ($billingKasirId, $rcId) {
                 $billingKasir = DataPenerimaanLayanan::where('id', $billingKasirId)
-                    ->where(function ($query) {
-                        $query->where('status_id', '!=', 6)
-                            ->orWhereNull('status_id');
-                    })
                     ->first();
 
                 if (!$billingKasir) {
                     throw new \Exception('Penerimaan layanan tidak ditemukan atau status tidak valid.');
                 }
 
-                DataPenerimaanLayanan::where('id', $billingKasirId)
-                    ->where(function ($query) {
-                        $query->where('status_id', '!=', 6)->orWhereNull('status_id');
-                    })
-                    ->update([
-                        'rc_id'     => null,
-                        'status_id' => 5,
+                $billingKasir->update([
+                        'status_id' => MasterStatus::SETOR_ID,
+                        'status'    => MasterStatus::SETOR,
                         'monev_id'  => null,
                     ]);
 

@@ -46,4 +46,10 @@ class MasterStatus extends Model
         '7' => 'Pending',
         '8' => 'Gagal',
     ];
+
+    public const SETOR_ID = '5';
+    public const SETOR = 'Setor';
+
+    public const BKU_ID = '6';
+    public const BKU = 'BKU';
 }
