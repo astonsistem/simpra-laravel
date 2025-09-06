@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\DataPenerimaanLayanan;
 
-class ValidasiBilingKasir
+class ValidasiBillingKasir
 {
     public function handle($rcId)
     {

@@ -16,7 +16,7 @@ use App\Http\Resources\BillingKasirResource;
 use App\Http\Resources\BillingKasirCollection;
 use Illuminate\Validation\ValidationException;
 use App\Http\Resources\BillingKasirFormResource;
-use App\Actions\BillingKasir\ValidasiBilingKasir;
+use App\Actions\BillingKasir\ValidasiBillingKasir;
 use App\Http\Requests\ValidasiBillingKasirRequest;
 
 class BillingKasirController extends Controller
@@ -224,8 +224,9 @@ class BillingKasirController extends Controller
 
             $billingKasir->update($data);
 
-            if($billingKasir->status_id == MasterStatus::BKU_ID && $billingKasir->rc_id) {
-                (new ValidasiBilingKasir())->handle($billingKasir->rc_id);
+            if($billingKasir->status_id == MasterStatus::SETOR_ID && $billingKasir->rc_id)
+            {
+                (new ValidasiBillingKasir())->handle($billingKasir->rc_id);
             }
 
             DB::commit();
@@ -499,7 +500,7 @@ class BillingKasirController extends Controller
             DB::transaction(function () use ($billingKasirId, $rcId, $currentUserId) {
                 $billingKasir = DataPenerimaanLayanan::where('id', $billingKasirId)
                     ->where(function ($query) {
-                        $query->where('status_id', '!=', MasterStatus::BKU_ID)
+                        $query->where('status_id', '!=', MasterStatus::SETOR_ID)
                             ->orWhereNull('status_id');
                     })
                     ->first();
@@ -512,12 +513,12 @@ class BillingKasirController extends Controller
 
                 $billingKasir->update([
                         'rc_id'     => $rcIdValue,
-                        'status_id' => MasterStatus::BKU_ID,
-                        'status'    => MasterStatus::BKU,
+                        'status_id' => MasterStatus::SETOR_ID,
+                        'status'    => MasterStatus::SETOR,
                         'monev_id'  => $currentUserId,
                     ]);
 
-                (new ValidasiBilingKasir )->handle($rcId);
+                (new ValidasiBillingKasir )->handle($rcId);
             });
 
             return response()->json([
@@ -556,8 +557,8 @@ class BillingKasirController extends Controller
                 }
 
                 $billingKasir->update([
-                        'status_id' => MasterStatus::SETOR_ID,
-                        'status'    => MasterStatus::SETOR,
+                        'status_id' => null,
+                        'status'    => null,
                         'monev_id'  => null,
                     ]);
 
