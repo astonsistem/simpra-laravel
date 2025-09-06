@@ -43,13 +43,13 @@ class BillingKasirFormResource extends JsonResource
             'instalasi_id'          => (string) $this->instalasi_id,
             'jenis_tagihan'         => $this->jenis_tagihan,
             'carabayar_id'          => (string) $this->carabayar_id,
+            'carabayar_nama'        => (string) $this->carabayar_nama,
             'penjamin_id'           => (int) $this->penjamin_id,
             'status_id'             => (string) $this->status_id,
             'klasifikasi'           => $this->klasifikasi,
             'rc_id'                 => (int) $this->rc_id,
             'rek_id'                => (int) $this->rek_id,
             //
-            'rekening_koran'        => $this->rekeningKoran,
             'tervalidasi'           => (bool) $this->tervalidasi,
         ];
     }

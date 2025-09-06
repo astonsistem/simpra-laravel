@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AkunController;
 use App\Http\Controllers\BankController;
 use App\Http\Controllers\BillingKasirController;
+use App\Http\Controllers\BillingKasirSetorController;
 use App\Http\Controllers\BillingSwaController;
 use App\Http\Controllers\BkuController;
 use App\Http\Controllers\BuktiSetorController;
@@ -125,6 +126,8 @@ Route::middleware([
     Route::put('billing_kasir/cancel_validasi/penerimaan_layanan', [BillingKasirController::class, 'cancelValidasi']);
     Route::put('billing_kasir/{id}', [BillingKasirController::class, 'update']);
     Route::delete('billing_kasir/{id}', [BillingKasirController::class, 'destroy']);
+    // Aksi setor
+    Route::get('billing_kasir/setor/{rc_id}', [BillingKasirSetorController::class, 'show']);
 });
 
 Route::middleware([

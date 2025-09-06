@@ -290,7 +290,7 @@ class RekeningKoranController extends Controller
         }
     }
 
-    public function show(string $id)
+    public function show(Request $request, string $id)
     {
         try {
             $validator = Validator::make(['id' => $id], [
@@ -316,6 +316,12 @@ class RekeningKoranController extends Controller
                     'message' => 'Not found.'
                 ], 404);
             }
+
+            if($request->has('simple') && $request->simple)
+            {
+                return new RekeningKoranListResource($rekeningKoran);
+            }
+
             return response()->json(
                 new RekeningKoranResource($rekeningKoran)
             );
