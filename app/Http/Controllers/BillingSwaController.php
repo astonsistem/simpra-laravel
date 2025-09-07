@@ -6,6 +6,7 @@ use App\Http\Requests\BillingSwaRequest;
 use App\Http\Requests\ValidasiBillingKasirRequest;
 use App\Http\Resources\BillingSwaCollection;
 use App\Http\Resources\BillingSwaResource;
+use App\Http\Resources\BillingSwaSimpleResource;
 use App\Models\DataPenerimaanLain;
 use App\Models\DataRekeningKoran;
 use Illuminate\Http\Request;
@@ -172,9 +173,7 @@ class BillingSwaController extends Controller
                     'message' => 'Not found.'
                 ], 404);
             }
-            return response()->json(
-                new BillingSwaResource($billingSwa)
-            );
+            return new BillingSwaSimpleResource($billingSwa);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Terjadi kesalahan pada server.',
@@ -205,11 +204,14 @@ class BillingSwaController extends Controller
         try {
             $data = $request->validated();
 
-            unset($data['akun_data']);
-
             DB::beginTransaction();
 
-            $billingSwa = DataPenerimaanLain::firstOrFail($id);
+            $billingSwa = DataPenerimaanLain::where('id', $id)->first();
+
+            if (!$billingSwa) {
+                throw new \Exception('Penerimaan lain tidak ditemukan.', 404);
+            }
+
             $billingSwa->update($data);
 
             DB::commit();

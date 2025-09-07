@@ -168,8 +168,16 @@ class AkunController extends Controller
     public function list(Request $request)
     {
         try {
-            $request->validate([
+            $params = $request->validate([
+                'page' => 'nullable|numeric|min:1',
+                'per_page' => 'nullable|numeric|min:1',
+                'search' => 'nullable|string',
+                'filters.akun_id.value' => 'nullable|numeric',
+                'filters.akun_nama.value' => 'nullable|string',
+                'sortField' => 'nullable|string',
+                'sortOrder' => 'nullable|string',
                 'akun_kode' => 'nullable|string',
+                'pagination' => 'nullable',
             ]);
 
             $akunKode = $request->input('akun_kode');
@@ -180,23 +188,28 @@ class AkunController extends Controller
             if (!empty($akunKode)) {
                 $query->where('akun_kode', 'ILIKE', "$akunKode%");
             }
-            $akuns = $query->select('akun_id', 'akun_nama')
-                ->where('rek_id', 'LIKE', "$prefix%")
-                ->whereNotNull('rek_id')
-                ->orderBy('akun_id')
-                ->get();
 
-            $data = $akuns->map(function ($akun) {
-                return [
-                    'akun_id' => $akun->akun_id,
-                    'akun_nama' => $akun->akun_nama,
-                ];
-            })->toArray();
+            // FILTER akun_id
+            $query->when($request->has('filters.akun_id.value'), function ($q) use ($params) {
+                $akun_id = $params['filters']['akun_id']['value'];
+                $q->where('akun_id', $akun_id);
+            });
+            // FILTER akun_id
+            $query->when($request->has('filters.akun_nama.value'), function ($q) use ($params) {
+                $akun_nama = $params['filters']['akun_nama']['value'];
+                $q->where('akun_nama', 'ILIKE', "%$akun_nama%");
+            });
+
+            $query->select('akun_id', 'akun_nama')
+                ->where('rek_id', 'LIKE', "$prefix%")
+                ->whereNotNull('rek_id');
+
+            $query->orderBy($params['sortField'] ?? 'akun_id', $params['sortOrder'] ?? 'asc');
 
             return response()->json([
-                'status' => "200",
+                'status' => 200,
                 'message' => "success",
-                'data' => $data
+                'data' => $request->has('pagination') ? $query->paginate( $params['per_page'] ?? 20 ) : $query->get()
             ], 200);
         } catch (ValidationException $e) {
             $errors = [];
@@ -280,12 +293,6 @@ class AkunController extends Controller
     public function listPendapatan(Request $request)
     {
         try {
-            $request->validate([
-                'akun_kode' => 'nullable|string',
-            ]);
-
-            $akunKode = $request->input('akun_kode');
-
             $akuns = MasterRekeningView::all();
 
             $data = $akuns->map(function ($rek) {

@@ -47,6 +47,8 @@ class DataPenerimaanLain extends Model
         'piutang_id',
         'piutanglain_id',
         'is_web_change',
+        'petugas',
+        'rek_id'
     ];
 
     protected $casts = [

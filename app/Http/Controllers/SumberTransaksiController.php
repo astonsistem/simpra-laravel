@@ -145,7 +145,7 @@ class SumberTransaksiController extends Controller
             })->toArray();
 
             return response()->json([
-                'status' => "200",
+                'status' => 200,
                 'message' => "success",
                 'data' => $data
             ], 200);

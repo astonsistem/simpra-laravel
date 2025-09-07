@@ -91,38 +91,6 @@ class BillingKasirRequest extends FormRequest
 
     public function attributes(): array
     {
-        return [
-            'no_buktibayar'         => 'No Kwitansi',
-            'tgl_buktibayar'        => 'Tanggal Kwitansi',
-            'total'                 => 'Jumlah Bayar',
-            'admin_kredit'          => 'Biaya Admin EDC',
-            'admin_debit'           => 'Biaya Admin QRIS',
-            'selisih'               => 'Selisih',
-            'jumlah_netto'          => 'Jumlah Netto',
-            'cara_pembayaran'       => 'Cara Pembayaran',
-            'bank_tujuan'           => 'Bank Tujuan',
-            'no_kartubank_pasien'   => 'No. Kartu Bank',
-            'kartubank_pasien'      => 'Nama Bank',
-            //
-            'loket_id'              => 'Loket',
-            'kasir_id'              => 'Kasir',
-            'no_closingkasir'       => 'No. Closing Kasir',
-            'tgl_closingkasir'      => 'Tgl. Closing Kasir',
-            'tgl_pendaftaran'       => 'Tgl. Pendaftaran',
-            'no_pendaftaran'        => 'No. Pendaftaran',
-            'tgl_krs'               => 'Tgl. KRS',
-            'tgl_pelayanan'         => 'Tgl. Pelayanan',
-            'pasien_nama'           => 'Nama Pasien',
-            'no_rekam_medik'        => 'No. Rekam Medik',
-            'pasien_alamat'         => 'Alamat Pasien',
-            //
-            'instalasi_id'          => 'Instalasi',
-            'jenis_tagihan'         => 'Jenis Tagihan',
-            'carabayar_id'          => 'Cara Bayar',
-            'penjamin_id'           => 'Penjamin',
-            'status_id'             => 'Status',
-            'klasifikasi'           => 'Klasifikasi',
-            'rek_id'                => 'Rekening DPA',
-        ];
+        return config('attributes');
     }
 }

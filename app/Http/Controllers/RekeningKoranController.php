@@ -126,7 +126,7 @@ class RekeningKoranController extends Controller
                 'search' => 'nullable|string',
                 'filters.nominal.min' => 'nullable|integer|min:0',
                 'filters.nominal.max' => 'nullable|integer|min:0',
-                'filters.no_rc' => 'nullable',
+                'filters.no_rc.value' => 'nullable',
                 'sortField' => 'nullable|string',
                 'sortOrder' => 'nullable|string',
             ]);
