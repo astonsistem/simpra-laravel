@@ -14,6 +14,8 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(ConsoleKernel::class, AppConsoleKernel::class);
+
+
     }
 
     /**
@@ -21,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        foreach (glob(app_path('Helpers') . '/*.php') as $filename) {
+            require_once $filename;
+        }
     }
 }

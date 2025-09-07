@@ -4,14 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\BillingSwaRequest;
 use App\Http\Requests\ValidasiBillingKasirRequest;
+use App\Http\Requests\ValidasiBillingSwaRequest;
 use App\Http\Resources\BillingSwaCollection;
 use App\Http\Resources\BillingSwaResource;
+use App\Http\Resources\BillingSwaSimpleResource;
 use App\Models\DataPenerimaanLain;
 use App\Models\DataRekeningKoran;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class BillingSwaController extends Controller
 {
@@ -172,9 +175,7 @@ class BillingSwaController extends Controller
                     'message' => 'Not found.'
                 ], 404);
             }
-            return response()->json(
-                new BillingSwaResource($billingSwa)
-            );
+            return new BillingSwaSimpleResource($billingSwa);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Terjadi kesalahan pada server.',
@@ -205,11 +206,14 @@ class BillingSwaController extends Controller
         try {
             $data = $request->validated();
 
-            unset($data['akun_data']);
-
             DB::beginTransaction();
 
-            $billingSwa = DataPenerimaanLain::firstOrFail($id);
+            $billingSwa = DataPenerimaanLain::where('id', $id)->first();
+
+            if (!$billingSwa) {
+                throw new \Exception('Penerimaan lain tidak ditemukan.', 404);
+            }
+
             $billingSwa->update($data);
 
             DB::commit();
@@ -493,7 +497,7 @@ class BillingSwaController extends Controller
         }
     }
 
-    public function updateValidasi(ValidasiBillingKasirRequest $request)
+    public function updateValidasi(ValidasiBillingSwaRequest $request)
     {
         $data = $request->validated();
         $billingSwaId = $data['id'];
@@ -509,24 +513,27 @@ class BillingSwaController extends Controller
 
                 $rcIdValue = ($rcId === 0 || $rcId === '0') ? null : $rcId;
 
-                DataPenerimaanLain::where('id', $billingSwaId)
-                    ->update([
+                $billingSwa->update([
                         'rc_id'     => $rcIdValue,
                     ]);
 
-                $billingSwaTableName = (new DataPenerimaanLain())->getTable();
+                $billingKasirTableName = (new DataPenerimaanLain())->getTable();
                 $rekeningKoranTableName = (new DataRekeningKoran())->getTable();
 
-                $klarifLainSubquery = DB::table($billingSwaTableName)
+                $klarifLain = DB::table($billingKasirTableName)
                     ->select(DB::raw('SUM(COALESCE(total,0) - COALESCE(admin_kredit,0) + COALESCE(selisih,0))'))
-                    ->where('rc_id', $rcId);
+                    ->where('rc_id', $rcId)
+                    ->value('sum');
+
+                Log::info("Klarif Lain: " . $klarifLain);
 
                 DB::table($rekeningKoranTableName)
                     ->where('rc_id', $rcId)
                     ->update([
-                        'klarif_lain'   => DB::raw('(' . $klarifLainSubquery->toSql() . ')'),
-                        'akun_id'       => '1010101',
+                        'klarif_lain' => $klarifLain,
+                        'akun_id'     => '1010101',
                     ]);
+
             });
 
             return response()->json([
@@ -563,25 +570,26 @@ class BillingSwaController extends Controller
                     throw new \Exception('penerimaan lain tidak ditemukan atau status tidak valid.');
                 }
 
-                DataPenerimaanLain::where('id', $billingSwaId)
-                    ->update([
+                $billingSwa->update([
                         'rc_id'     => null,
                     ]);
 
-                $billingSwaTableName = (new DataPenerimaanLain())->getTable();
+                $billingKasirTableName = (new DataPenerimaanLain())->getTable();
                 $rekeningKoranTableName = (new DataRekeningKoran())->getTable();
 
-                $klarifLainSubquery = DB::table($billingSwaTableName)
-                    ->select(DB::raw('COALESCE(SUM(total - admin_kredit + selisih), 0)'))
-                    ->where('rc_id', $rcId);
+                $klarifLain = DB::table($billingKasirTableName)
+                    ->select(DB::raw('SUM(COALESCE(total,0) - COALESCE(admin_kredit,0) + COALESCE(selisih,0))'))
+                    ->where('rc_id', $rcId)
+                    ->value('sum');
+
+                Log::info("Klarif Lain: " . $klarifLain);
+                $akun = DB::table($billingKasirTableName)->where('rc_id', $rcId)->value('akun_id');
 
                 DB::table($rekeningKoranTableName)
                     ->where('rc_id', $rcId)
                     ->update([
-                        'klarif_lain' => DB::raw('(' . $klarifLainSubquery->toSql() . ')'),
-                        'akun_id'        => DB::raw(
-                            "CASE WHEN (" . $klarifLainSubquery->toSql() . ") = 0 THEN NULL ELSE akun_id END"
-                        ),
+                        'klarif_lain' => $klarifLain,
+                        'akun_id'     => $akun,
                     ]);
             });
 

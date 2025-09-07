@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\RekeningKoranCollection;
+use App\Http\Resources\RekeningKoranListResource;
 use App\Http\Resources\RekeningKoranResource;
 use App\Models\DataRekeningKoran;
 use Illuminate\Http\Request;
@@ -109,6 +110,66 @@ class RekeningKoranController extends Controller
             return response()->json([
                 'detail' => $errors
             ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan pada server.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+    public function list(Request $request)
+    {
+        try {
+            $params = $request->validate([
+                'page' => 'nullable|integer|min:1',
+                'per_page' => 'nullable|integer|min:1',
+                'search' => 'nullable|string',
+                'filters.nominal.min' => 'nullable|integer|min:0',
+                'filters.nominal.max' => 'nullable|integer|min:0',
+                'filters.no_rc.value' => 'nullable',
+                'sortField' => 'nullable|string',
+                'sortOrder' => 'nullable|string',
+            ]);
+
+            $query = DataRekeningKoran::query();
+
+            // FILTER NOMINAL
+            $query->when($request->has('filters.nominal.min') && $request->has('filters.nominal.max'), function ($q) use ($params) {
+                $min = $params['filters']['nominal']['min'];
+                $max = $params['filters']['nominal']['max'];
+
+                $q->where(function ($q) use ($min, $max) {
+                    $q->whereBetween('debit', [$min, $max])
+                        ->orWhereBetween('kredit', [$min, $max]);
+                });
+            });
+            // FILTER no_rc
+            $query->when($request->has('filters.no_rc.value'), function ($q) use ($params) {
+                $no_rc = $params['filters']['no_rc']['value'];
+                $q->where('no_rc', 'ILIKE', "%$no_rc%");
+            });
+
+            // SEARCH
+            $query->when($request->has('search') && !empty($params['search']), function ($q) use ($params) {
+                $search = $params['search'];
+                $q->where(function ($q) use ($search) {
+                    $q->where('no_rc', 'ILIKE', "%$search%")
+                        ->orWhere('rc_id', 'ILIKE', "%$search%")
+                        ->orWhere('uraian', 'ILIKE', "%$search%");
+                });
+            });
+
+            if($params['sortField'] == 'nominal') {
+                $query->orderBy('kredit', $params['sortOrder'] ?? 'asc')
+                ->orderBy('debit', $params['sortOrder'] ?? 'asc');
+            }
+            else {
+                $query->orderBy($params['sortField'] ?? 'no_rc', $params['sortOrder'] ?? 'asc');
+            }
+
+            return RekeningKoranListResource::collection(
+                $query->paginate( $params['per_page']?? 10)
+            );
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Terjadi kesalahan pada server.',
@@ -229,7 +290,7 @@ class RekeningKoranController extends Controller
         }
     }
 
-    public function show(string $id)
+    public function show(Request $request, string $id)
     {
         try {
             $validator = Validator::make(['id' => $id], [
@@ -255,6 +316,12 @@ class RekeningKoranController extends Controller
                     'message' => 'Not found.'
                 ], 404);
             }
+
+            if($request->has('simple') && $request->simple)
+            {
+                return new RekeningKoranListResource($rekeningKoran);
+            }
+
             return response()->json(
                 new RekeningKoranResource($rekeningKoran)
             );

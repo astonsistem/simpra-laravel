@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AkunController;
 use App\Http\Controllers\BankController;
 use App\Http\Controllers\BillingKasirController;
+use App\Http\Controllers\BillingKasirSetorController;
 use App\Http\Controllers\BillingSwaController;
 use App\Http\Controllers\BkuController;
 use App\Http\Controllers\BuktiSetorController;
@@ -125,6 +126,8 @@ Route::middleware([
     Route::put('billing_kasir/cancel_validasi/penerimaan_layanan', [BillingKasirController::class, 'cancelValidasi']);
     Route::put('billing_kasir/{id}', [BillingKasirController::class, 'update']);
     Route::delete('billing_kasir/{id}', [BillingKasirController::class, 'destroy']);
+    // Aksi setor
+    Route::get('billing_kasir/setor/{rc_id}', [BillingKasirSetorController::class, 'show']);
 });
 
 Route::middleware([
@@ -138,8 +141,8 @@ Route::middleware([
     Route::get('billing_swa/validasi/filterjumlah/{id}', [BillingSwaController::class, 'validasiFilterJumlah']);
     Route::get('billing_swa/validasi/{id}', [BillingSwaController::class, 'validasi']);
     Route::get('billing_swa/{id}', [BillingSwaController::class, 'show']);
-    Route::put('billing_swa/validasi/penerimaan_lain', [BillingSwaController::class, 'updateValidasi']);
-    Route::put('billing_swa/cancel_validasi/penerimaan_lain', [BillingSwaController::class, 'cancelValidasi']);
+    Route::post('billing_swa/validasi/penerimaan_lain', [BillingSwaController::class, 'updateValidasi']);
+    Route::post('billing_swa/cancel_validasi/penerimaan_lain', [BillingSwaController::class, 'cancelValidasi']);
     Route::put('billing_swa/{id}', [BillingSwaController::class, 'update']);
     Route::delete('billing_swa/{id}', [BillingSwaController::class, 'destroy']);
 });
@@ -183,7 +186,13 @@ Route::delete('data_closing/{id}', [DataClosingController::class, 'destroy']);
 Route::get('temp_penerimaan_swa', [TempPenerimaanSwaController::class, 'index']);
 Route::get('temp_penerimaan_swa/{id}', [TempPenerimaanSwaController::class, 'show']);
 
-Route::get('rekening_koran', [RekeningKoranController::class, 'index'])->middleware('api');
+Route::group([
+    'middleware' => 'api',
+], function() {
+    Route::get('rekening_koran', [RekeningKoranController::class, 'index']);
+    Route::get('rekening_koran/list', [RekeningKoranController::class, 'list']);
+});
+
 Route::get('rekening_koran/statistik', [RekeningKoranController::class, 'statistik']);
 Route::get('rekening_koran/sum_rekening_koran', [RekeningKoranController::class, 'sum']);
 Route::get('rekening_koran/statistik', [RekeningKoranController::class, 'statistik']);
