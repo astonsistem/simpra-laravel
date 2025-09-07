@@ -141,8 +141,8 @@ Route::middleware([
     Route::get('billing_swa/validasi/filterjumlah/{id}', [BillingSwaController::class, 'validasiFilterJumlah']);
     Route::get('billing_swa/validasi/{id}', [BillingSwaController::class, 'validasi']);
     Route::get('billing_swa/{id}', [BillingSwaController::class, 'show']);
-    Route::put('billing_swa/validasi/penerimaan_lain', [BillingSwaController::class, 'updateValidasi']);
-    Route::put('billing_swa/cancel_validasi/penerimaan_lain', [BillingSwaController::class, 'cancelValidasi']);
+    Route::post('billing_swa/validasi/penerimaan_lain', [BillingSwaController::class, 'updateValidasi']);
+    Route::post('billing_swa/cancel_validasi/penerimaan_lain', [BillingSwaController::class, 'cancelValidasi']);
     Route::put('billing_swa/{id}', [BillingSwaController::class, 'update']);
     Route::delete('billing_swa/{id}', [BillingSwaController::class, 'destroy']);
 });

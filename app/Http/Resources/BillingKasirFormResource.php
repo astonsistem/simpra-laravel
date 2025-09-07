@@ -48,7 +48,7 @@ class BillingKasirFormResource extends JsonResource
             'status_id'             => (string) $this->status_id,
             'klasifikasi'           => $this->klasifikasi,
             'rc_id'                 => (int) $this->rc_id,
-            'rek_id'                => (int) $this->rek_id,
+            'rek_id'                => (string) $this->rek_id,
             //
             'tervalidasi'           => (bool) $this->tervalidasi,
         ];

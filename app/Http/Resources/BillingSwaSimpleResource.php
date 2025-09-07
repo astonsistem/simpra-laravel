@@ -34,8 +34,10 @@ class BillingSwaSimpleResource extends JsonResource
             'tgl_bayar'             => $this->tgl_bayar ? date('d/m/Y', strtotime($this->tgl_bayar)) : null,
             'tgl_dokumen'           => $this->tgl_dokumen ? date('d/m/Y', strtotime($this->tgl_dokumen)) : null,
             'total'                 => $this->total,
-            'uraian'                => $this->uraian
-
+            'uraian'                => $this->uraian,
+            //
+            'akun_nama'             => $this->masterAkun? $this->masterAkun->akun_nama : null,
         ];
     }
 }
+ 

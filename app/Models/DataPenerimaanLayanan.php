@@ -63,7 +63,8 @@ class DataPenerimaanLayanan extends Model
         'bulan_pelayanan',
         'akun_id',
         'rc_id',
-        'is_web_change'
+        'is_web_change',
+        'rek_id'
     ];
 
     protected $appends = [

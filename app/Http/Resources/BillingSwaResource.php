@@ -31,6 +31,8 @@ class BillingSwaResource extends JsonResource
             'rekeningDpa' => (string) $this->rek_dpa,
             'selisih' => (string) $this->selisih,
             'jumlahNetto' => (int) $this->jumlah_netto,
+            'rcId' => (string) $this->rc_id,
+            'rekId' => (string) $this->rek_id,
         ];
     }
 }
