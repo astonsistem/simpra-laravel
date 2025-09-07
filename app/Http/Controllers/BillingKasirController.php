@@ -560,6 +560,7 @@ class BillingKasirController extends Controller
                         'status_id' => null,
                         'status'    => null,
                         'monev_id'  => null,
+                        'rc_id'     => null
                     ]);
 
                 $billingKasirTableName = (new DataPenerimaanLayanan())->getTable();
