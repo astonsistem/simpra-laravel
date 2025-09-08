@@ -79,9 +79,9 @@ class BillingSwaController extends Controller
                 $query->whereBetween('tgl_bayar', [$startDate, $endDate]);
             }
             if (!empty($tglAwal) && !empty($tglAkhir) && $periode === "BULANAN") {
-                $startMonth = Carbon::parse($tglAwal)->format('m');
-                $endMonth = Carbon::parse($tglAkhir)->format('m');
-                $query->whereBetween('tgl_bayar', [$startMonth, $endMonth]);
+                $startDate = Carbon::parse($tglAwal)->startOfMonth();
+                $endDate = Carbon::parse($tglAkhir)->endOfMonth();
+                $query->whereBetween('tgl_bayar', [$startDate, $endDate]);
             }
             if (!empty($noBayar)) {
                 $query->where('no_bayar', 'ILIKE', "%$noBayar%");
