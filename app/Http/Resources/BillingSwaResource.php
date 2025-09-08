@@ -15,8 +15,7 @@ class BillingSwaResource extends JsonResource
             'id' => (string) $this->id,
             'noBayar' => (string) $this->no_bayar,
             'tglBayar' => $this->tgl_bayar ? date('d/m/Y', strtotime($this->tgl_bayar)) : null,
-            'penyetor' => (string) $this->pihak3,
-            'pasien' => (string) $this->pasien_nama,
+            'pihak3' => (string) $this->pihak3,
             'uraian' => (string) $this->uraian,
             'noDokumen' => (string) $this->no_dokumen,
             'tglDokumen' => $this->tgl_dokumen ? date('d/m/Y', strtotime($this->tgl_dokumen)) : null,
@@ -28,11 +27,14 @@ class BillingSwaResource extends JsonResource
             'biayaAdminEdc' => (string) $this->admin_kredit,
             'biayaAdminQris' => (string) $this->admin_debit,
             'instalasi' => (string) $this->instalasi_nama,
-            'rekeningDpa' => (string) $this->rek_dpa,
             'selisih' => (string) $this->selisih,
             'jumlahNetto' => (int) $this->jumlah_netto,
             'rcId' => (string) $this->rc_id,
             'rekId' => (string) $this->rek_id,
+            'rekeningDpa' => isset($this->rekeningDpa) ? [
+                'rekId' => (string) $this->rekeningDpa->rek_id,
+                'rekNama' => (string) $this->rekeningDpa->rek_nama,
+            ] : null,
         ];
     }
 }

@@ -8,6 +8,7 @@ use App\Http\Controllers\BankController;
 use App\Http\Controllers\BillingKasirController;
 use App\Http\Controllers\BillingKasirSetorController;
 use App\Http\Controllers\BillingSwaController;
+use App\Http\Controllers\BilllingSwaSetorController;
 use App\Http\Controllers\BkuController;
 use App\Http\Controllers\BuktiSetorController;
 use App\Http\Controllers\CaraBayarController;
@@ -145,6 +146,7 @@ Route::middleware([
     Route::post('billing_swa/cancel_validasi/penerimaan_lain', [BillingSwaController::class, 'cancelValidasi']);
     Route::put('billing_swa/{id}', [BillingSwaController::class, 'update']);
     Route::delete('billing_swa/{id}', [BillingSwaController::class, 'destroy']);
+    Route::get('billing_swa/setor/{rc_id}', [BilllingSwaSetorController::class, 'show']);
 });
 
 Route::get('potensi_pelayanan', [PotensiPelayananController::class, 'index']);
