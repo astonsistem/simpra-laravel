@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DataPenerimaanLain extends Model
 {
@@ -65,9 +66,14 @@ class DataPenerimaanLain extends Model
         });
     }
 
-    public function masterAkun()
+    public function masterAkun(): BelongsTo
     {
         return $this->belongsTo(MasterAkun::class, 'akun_id', 'akun_id');
+    }
+
+    public function rekeningDpa(): BelongsTo
+    {
+        return $this->belongsTo(MasterRekeningView::class, 'rek_id', 'rek_id');
     }
 
     public static function sumTotal(?string $type = null, ?string $month = null, ?string $sumberTransaksi = null): int

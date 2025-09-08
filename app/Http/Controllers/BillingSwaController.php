@@ -44,7 +44,7 @@ class BillingSwaController extends Controller
             ]);
 
             $page = $request->input('page', 1) ?? 1;
-            $size = $request->input('size', 100) ?? 100;
+            $size = $request->input('size', 10) ?? 10;
             $tahunPeriode = $request->input('tahunPeriode');
             $tglAwal = $request->input('tglAwal');
             $tglAkhir = $request->input('tglAkhir');
@@ -123,14 +123,10 @@ class BillingSwaController extends Controller
                 $query->where('jumlah_netto', 'LIKE', "%$jumlahNetto%");
             }
 
-            $totalItems = $query->count();
-            $items = $query->skip(($page - 1) * $size)->take($size)->orderBy('tgl_bayar', 'desc')->orderBy('no_bayar', 'desc')->with('masterAkun')->get();
+            $query->orderBy('tgl_bayar', 'desc')->orderBy('no_bayar', 'desc')->with('masterAkun');
 
-            $totalPages = ceil($totalItems / $size);
+            return  BillingSwaResource::collection($query->paginate( $size));
 
-            return response()->json(
-                new BillingSwaCollection($items, $totalItems, $page, $size, $totalPages)
-            );
         } catch (ValidationException $e) {
             $errors = [];
             foreach ($e->errors() as $field => $messages) {

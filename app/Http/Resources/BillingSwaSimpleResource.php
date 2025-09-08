@@ -22,6 +22,7 @@ class BillingSwaSimpleResource extends JsonResource
             'bank_tujuan'           => $this->bank_tujuan,
             'cara_pembayaran'       => $this->cara_pembayaran,
             'jumlah_netto'          => $this->jumlah_netto,
+            'metode_pembayaran'     => $this->metode_pembayaran,
             'no_bayar'              => $this->no_bayar,
             'no_dokumen'            => $this->no_dokumen,
             'pdd'                   => $this->pdd,
@@ -40,4 +41,3 @@ class BillingSwaSimpleResource extends JsonResource
         ];
     }
 }
- 
