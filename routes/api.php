@@ -154,10 +154,16 @@ Route::get('potensi_pelayanan/getdata', [PotensiPelayananController::class, 'get
 Route::get('potensi_pelayanan/statistik', [PotensiPelayananController::class, 'statistik']);
 Route::get('potensi_pelayanan/{id}', [PotensiPelayananController::class, 'index']);
 
-Route::get('penerimaan_lain', [PenerimaanLainController::class, 'index']);
+Route::middleware([
+    'middleware' => 'api',
+    'prefix' => 'auth'
+])->group(function () {
+    Route::get('penerimaan_lain', [PenerimaanLainController::class, 'index']);
+    Route::get('penerimaan_lain/{id}', [PenerimaanLainController::class, 'show']);
+
+});
 Route::get('penerimaan_lain/getdata', [PenerimaanLainController::class, 'getdata']);
 Route::get('penerimaan_lain/statistik', [PenerimaanLainController::class, 'statistik']);
-Route::get('penerimaan_lain/{id}', [PenerimaanLainController::class, 'show']);
 Route::get('penerimaan_lain/validasi/filter/{id}', [PenerimaanLainController::class, 'validasiFilter']);
 Route::get('penerimaan_lain/validasi/filteruraian/{id}', [PenerimaanLainController::class, 'validasiFilterUraian']);
 Route::get('penerimaan_lain/validasi/filterjumlah/{id}', [PenerimaanLainController::class, 'validasiFilterJumlah']);
