@@ -36,6 +36,7 @@ use App\Http\Controllers\SumberTransaksiController;
 use App\Http\Controllers\SelisihKasController;
 use App\Http\Controllers\DataPenerimaanSelisihController;
 use App\Http\Controllers\PendapatanPenjamin1Controller;
+use App\Http\Controllers\PenerimaanLainSetorController;
 
 Route::post('auth/login_token', [AuthController::class, 'login']);
 Route::post('auth/logintoken', [AuthController::class, 'loginToken']);
@@ -160,22 +161,23 @@ Route::middleware([
 ])->group(function () {
     Route::get('penerimaan_lain', [PenerimaanLainController::class, 'index']);
     Route::get('penerimaan_lain/{id}', [PenerimaanLainController::class, 'show']);
-
+    Route::post('penerimaan_lain', [PenerimaanLainController::class, 'store']);
+    Route::put('penerimaan_lain/{id}', [PenerimaanLainController::class, 'update']);
+    Route::post('penerimaan_lain/validasi/penerimaan_lain', [PenerimaanLainController::class, 'updateValidasi']);
+    Route::post('penerimaan_lain/cancel_validasi/penerimaan_lain', [PenerimaanLainController::class, 'cancelValidasi']);
+    Route::delete('penerimaan_lain/{id}', [PenerimaanLainController::class, 'destroy']);
+    Route::get('penerimaan_lain/setor/{rc_id}', [PenerimaanLainSetorController::class, 'show']);
 });
+
 Route::get('penerimaan_lain/getdata', [PenerimaanLainController::class, 'getdata']);
 Route::get('penerimaan_lain/statistik', [PenerimaanLainController::class, 'statistik']);
 Route::get('penerimaan_lain/validasi/filter/{id}', [PenerimaanLainController::class, 'validasiFilter']);
 Route::get('penerimaan_lain/validasi/filteruraian/{id}', [PenerimaanLainController::class, 'validasiFilterUraian']);
 Route::get('penerimaan_lain/validasi/filterjumlah/{id}', [PenerimaanLainController::class, 'validasiFilterJumlah']);
 Route::get('penerimaan_lain/validasi/{id}', [PenerimaanLainController::class, 'validasi']);
-Route::post('penerimaan_lain', [PenerimaanLainController::class, 'store']);
 Route::post('penerimaan_lain/list', [PenerimaanLainController::class, 'list']);
 Route::post('penerimaan_lain/createdata', [PenerimaanLainController::class, 'createData']);
 Route::put('penerimaan_lain/editdata/{id}', [PenerimaanLainController::class, 'updateEditData']);
-Route::put('penerimaan_lain/validasi/penerimaan_lain', [PenerimaanLainController::class, 'updateValidasi']);
-Route::put('penerimaan_lain/cancel_validasi/penerimaan_lain', [PenerimaanLainController::class, 'cancelValidasi']);
-Route::put('penerimaan_lain/{id}', [PenerimaanLainController::class, 'update']);
-Route::delete('penerimaan_lain/{id}', [PenerimaanLainController::class, 'destroy']);
 
 Route::get('potensi_lain', [PotensiLainController::class, 'index']);
 Route::get('potensi_lain/statistik', [PotensiLainController::class, 'statistik']);

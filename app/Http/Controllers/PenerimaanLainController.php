@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\BillingKasir\ValidasiBillingKasir;
 use App\Http\Requests\PenerimaanLainRequest;
 use App\Http\Requests\ValidasiPenerimaanLainRequest;
 use App\Http\Requests\ValidasiCancelPenerimaanLainRequest;
@@ -507,7 +508,7 @@ class PenerimaanLainController extends Controller
                 'message' => 'Berhasil memperbarui data billing swa',
                 'data' => new PenerimaanLainResource($penerimaanLain),
             ], 200);
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -868,7 +869,7 @@ class PenerimaanLainController extends Controller
         $data = $request->validated();
         $penerimaanLainId = $data['id'];
         $rcId = $data['rc_id'];
-        $akunId = $data['akun_id'];
+        $akunId = $data['akun_id'] ?? '1010101';
 
         try {
             DB::transaction(function () use ($penerimaanLainId, $rcId, $akunId) {
@@ -888,15 +889,18 @@ class PenerimaanLainController extends Controller
                 $penerimaanLainTableName = (new DataPenerimaanLain())->getTable();
                 $rekeningKoranTableName = (new DataRekeningKoran())->getTable();
 
-                $klarifLainSubquery = DB::table($penerimaanLainTableName)
+                $klarifLayanan = DB::table($penerimaanLainTableName)
                     ->select(DB::raw('SUM(COALESCE(total,0) - COALESCE(admin_kredit,0) + COALESCE(selisih,0))'))
-                    ->where('rc_id', $rcId);
+                    ->where('rc_id', $rcId)
+                    ->value('sum');
+
+                Log::info("Klarif Layanan: " . $klarifLayanan);
 
                 DB::table($rekeningKoranTableName)
                     ->where('rc_id', $rcId)
                     ->update([
-                        'klarif_lain'   => DB::raw('(' . $klarifLainSubquery->toSql() . ')'),
-                        'akun_id'       => $akunId,
+                        'klarif_layanan' => $klarifLayanan,
+                        'akun_id'     => $akunId || '1010101',
                     ]);
             });
 
@@ -934,25 +938,26 @@ class PenerimaanLainController extends Controller
                     throw new \Exception('penerimaan lain tidak ditemukan atau status tidak valid.');
                 }
 
-                DataPenerimaanLain::where('id', $penerimaanLainId)
-                    ->update([
+                $penerimaanLain->update([
                         'rc_id'     => null,
                     ]);
 
-                $penerimaanLainTableName = (new DataPenerimaanLain())->getTable();
-                $rekeningKoranTableName = (new DataRekeningKoran())->getTable();
+                $modelTable = (new DataPenerimaanLain())->getTable();
+                $rekeningTable = (new DataRekeningKoran())->getTable();
 
-                $klarifLainSubquery = DB::table($penerimaanLainTableName)
-                    ->select(DB::raw('COALESCE(SUM(total - admin_kredit + selisih), 0)'))
-                    ->where('rc_id', $rcId);
+                $klarifLain = DB::table($modelTable)
+                    ->select(DB::raw('SUM(COALESCE(total,0) - COALESCE(admin_kredit,0) + COALESCE(selisih,0))'))
+                    ->where('rc_id', $rcId)
+                    ->value('sum');
 
-                DB::table($rekeningKoranTableName)
+                Log::info("Klarif Lain: " . $klarifLain);
+                $akun = DB::table($modelTable)->where('rc_id', $rcId)->value('akun_id');
+
+                DB::table($rekeningTable)
                     ->where('rc_id', $rcId)
                     ->update([
-                        'klarif_lain' => DB::raw('(' . $klarifLainSubquery->toSql() . ')'),
-                        'akun_id'        => DB::raw(
-                            "CASE WHEN (" . $klarifLainSubquery->toSql() . ") = 0 THEN NULL ELSE akun_id END"
-                        ),
+                        'klarif_lain' => $klarifLain,
+                        'akun_id'     => $akun,
                     ]);
             });
 
