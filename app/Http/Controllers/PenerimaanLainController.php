@@ -163,17 +163,17 @@ class PenerimaanLainController extends Controller
     public function show(string $id)
     {
         try {
-            if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $id)) {
-                return response()->json([
-                    'detail' => [
-                        [
-                            'loc' => ['path', 'id'],
-                            'msg' => 'ID must be a valid UUID format.',
-                            'type' => 'validation'
-                        ]
-                    ]
-                ], 422);
-            }
+            // if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $id)) {
+            //     return response()->json([
+            //         'detail' => [
+            //             [
+            //                 'loc' => ['path', 'id'],
+            //                 'msg' => 'ID must be a valid UUID format.',
+            //                 'type' => 'validation'
+            //             ]
+            //         ]
+            //     ], 422);
+            // }
 
             $penerimaanLain = DataPenerimaanLain::where('id', $id)->first();
 
