@@ -13,61 +13,49 @@ class PenerimaanLainRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation()
+    {
+        foreach(['tgl_bayar', 'tgl_dokumen'] as $key) {
+            if(request()->has($key) && request($key))
+            {
+                $date = normalize_date(request($key));
+
+                request()->merge([$key => $date]);
+            }
+        }
+    }
+
     public function rules(): array
     {
         return [
-            'no_dokumen' => 'required|string',
-            'tgl_dokumen' => 'required|date',
-            'akun_id' => 'required|string',
-            'pihak3' => 'nullable|string|max:255',
-            'pihak3_alamat' => 'nullable|string|max:255',
-            'pihak3_telp' => 'nullable|string|max:50',
-            'uraian' => 'nullable|string',
-            'tgl_bayar' => 'nullable|date',
-            'no_bayar' => 'nullable|string',
-            'sumber_transaksi' => 'nullable|string',
-            'transaksi_id' => 'nullable|string',
-            'metode_pembayaran' => 'nullable|string',
-            'total' => 'nullable|numeric',
-            'pendapatan' => 'nullable|numeric',
-            'pdd' => 'nullable|string',
-            'piutang' => 'nullable|string',
-            'cara_pembayaran' => 'nullable|string',
-            'bank_tujuan' => 'nullable|string',
-            'admin_kredit' => 'nullable|numeric',
-            'admin_debit' => 'nullable|numeric',
-            'kartubank' => 'nullable|string',
-            'no_kartubank' => 'nullable|string',
-            'rc_id' => 'nullable|integer',
-            'selisih' => 'nullable|numeric',
-            'jumlah_netto' => 'nullable|numeric',
-            'desc_piutang_pelayanan' => 'nullable|string',
-            'desc_piutang_lain' => 'nullable|string',
-            'piutang_id' => 'nullable|string',
-            'piutanglain_id' => 'nullable|string',
-            'akun_data' => 'nullable|array',
-            'akun_data.akun_id' => 'nullable|string',
-            'akun_data.akun_kode' => 'nullable|string',
-            'akun_data.akun_nama' => 'nullable|string',
-            'is_web_change' => 'nullable|boolean',
+            'admin_debit'           => 'nullable|numeric',          // 5
+            'admin_kredit'          => 'nullable|numeric',          // 4
+            'akun_id'               => 'required|numeric',          // 13
+            'bank_tujuan'           => 'required|string',           // 9
+            'cara_pembayaran'       => 'required|string',           // 8
+            'desc_piutang_pelayanan'=> 'nullable|string',           // new
+            'desc_piutang_lain'     => 'nullable|string',           // new
+            'jumlah_netto'          => 'required|numeric',          // 7
+            'no_bayar'              => 'required|string',           // 16
+            'no_dokumen'            => 'required|string',           // 1
+            'pdd'                   => 'nullable|numeric',          // 11
+            'pendapatan'            => 'nullable|numeric',          // 10
+            'pihak3'                => 'required|string',           // 17
+            'piutang'               => 'nullable|string',           // 12
+            'rek_id'                => 'required|numeric',          // 0
+            'selisih'               => 'nullable|numeric',          // 6
+            'tgl_bayar'             => 'required|date',             // 15
+            'tgl_dokumen'           => 'required|date',             // 2
+            'total'                 => 'required|numeric',          // 3
+            'uraian'                => 'nullable|string',           // 18
         ];
     }
 
-    public function messages(): array
+    public function attributes(): array
     {
-        return [];
-    }
-
-    protected function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(response()->json([
-            'detail' => collect($validator->errors())->map(function ($message, $field) {
-                return [
-                    'loc' => [$field, 0],
-                    'msg' => $message[0],
-                    'type' => 'validation_error'
-                ];
-            })->values()
-        ], 422));
+        return array_merge(config('attributes'), [
+            'total'     => 'Jumlah Bruto',
+            'pihak3'    => 'Pihak 3',
+        ]);
     }
 }

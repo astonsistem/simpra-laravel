@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\BillingKasir\ValidasiBillingKasir;
 use App\Http\Requests\PenerimaanLainRequest;
 use App\Http\Requests\ValidasiPenerimaanLainRequest;
 use App\Http\Requests\ValidasiCancelPenerimaanLainRequest;
@@ -13,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class PenerimaanLainController extends Controller
 {
@@ -62,11 +64,14 @@ class PenerimaanLainController extends Controller
             $jumlahNetto = $request->input('jumlahNetto');
 
             $query = DataPenerimaanLain::query();
-            $query->whereIn('sumber_transaksi', function ($sub) {
-                $sub->select('sumber_id')
-                    ->from('master_sumbertransaksi')
-                    ->where('sumber_jenis', 'Lainnya');
-            });
+
+            if( config('app.env') == 'production' ) {
+                $query->whereIn('sumber_transaksi', function ($sub) {
+                    $sub->select('sumber_id')
+                        ->from('master_sumbertransaksi')
+                        ->where('sumber_jenis', 'Lainnya');
+                });
+            }
 
             if (!empty($tahunPeriode)) {
                 $query->whereYear('tgl_bayar', (int)$tahunPeriode);
@@ -77,8 +82,8 @@ class PenerimaanLainController extends Controller
                 $query->whereBetween('tgl_bayar', [$startDate, $endDate]);
             }
             if (!empty($tglAwal) && !empty($tglAkhir) && $periode === "BULANAN") {
-                $startMonth = Carbon::parse($tglAwal)->format('m');
-                $endMonth = Carbon::parse($tglAkhir)->format('m');
+                $startMonth = Carbon::parse($tglAwal)->startOfMonth();
+                $endMonth = Carbon::parse($tglAkhir)->endOfMonth();
                 $query->whereBetween('tgl_bayar', [$startMonth, $endMonth]);
             }
             if (!empty($noBayar)) {
@@ -99,9 +104,9 @@ class PenerimaanLainController extends Controller
             if (!empty($tglDokumen)) {
                 $query->where('tgl_dokumen', $tglDokumen);
             }
-            if (!empty($sumberTransaksi)) {
-                $query->where('sumber_transaksi', $sumberTransaksi);
-            }
+            // if (!empty($sumberTransaksi)) {
+            //     $query->where('sumber_transaksi', $sumberTransaksi);
+            // }
             if (!empty($instalasi)) {
                 $query->where('instalasi_nama', 'ILIKE', "%$instalasi%");
             }
@@ -170,17 +175,18 @@ class PenerimaanLainController extends Controller
                 ], 422);
             }
 
-            $penerimaanLain = DataPenerimaanLain::with('masterAkun')->where('akun_id', $akunId)->first();
+            $penerimaanLain = DataPenerimaanLain::where('id', $id)->first();
 
             if (!$penerimaanLain) {
                 return response()->json([
                     'message' => 'Not found.'
                 ], 404);
             }
-            return response()->json(
-                new PenerimaanLainResource($penerimaanLain)
-            );
+            $penerimaanLain->load('masterAkun');
+            return new PenerimaanLainResource($penerimaanLain);
+
         } catch (\Exception $e) {
+            Log::error('Error in PenerimaanLainController@show: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Terjadi kesalahan pada server.',
                 'error' => $e->getMessage()
@@ -484,13 +490,16 @@ class PenerimaanLainController extends Controller
     public function update(PenerimaanLainRequest $request, string $id)
     {
         try {
-            $data = $request->validated();
+            $penerimaanLain = DataPenerimaanLain::where('id', $id)->first();
 
-            unset($data['akun_data']);
+            if (!$penerimaanLain) {
+                throw new \Exception("Data dengan id $id tidak ditemukan.", 404);
+            }
+
+            $data = $request->validated();
 
             DB::beginTransaction();
 
-            $penerimaanLain = DataPenerimaanLain::firstOrFail($id);
             $penerimaanLain->update($data);
 
             DB::commit();
@@ -499,6 +508,7 @@ class PenerimaanLainController extends Controller
                 'message' => 'Berhasil memperbarui data billing swa',
                 'data' => new PenerimaanLainResource($penerimaanLain),
             ], 200);
+
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -859,7 +869,7 @@ class PenerimaanLainController extends Controller
         $data = $request->validated();
         $penerimaanLainId = $data['id'];
         $rcId = $data['rc_id'];
-        $akunId = $data['akun_id'];
+        $akunId = $data['akun_id'] ?? '1010101';
 
         try {
             DB::transaction(function () use ($penerimaanLainId, $rcId, $akunId) {
@@ -879,15 +889,18 @@ class PenerimaanLainController extends Controller
                 $penerimaanLainTableName = (new DataPenerimaanLain())->getTable();
                 $rekeningKoranTableName = (new DataRekeningKoran())->getTable();
 
-                $klarifLainSubquery = DB::table($penerimaanLainTableName)
+                $klarifLayanan = DB::table($penerimaanLainTableName)
                     ->select(DB::raw('SUM(COALESCE(total,0) - COALESCE(admin_kredit,0) + COALESCE(selisih,0))'))
-                    ->where('rc_id', $rcId);
+                    ->where('rc_id', $rcId)
+                    ->value('sum');
+
+                Log::info("Klarif Layanan: " . $klarifLayanan);
 
                 DB::table($rekeningKoranTableName)
                     ->where('rc_id', $rcId)
                     ->update([
-                        'klarif_lain'   => DB::raw('(' . $klarifLainSubquery->toSql() . ')'),
-                        'akun_id'       => $akunId,
+                        'klarif_layanan' => $klarifLayanan,
+                        'akun_id'     => $akunId || '1010101',
                     ]);
             });
 
@@ -925,25 +938,26 @@ class PenerimaanLainController extends Controller
                     throw new \Exception('penerimaan lain tidak ditemukan atau status tidak valid.');
                 }
 
-                DataPenerimaanLain::where('id', $penerimaanLainId)
-                    ->update([
+                $penerimaanLain->update([
                         'rc_id'     => null,
                     ]);
 
-                $penerimaanLainTableName = (new DataPenerimaanLain())->getTable();
-                $rekeningKoranTableName = (new DataRekeningKoran())->getTable();
+                $modelTable = (new DataPenerimaanLain())->getTable();
+                $rekeningTable = (new DataRekeningKoran())->getTable();
 
-                $klarifLainSubquery = DB::table($penerimaanLainTableName)
-                    ->select(DB::raw('COALESCE(SUM(total - admin_kredit + selisih), 0)'))
-                    ->where('rc_id', $rcId);
+                $klarifLain = DB::table($modelTable)
+                    ->select(DB::raw('SUM(COALESCE(total,0) - COALESCE(admin_kredit,0) + COALESCE(selisih,0))'))
+                    ->where('rc_id', $rcId)
+                    ->value('sum');
 
-                DB::table($rekeningKoranTableName)
+                Log::info("Klarif Lain: " . $klarifLain);
+                $akun = DB::table($modelTable)->where('rc_id', $rcId)->value('akun_id');
+
+                DB::table($rekeningTable)
                     ->where('rc_id', $rcId)
                     ->update([
-                        'klarif_lain' => DB::raw('(' . $klarifLainSubquery->toSql() . ')'),
-                        'akun_id'        => DB::raw(
-                            "CASE WHEN (" . $klarifLainSubquery->toSql() . ") = 0 THEN NULL ELSE akun_id END"
-                        ),
+                        'klarif_lain' => $klarifLain,
+                        'akun_id'     => $akun,
                     ]);
             });
 
