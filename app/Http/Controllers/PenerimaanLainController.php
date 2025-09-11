@@ -65,13 +65,11 @@ class PenerimaanLainController extends Controller
 
             $query = DataPenerimaanLain::query();
 
-            if( config('app.env') == 'production' ) {
-                $query->whereIn('sumber_transaksi', function ($sub) {
-                    $sub->select('sumber_id')
-                        ->from('master_sumbertransaksi')
-                        ->where('sumber_jenis', 'Lainnya');
-                });
-            }
+            $query->whereIn('sumber_transaksi', function ($sub) {
+                $sub->select('sumber_id')
+                    ->from('master_sumbertransaksi')
+                    ->where('sumber_jenis', 'Lainnya');
+            });
 
             if (!empty($tahunPeriode)) {
                 $query->whereYear('tgl_bayar', (int)$tahunPeriode);
