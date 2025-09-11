@@ -224,4 +224,49 @@ class AuthController extends Controller
     }
 
     public function adminonly() {}
+
+    public function getProfile()
+    {
+        $user = auth()->user();
+        
+        return response()->json([
+            'status' => 200,
+            'message' => 'Berhasil mengambil data profil',
+            'data' => [
+                'id' => $user->id,
+                'nama' => $user->nama,
+                'email' => $user->email,
+                'username' => $user->username,
+                'role' => $user->role,
+                'nip' => $user->nip,
+                'no_telp' => $user->no_telp,
+                'jabatan' => $user->jabatan,
+            ]
+        ], 200);
+    }
+
+    public function changePassword(\App\Http\Requests\ChangePasswordRequest $request)
+    {
+        $user = auth()->user();
+        $data = $request->validated();
+
+        // Cek apakah password saat ini sesuai
+        if (!\Illuminate\Support\Facades\Hash::check($data['current_password'], $user->hashed_password)) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Password saat ini tidak sesuai',
+                'data' => null
+            ], 400);
+        }
+
+        // Update password
+        $user->hashed_password = \Illuminate\Support\Facades\Hash::make($data['new_password']);
+        $user->save();
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Berhasil mengganti password',
+            'data' => null
+        ], 200);
+    }
 }
