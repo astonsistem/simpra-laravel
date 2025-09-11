@@ -53,6 +53,9 @@ Route::middleware([
     Route::post('auth/refresh', [AuthController::class, 'refresh']);
     Route::put('auth/user/{id}', [AuthController::class, 'update']);
     Route::delete('auth/user/{id}', [AuthController::class, 'destroy']);
+    // Profile routes
+    Route::get('auth/profile', [AuthController::class, 'getProfile']);
+    Route::put('auth/profile/change-password', [AuthController::class, 'changePassword']);
 });
 
 Route::get('akun', [AkunController::class, 'index']);
