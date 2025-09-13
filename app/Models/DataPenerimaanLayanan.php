@@ -68,7 +68,8 @@ class DataPenerimaanLayanan extends Model
     ];
 
     protected $appends = [
-        'tervalidasi'
+        'tervalidasi',
+        'total_jumlah_netto',
     ];
 
     protected $casts = [
@@ -86,6 +87,14 @@ class DataPenerimaanLayanan extends Model
             get: fn () => $this->rc_id !== null || $this->rc_id !== ''
         );
     }
+
+    protected function totalJumlahNetto(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => ($this->total ?? 0) - ($this->admin_kredit ?? 0) - ($this->admin_debit ?? 0) + ($this->selisih ?? 0)
+        );
+    }
+
 
     public static function sumTotal(): float
     {

@@ -33,7 +33,7 @@ class PenerimaanLainResource extends JsonResource
             'tgl_dokumen'               => $this->tgl_dokumen ? date('d/m/Y', strtotime($this->tgl_dokumen)) : null,
             'total'                     => $this->total,
             'uraian'                    => $this->uraian,
-
+            'total_jumlah_netto'        => (int) $this->jumlah_netto > 0 ? $this->jumlah_netto : $this->total_jumlah_netto,
         ];
     }
 }
