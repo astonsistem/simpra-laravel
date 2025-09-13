@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -56,6 +57,10 @@ class DataPenerimaanLain extends Model
         'id' => 'string',
     ];
 
+    protected $appends = [
+        'total_jumlah_netto'
+    ];
+
     protected static function boot()
     {
         parent::boot();
@@ -74,6 +79,13 @@ class DataPenerimaanLain extends Model
     public function rekeningDpa(): BelongsTo
     {
         return $this->belongsTo(MasterRekeningView::class, 'rek_id', 'rek_id');
+    }
+
+    protected function totalJumlahNetto(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => ($this->total ?? 0) - ($this->admin_kredit ?? 0) - ($this->admin_debit ?? 0) + ($this->selisih ?? 0)
+        );
     }
 
     public static function sumTotal(?string $type = null, ?string $month = null, ?string $sumberTransaksi = null): int

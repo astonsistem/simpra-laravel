@@ -51,6 +51,7 @@ class BillingKasirFormResource extends JsonResource
             'rek_id'                => (string) $this->rek_id,
             //
             'tervalidasi'           => (bool) $this->tervalidasi,
+            'total_jumlah_netto'    => (int) $this->jumlah_netto > 0 ? $this->jumlah_netto :  $this->total_jumlah_netto,
         ];
     }
 }
