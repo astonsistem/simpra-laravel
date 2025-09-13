@@ -21,7 +21,7 @@ class BillingKasirFormResource extends JsonResource
             'total'                 => $this->total,
             'admin_kredit'          => $this->admin_kredit,
             'admin_debit'           => $this->admin_debit,
-            'selisih'               => $this->selisih,
+            'selisih'               => $this->selisih ?? 0,
             'jumlah_netto'          => $this->jumlah_netto,
             'cara_pembayaran'       => $this->cara_pembayaran,
             'bank_tujuan'           => $this->bank_tujuan,

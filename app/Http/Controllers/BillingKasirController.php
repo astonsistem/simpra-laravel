@@ -121,7 +121,8 @@ class BillingKasirController extends Controller
                 $query->where('jumlah_netto', 'LIKE', "%$jumlahNetto%");
             }
 
-            $query->with('rekeningKoran')->orderBy('tgl_buktibayar', 'desc')->orderBy('no_buktibayar', 'desc');
+            $query->with('rekeningKoran');
+            // $query->orderBy('tgl_buktibayar', 'desc')->orderBy('no_buktibayar', 'desc');
 
             return BillingKasirResource::collection(
                 $query->paginate($size)
