@@ -44,6 +44,7 @@ class BillingKasirController extends Controller
                 'rekeningDpa' => 'nullable|string',
                 'bank' => 'nullable|string',
                 'jumlahBruto' => 'nullable|string',
+                'validated' => 'nullable|in:0,1',
             ]);
 
             $page = $request->input('page', 1) ?? 1;
@@ -65,6 +66,7 @@ class BillingKasirController extends Controller
             $rekeningDpa = $request->input('rekeningDpa');
             $bank = $request->input('bank');
             $jumlahNetto = $request->input('jumlahNetto');
+            $validated = $request->input('validated');
 
             $query = DataPenerimaanLayanan::query();
 
@@ -119,6 +121,16 @@ class BillingKasirController extends Controller
             }
             if (!empty($jumlahNetto)) {
                 $query->where('jumlah_netto', 'LIKE', "%$jumlahNetto%");
+            }
+
+            if($request->has('validated')) {
+                $query->where(function($query) use ($validated) {
+                    if($validated == '1') {
+                        $query->whereNotNull('rc_id')->where('rc_id', '>', 0);
+                    } elseif($validated == '0') {
+                        $query->whereNull('rc_id');
+                    }
+                });
             }
 
             $query->with('rekeningKoran');
