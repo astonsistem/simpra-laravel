@@ -134,7 +134,7 @@ class BillingKasirController extends Controller
             });
             if($request->has('validated')) {
                 $query->where(function($query) use ($params) {
-                    $validated = $params['valudated'] ?? null;
+                    $validated = $params['validated'] ?? null;
                     if($validated == '1') {
                         $query->whereNotNull('rc_id')->where('rc_id', '>', 0);
                     } elseif($validated == '0') {

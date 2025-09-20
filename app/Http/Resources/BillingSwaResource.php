@@ -19,7 +19,7 @@ class BillingSwaResource extends JsonResource
             'uraian' => (string) $this->uraian,
             'noDokumen' => (string) $this->no_dokumen,
             'tglDokumen' => $this->tgl_dokumen ? date('d/m/Y', strtotime($this->tgl_dokumen)) : null,
-            'sumberTransaksi' => (string) $this->sumber_transaksi,
+            'sumberTransaksi' => $this->sumber ? $this->sumber->sumber_nama : '',
             'metodeBayar' => (string) $this->metode_pembayaran,
             'caraPembayaran' => (string) $this->cara_pembayaran,
             'jumlahBruto' => (string) $this->total,
