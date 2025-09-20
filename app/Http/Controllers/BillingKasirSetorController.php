@@ -27,7 +27,9 @@ class BillingKasirSetorController extends Controller
 
             $billingKasirItems = DataPenerimaanLayanan::where('rc_id', $rcId)->get();
             $dataPenerimaanSelisih = DataPenerimaanSelisih::where('rc_id', $rcId)->get();
-            $dataPenerimaanLain = DataPenerimaanLain::where('rc_id', $rcId)->get();
+            $dataPenerimaanLain = DataPenerimaanLain::where('rc_id', $rcId)
+                ->with('sumber')
+                ->get();
 
             return response()->json([
                 'status' => 200,

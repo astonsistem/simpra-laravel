@@ -29,11 +29,17 @@ class PenerimaanLainResource extends JsonResource
             'rek_id'                    => $this->rek_id,
             'selisih'                   => $this->selisih,
             'sumber_transaksi'          => $this->sumber_transaksi,
+            'sumber'                    => !empty($this->sumber) ? [
+                                            'sumber_id' => $this->sumber->sumber_id,
+                                            'sumber_nama' => $this->sumber->sumber_nama,
+                                            'sumber_jenis' => $this->sumber->sumber_jenis,
+                                        ] : null,
             'tgl_bayar'                 => $this->tgl_bayar ? date('d/m/Y', strtotime($this->tgl_bayar)) : null,
             'tgl_dokumen'               => $this->tgl_dokumen ? date('d/m/Y', strtotime($this->tgl_dokumen)) : null,
             'total'                     => $this->total,
             'uraian'                    => $this->uraian,
             'total_jumlah_netto'        => (int) $this->jumlah_netto > 0 ? $this->jumlah_netto : $this->total_jumlah_netto,
+            // relasi
         ];
     }
 }
