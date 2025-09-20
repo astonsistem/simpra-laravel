@@ -81,6 +81,11 @@ class DataPenerimaanLain extends Model
         return $this->belongsTo(MasterRekeningView::class, 'rek_id', 'rek_id');
     }
 
+    public function sumber(): BelongsTo
+    {
+        return $this->belongsTo(MasterSumberTransaksi::class, 'sumber_transaksi', 'sumber_id');
+    }
+
     protected function totalJumlahNetto(): Attribute
     {
         return Attribute::make(

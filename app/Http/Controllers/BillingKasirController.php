@@ -24,7 +24,7 @@ class BillingKasirController extends Controller
     public function index(Request $request)
     {
         try {
-            $request->validate([
+            $params = $request->validate([
                 'page' => 'nullable|integer|min:1',
                 'size' => 'nullable|integer|min:1',
                 'tahunPeriode' => 'nullable|string',
@@ -44,6 +44,8 @@ class BillingKasirController extends Controller
                 'rekeningDpa' => 'nullable|string',
                 'bank' => 'nullable|string',
                 'jumlahBruto' => 'nullable|string',
+                'validated' => 'nullable|in:0,1',
+                'noClosingKasir' => 'nullable|string',
             ]);
 
             $page = $request->input('page', 1) ?? 1;
@@ -62,7 +64,6 @@ class BillingKasirController extends Controller
             $instalasi = $request->input('instalasi');
             $metodeBayar = $request->input('metodeBayar');
             $caraBayar = $request->input('caraBayar');
-            $rekeningDpa = $request->input('rekeningDpa');
             $bank = $request->input('bank');
             $jumlahNetto = $request->input('jumlahNetto');
 
@@ -121,8 +122,29 @@ class BillingKasirController extends Controller
                 $query->where('jumlah_netto', 'LIKE', "%$jumlahNetto%");
             }
 
-            $query->with('rekeningKoran');
-            // $query->orderBy('tgl_buktibayar', 'desc')->orderBy('no_buktibayar', 'desc');
+            $query->when(!empty($params['noClosingKasir']), function ($q) use ($params) {
+                $q->where('no_closingkasir', 'ILIKE', '%' . $params['noClosingKasir'] . '%');
+            });
+
+            $query->when(!empty($params['rekeningDpa']), function ($q) use ($params) {
+                $q->whereHas('rekeningDpa', function ($q) use ($params) {
+                    $q->where('rek_nama', 'ILIKE', '%' . $params['rekeningDpa'] . '%')
+                      ->orWhere('rek_id', $params['rekeningDpa']);
+                });
+            });
+            if($request->has('validated')) {
+                $query->where(function($query) use ($params) {
+                    $validated = $params['validated'] ?? null;
+                    if($validated == '1') {
+                        $query->whereNotNull('rc_id')->where('rc_id', '>', 0);
+                    } elseif($validated == '0') {
+                        $query->whereNull('rc_id');
+                    }
+                });
+            }
+
+            $query->with('rekeningKoran', 'rekeningDpa');
+            $query->orderBy('tgl_buktibayar', 'desc')->orderBy('no_buktibayar', 'desc');
 
             return BillingKasirResource::collection(
                 $query->paginate($size)

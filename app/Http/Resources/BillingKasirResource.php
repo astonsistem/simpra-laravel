@@ -39,7 +39,10 @@ class BillingKasirResource extends JsonResource
             'noClosingKasir' => (string) $this->no_closingkasir,
             'tglClosingKasir' => (string) date('d/m/Y', strtotime($this->tgl_closingkasir)),
             'klasifikasi' => (string) $this->klasifikasi,
-            'rekeningDpa' => $this->rekeningKoran?->no_rc,
+            'rekeningDpa' => $this->rekeningDpa ? [
+                'rekId' => (string) $this->rekeningDpa->rek_id,
+                'rekNama' => (string) $this->rekeningDpa->rek_nama,
+            ] : null,
         ];
     }
 }

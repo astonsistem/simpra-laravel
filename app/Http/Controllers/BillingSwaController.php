@@ -21,7 +21,7 @@ class BillingSwaController extends Controller
     public function index(Request $request)
     {
         try {
-            $request->validate([
+            $params = $request->validate([
                 'page' => 'nullable|integer|min:1',
                 'size' => 'nullable|integer|min:1',
                 'tahunPeriode' => 'nullable|string',
@@ -40,7 +40,9 @@ class BillingSwaController extends Controller
                 'caraBayar' => 'nullable|string',
                 'rekeningDpa' => 'nullable|string',
                 'bank' => 'nullable|string',
-                'jumlahBruto' => 'nullable|string',
+                'jumlahBrutoMin' => 'nullable|numeric',
+                'jumlahBrutoMax' => 'nullable|numeric',
+                'validated' => 'nullable|in:0,1',
             ]);
 
             $page = $request->input('page', 1) ?? 1;
@@ -113,14 +115,50 @@ class BillingSwaController extends Controller
             if (!empty($caraBayar)) {
                 $query->where('cara_pembayaran', 'ILIKE', "%$caraBayar%");
             }
-            if (!empty($rekeningDpa)) {
-                $query->where('rek_dpa', 'ILIKE', "%$rekeningDpa%");
-            }
             if (!empty($bank)) {
                 $query->where('bank_tujuan', 'ILIKE', "%$bank%");
             }
             if (!empty($jumlahNetto)) {
                 $query->where('jumlah_netto', 'LIKE', "%$jumlahNetto%");
+            }
+
+            $query->when(!empty($params['rekeningDpa']), function ($q) use ($params) {
+                $q->whereHas('rekeningDpa', function ($q) use ($params) {
+                    $q->where('rek_nama', 'ILIKE', '%' . $params['rekeningDpa'] . '%')
+                      ->orWhere('rek_id', $params['rekeningDpa']);
+                });
+            });
+
+            $query->when(!empty($params['jumlahBrutoMin']), function ($q) use ($params) {
+                $operator = empty($params['jumlahBrutoMax']) ? '=' : '>=';
+                $q->where('total', $operator, $params['jumlahBrutoMin']);
+            });
+
+            $query->when(!empty($params['jumlahBrutoMax']), function ($q) use ($params) {
+                $operator = empty($params['jumlahBrutoMin']) ? '=' : '<=';
+                $q->where('total', $operator, $params['jumlahBrutoMax']);
+            });
+
+            // Filter Netto
+            $query->when(!empty($params['jumlahNettoMin']), function ($q) use ($params) {
+                $operator = empty($params['jumlahNettoMax']) ? '=' : '>=';
+                $q->where('jumlah_netto', $operator, $params['jumlahNettoMin']);
+            });
+
+            $query->when(!empty($params['jumlahNettoMax']), function ($q) use ($params) {
+                $operator = empty($params['jumlahNettoMin']) ? '=' : '<=';
+                $q->where('jumlah_netto', $operator, $params['jumlahNettoMax']);
+            });
+
+            if($request->has('validated')) {
+                $query->where(function($query) use ($params) {
+                    $validated = $params['validated'] ?? null;
+                    if($validated == '1') {
+                        $query->whereNotNull('rc_id')->where('rc_id', '>', 0);
+                    } elseif($validated == '0') {
+                        $query->whereNull('rc_id');
+                    }
+                });
             }
 
             $query->orderBy('tgl_bayar', 'desc')->orderBy('no_bayar', 'desc')->with('masterAkun');
