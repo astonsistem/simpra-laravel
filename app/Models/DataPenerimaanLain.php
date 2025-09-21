@@ -58,7 +58,8 @@ class DataPenerimaanLain extends Model
     ];
 
     protected $appends = [
-        'total_jumlah_netto'
+        'total_jumlah_netto',
+        'is_valid',
     ];
 
     protected static function boot()
@@ -90,6 +91,13 @@ class DataPenerimaanLain extends Model
     {
         return Attribute::make(
             get: fn () => ($this->total ?? 0) - ($this->admin_kredit ?? 0) - ($this->admin_debit ?? 0) + ($this->selisih ?? 0)
+        );
+    }
+
+    protected function isValid(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => !empty($this->rc_id)
         );
     }
 
