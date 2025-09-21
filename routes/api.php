@@ -134,7 +134,6 @@ Route::middleware([
 
 Route::middleware([
     'middleware' => 'api',
-    'prefix' => 'auth'
 ])->group(function () {
     Route::get('billing_swa', [BillingSwaController::class, 'index']);
     Route::get('billing_swa/statistik', [BillingSwaController::class, 'statistik']);
@@ -155,11 +154,9 @@ Route::get('potensi_pelayanan/getdata', [PotensiPelayananController::class, 'get
 Route::get('potensi_pelayanan/statistik', [PotensiPelayananController::class, 'statistik']);
 Route::get('potensi_pelayanan/{id}', [PotensiPelayananController::class, 'index']);
 
-Route::middleware([
-    'middleware' => 'api',
-    'prefix' => 'auth'
-])->group(function () {
+Route::middleware(['api', 'auth'])->group(function () {
     Route::get('penerimaan_lain', [PenerimaanLainController::class, 'index']);
+    Route::get('penerimaan_lain/create', [PenerimaanLainController::class, 'create']);
     Route::get('penerimaan_lain/{id}', [PenerimaanLainController::class, 'show']);
     Route::post('penerimaan_lain', [PenerimaanLainController::class, 'store']);
     Route::put('penerimaan_lain/{id}', [PenerimaanLainController::class, 'update']);
