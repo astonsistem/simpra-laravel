@@ -46,7 +46,9 @@ class AuthController extends Controller
     public function loginToken(LoginUserRequest $request)
     {
         $credentials = $request->validated();
-        if (!$token = JWTAuth::attempt($credentials)) {
+
+        if (!$token = JWTAuth::attempt($credentials))
+        {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
@@ -67,7 +69,12 @@ class AuthController extends Controller
 
     public function refresh()
     {
-        return $this->respondWithToken(auth()->refresh());
+         try {
+            $newToken = JWTAuth::parseToken()->refresh();
+            return $this->respondWithToken($newToken);
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'could_not_refresh_token'], 401);
+        }
     }
 
     protected function respondWithToken($token)
