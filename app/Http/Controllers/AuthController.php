@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -73,6 +74,7 @@ class AuthController extends Controller
             $newToken = JWTAuth::parseToken()->refresh();
             return $this->respondWithToken($newToken);
         } catch (JWTException $e) {
+            Log::error('Error refreshing token: ' . $e->getMessage());
             return response()->json(['error' => 'could_not_refresh_token'], 401);
         }
     }
