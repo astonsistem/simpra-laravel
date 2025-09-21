@@ -5,9 +5,9 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
-class PotensiLayananCollection extends ResourceCollection
+class BuktiSetorCollection extends ResourceCollection
 {
-    public $collects = PotensiLayananResource::class;
+    public $collects = BuktiSetorResource::class;
 
     protected $total;
     protected $page;

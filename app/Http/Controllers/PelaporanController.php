@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\MasterPelaporanResource;
 use App\Models\MasterPelaporan;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
@@ -18,8 +19,8 @@ class PelaporanController extends Controller
     public function show(string $slug)
     {
         try {
-            $nama_laporan = ucwords(str_replace('_', ' ', $slug));
-            $laporan = MasterPelaporan::where('nama_laporan', $nama_laporan)->firstOrFail();
+            $namaLaporan = ucwords(str_replace('_', ' ', $slug));
+            $laporan = MasterPelaporan::where('nama_laporan', 'ILIKE', "%$namaLaporan%")->firstOrFail();
             $laporan->params = $laporan->resolved_params;
             return new MasterPelaporanResource($laporan);
         } catch (\Exception $e) {
@@ -110,9 +111,11 @@ class PelaporanController extends Controller
             if ($fileType == 'pdf') {
                 // Page setting
                 $pageSetting = json_decode($laporan->page_setting);
+                // Get Kabag info
+                $kabagInfo = json_decode(Setting::where('key', 'kabag_info')->first()->value);
                 // Store exported pdf to spesific path
                 PDF::loadView("{$laporanSlug}-pdf", [
-                        'laporan' => $laporan, 'laporanData' => $laporanData, 'laporanTitle' => $laporanTitle, 'laporan_width' => 0
+                        'laporan' => $laporan, 'laporanData' => $laporanData, 'laporanTitle' => $laporanTitle, 'laporan_width' => 0, 'kabagInfo' => $kabagInfo
                     ])
                     ->setOption('dpi', $pageSetting->dpi)
                     ->setPaper($pageSetting->page, $pageSetting->orientation)
@@ -120,7 +123,7 @@ class PelaporanController extends Controller
             }else {
             // If tipe file pelaporan is excel
                 // Store exported excel to spesific path
-                Excel::store(new LaporanExport("{$laporanSlug}-excel", $laporanTitle, $laporanData), $fileName, 'exports');
+                Excel::store(new PelaporanExport("{$laporanSlug}-excel", $laporanTitle, $laporanData), $fileName, 'exports');
             }
 
             // Add count to download_count
