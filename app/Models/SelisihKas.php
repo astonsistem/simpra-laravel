@@ -10,9 +10,14 @@ class SelisihKas extends Model
 
     protected $fillable = [
         'tgl_setor',
-        'tgl_bukti',
-        'tandabuktibayar_id',
+        'tgl_buktibayar',
         'no_buktibayar',
+        'penyetor',
+        'rek_id',
+        'jenis',
+        'jumlah',
+
+        'tandabuktibayar_id',
         'cara_pembayaran',
         'bank_tujuan',
         'kartubank',
@@ -21,9 +26,8 @@ class SelisihKas extends Model
         'kasir_nama',
         'loket_id',
         'loket_nama',
-        'nilai',
         'klasifikasi',
-        'jumlah',
+        'nilai',
         'admin_kredit',
         'admin_debit',
         'selisih',
@@ -31,10 +35,7 @@ class SelisihKas extends Model
         'rc_id',
         'bku_id',
         'akun_id',
-        'rek_id',
-        'jenis',
+        'sumber_id',
         'sumber_transaksi',
-        'penyetor',
-        'sumber_id'
     ];
 }
