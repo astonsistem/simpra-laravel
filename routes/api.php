@@ -36,9 +36,7 @@ use App\Http\Controllers\SumberTransaksiController;
 use App\Http\Controllers\SelisihKasController;
 use App\Http\Controllers\DataPenerimaanSelisihController;
 use App\Http\Controllers\PendapatanPenjamin1Controller;
-
 use App\Http\Controllers\RincianPotensiPelayananController;
-=======
 use App\Http\Controllers\PenerimaanLainSetorController;
 
 Route::post('auth/login_token', [AuthController::class, 'login']);
@@ -186,7 +184,6 @@ Route::middleware([
 
 
 Route::get('penerimaan_lain', [PenerimaanLainController::class, 'index']);
-=======
 Route::get('potensi_pelayanan', [PotensiPelayananController::class, 'index']);
 Route::get('potensi_pelayanan/getdata', [PotensiPelayananController::class, 'getdata']);
 Route::get('potensi_pelayanan/statistik', [PotensiPelayananController::class, 'statistik']);
