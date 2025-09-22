@@ -11,7 +11,6 @@ class RincianPotensiPelayanan extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'rincian_id',
         'piutang_id',
         'pendaftaran_id',
         'total_tagihan',
@@ -19,6 +18,14 @@ class RincianPotensiPelayanan extends Model
         'total_verif',
         'total_bayar',
         'jenis',
-        'is_web_change'
+        'bulan',
+        'tahun',
+        'penjamin_id',
+        'sumber',
+        'is_web_change',
+        'sep',
+        'norm',
+        'nama',
+        'tgl_mrs',
     ];
 }

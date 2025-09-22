@@ -36,6 +36,9 @@ use App\Http\Controllers\SumberTransaksiController;
 use App\Http\Controllers\SelisihKasController;
 use App\Http\Controllers\DataPenerimaanSelisihController;
 use App\Http\Controllers\PendapatanPenjamin1Controller;
+
+use App\Http\Controllers\RincianPotensiPelayananController;
+=======
 use App\Http\Controllers\PenerimaanLainSetorController;
 
 Route::post('auth/login_token', [AuthController::class, 'login']);
@@ -104,17 +107,47 @@ Route::post('sinkronisasi/request/kasir/{kasirId}', [SinkronisasiController::cla
 Route::get('pendapatan_pelayanan', [PendapatanPelayananController::class, 'index']);
 Route::get('pendapatan_pelayanan/statistik', [PendapatanPelayananController::class, 'statistik']);
 Route::get('pendapatan_pelayanan/validasi/{id}', [PendapatanPelayananController::class, 'validasi']);
+Route::get('pendapatan_pelayanan/cancel_validasi/{id}', [PendapatanPelayananController::class, 'cancelValidasi']);
 Route::get('pendapatan_pelayanan/tarik/{id}', [PendapatanPelayananController::class, 'tarik']);
-Route::get('pendapatan_pelayanan/sinkron_fase1/{id}', [PendapatanPelayananController::class, 'sinkron_fase1']);
-Route::get('pendapatan_pelayanan/sinkron_fase2/{id}', [PendapatanPelayananController::class, 'sinkron_fase2']);
+Route::get('pendapatan_pelayanan/sinkron_fase1/{id}', [PendapatanPelayananController::class, 'sinkronFase1']);
+Route::get('pendapatan_pelayanan/sinkron_fase2/{id}', [PendapatanPelayananController::class, 'sinkronFase2']);
 Route::get('pendapatan_pelayanan/{id}', [PendapatanPelayananController::class, 'show']);
 Route::put('pendapatan_pelayanan/{id}', [PendapatanPelayananController::class, 'update']);
 
 Route::get('pendapatan_penjamin1', [PendapatanPenjamin1Controller::class, 'index']);
 Route::post('pendapatan_penjamin1', [PendapatanPenjamin1Controller::class, 'store']);
+Route::get('pendapatan_penjamin1/sinkron/{id}', [PendapatanPenjamin1Controller::class, 'sinkron']);
 Route::get('pendapatan_penjamin1/{id}', [PendapatanPenjamin1Controller::class, 'show']);
 Route::put('pendapatan_penjamin1/{id}', [PendapatanPenjamin1Controller::class, 'update']);
 Route::delete('pendapatan_penjamin1/{id}', [PendapatanPenjamin1Controller::class, 'destroy']);
+
+Route::get('potensi_pelayanan', [PotensiPelayananController::class, 'index']);
+Route::get('potensi_pelayanan/update_tp/{id}', [PotensiPelayananController::class, 'updateTP']);
+Route::get('potensi_pelayanan/{id}', [PotensiPelayananController::class, 'show']);
+Route::post('potensi_pelayanan', [PotensiPelayananController::class, 'store']);
+Route::post('potensi_pelayanan/tarik', [PotensiPelayananController::class, 'tarik']);
+Route::post('potensi_pelayanan/terima', [PotensiPelayananController::class, 'terima']);
+Route::put('potensi_pelayanan/{id}', [PotensiPelayananController::class, 'update']);
+Route::delete('potensi_pelayanan/{id}', [PotensiPelayananController::class, 'destroy']);
+
+Route::get('rincian_potensi_pelayanan', [RincianPotensiPelayananController::class, 'index']);
+Route::post('rincian_potensi_pelayanan', [RincianPotensiPelayananController::class, 'store']);
+Route::put('rincian_potensi_pelayanan/keluarkan/{id}', [RincianPotensiPelayananController::class, 'keluarkan']);
+Route::put('rincian_potensi_pelayanan/daftarkan/{id}', [RincianPotensiPelayananController::class, 'daftarkan']);
+
+Route::get('potensi_lainnya', [PotensiLainController::class, 'index']);
+Route::get('potensi_lainnya/{id}', [PotensiLainController::class, 'show']);
+Route::post('potensi_lainnya', [PotensiLainController::class, 'store']);
+Route::post('potensi_lainnya/terima', [PotensiLainController::class, 'terima']);
+Route::put('potensi_lainnya/{id}', [PotensiLainController::class, 'update']);
+Route::delete('potensi_lainnya/{id}', [PotensiLainController::class, 'destroy']);
+
+Route::get('rincian_potensi_lainnya', [PotensiLainController::class, 'index_rincian']);
+Route::put('rincian_potensi_lainnya/batalkan/{id}', [PotensiLainController::class, 'batalkan']);
+Route::put('rincian_potensi_lainnya/daftarkan/{id}', [PotensiLainController::class, 'daftarkan']);
+
+Route::get('bukti_setor', [BuktiSetorController::class, 'index']);
+Route::get('bukti_setor/{id}', [BuktiSetorController::class, 'show']);
 
 Route::middleware([
     'middleware' => 'jwt.auth',
@@ -151,6 +184,9 @@ Route::middleware([
     Route::get('billing_swa/setor/{rc_id}', [BilllingSwaSetorController::class, 'show']);
 });
 
+
+Route::get('penerimaan_lain', [PenerimaanLainController::class, 'index']);
+=======
 Route::get('potensi_pelayanan', [PotensiPelayananController::class, 'index']);
 Route::get('potensi_pelayanan/getdata', [PotensiPelayananController::class, 'getdata']);
 Route::get('potensi_pelayanan/statistik', [PotensiPelayananController::class, 'statistik']);
@@ -177,14 +213,6 @@ Route::get('penerimaan_lain/validasi/{id}', [PenerimaanLainController::class, 'v
 Route::post('penerimaan_lain/list', [PenerimaanLainController::class, 'list']);
 Route::post('penerimaan_lain/createdata', [PenerimaanLainController::class, 'createData']);
 Route::put('penerimaan_lain/editdata/{id}', [PenerimaanLainController::class, 'updateEditData']);
-
-Route::get('potensi_lain', [PotensiLainController::class, 'index']);
-Route::get('potensi_lain/statistik', [PotensiLainController::class, 'statistik']);
-Route::get('potensi_lain/{id}', [PotensiLainController::class, 'show']);
-Route::post('potensi_lain', [PotensiLainController::class, 'store']);
-Route::post('potensi_lain/terima/{id}', [PotensiLainController::class, 'terima']);
-Route::put('potensi_lain/{id}', [PotensiLainController::class, 'update']);
-Route::delete('potensi_lain/{id}', [PotensiLainController::class, 'destroy']);
 
 Route::get('data_closing', [DataClosingController::class, 'index']);
 Route::post('data_closing/list_closing', [DataClosingController::class, 'list']);
@@ -216,9 +244,6 @@ Route::post('rekening_koran/sinkronisasi-api/{bank}', [RekeningKoranController::
 Route::put('rekening_koran/{id}', [RekeningKoranController::class, 'update']);
 Route::put('rekening_koran/pb/{id}', [RekeningKoranController::class, 'updatePb']);
 Route::put('rekening_koran/pb_cancel/{id}', [RekeningKoranController::class, 'updatePbCancel']);
-
-Route::get('bukti_setor', [BuktiSetorController::class, 'index']);
-Route::get('bukti_setor/statistik', [BuktiSetorController::class, 'statistik']);
 
 Route::get('bku', [BkuController::class, 'index']);
 Route::get('bku/list', [BkuController::class, 'list']);

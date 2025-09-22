@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class DataRekeningKoran extends Model
@@ -262,5 +263,57 @@ class DataRekeningKoran extends Model
         $result = $query->first();
 
         return $result?->total ?? 0;
+    }
+
+    public function scopeWithKwitansiSummary($query)
+    {
+        $sub = DB::table('data_penerimaan_layanan')
+            ->select(
+                'rc_id',
+                DB::raw('COUNT(*) as vol'),
+                DB::raw('SUM(total) as total'),
+                DB::raw('SUM(admin_kredit) as admin_kredit'),
+                DB::raw('SUM(admin_debit) as admin_debit'),
+                DB::raw('SUM(selisih) as selisih')
+            )
+            ->groupBy('rc_id')
+            ->unionAll(
+                DB::table('data_penerimaan_lain')
+                    ->select(
+                        'rc_id',
+                        DB::raw('COUNT(*) as vol'),
+                        DB::raw('SUM(total) as total'),
+                        DB::raw('SUM(admin_kredit) as admin_kredit'),
+                        DB::raw('SUM(admin_debit) as admin_debit'),
+                        DB::raw('SUM(selisih) as selisih')
+                    )
+                    ->groupBy('rc_id')
+            );
+
+        return $query->select(
+                'data_rekening_koran.rc_id',
+                'data_rekening_koran.tgl_rc',
+                'data_rekening_koran.bank',
+                'data_rekening_koran.uraian',
+                'data_rekening_koran.kredit',
+                DB::raw('SUM(kw.vol) as volume'),
+                DB::raw('SUM(kw.total) as total_kwitansi'),
+                DB::raw('SUM(kw.admin_kredit) as admin_kredit'),
+                DB::raw('SUM(kw.admin_debit) as admin_debit'),
+                DB::raw('SUM(kw.selisih) as selisih')
+            )
+            ->joinSub($sub, 'kw', fn($join) => $join->on('data_rekening_koran.rc_id', '=', 'kw.rc_id'))
+            ->groupBy(
+                'data_rekening_koran.rc_id',
+                'data_rekening_koran.tgl_rc',
+                'data_rekening_koran.bank',
+                'data_rekening_koran.uraian',
+                'data_rekening_koran.kredit'
+            );
+    }
+    // Accessor for total_setor
+    public function getTotalSetorAttribute()
+    {
+        return $this->total_kwitansi - $this->admin_kredit + $this->selisih;
     }
 }

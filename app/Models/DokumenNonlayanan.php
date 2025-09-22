@@ -31,5 +31,24 @@ class DokumenNonlayanan extends Model
         'pembayaran_piutang',
         'monev_id',
         'is_web_change',
+        'no_putus',
+        'tgl_putus',
+        'tgl_berlakuputus',
+        'nilai_reklasputus',
+        'is_buktitagihan',
+        'induk_id',
     ];
+
+    // Accessor for terbayar
+    public function getTerbayarAttribute()
+    {
+        return \DB::table('data_penerimaan_lain')
+            ->where('piutanglain_id', $this->id)
+            ->sum('jumlah_netto');
+    }
+    // Accessor for sisa_potensi
+    public function getSisaPotensiAttribute()
+    {
+        return $this->total - $this->terbayar;
+    }
 }

@@ -24,20 +24,25 @@ class PendapatanPelayananController extends Controller
             $request->validate([
                 'page' => 'nullable|integer|min:1',
                 'size' => 'nullable|integer|min:1',
+                'tahun_periode' => 'nullable|string',
                 'tgl_awal' => 'nullable|string',
                 'tgl_akhir' => 'nullable|string',
                 'jenis_pelayanan' => 'nullable|string',
                 'no_pendaftaran' => 'nullable|string',
-                'no_rm' => 'nullable|string',
-                'nama' => 'nullable|string',
-                'cara_bayar' => 'nullable|int',
-                'penjamin' => 'nullable|int',
-                'status' => 'nullable|boolean',
-                'penjamin_lebih_1' => 'nullable|boolean',
+                'no_rekam_medik' => 'nullable|string',
+                'pasien_nama' => 'nullable|string',
+                'carabayar_nama' => 'nullable|string',
+                'penjamin_nama' => 'nullable|string',
+                'total' => 'nullable|array',
+                'total.value' => 'nullable|integer',
+                'total.matchMode' => 'nullable|string|in:equals,notEquals,gt,gte,lt,lte',
+                'is_valid' => 'nullable|string',
+                'is_penjaminlebih1' => 'nullable|string',
             ]);
 
             $page = $request->input('page', 1) ?? 1;
             $size = $request->input('size', 100) ?? 100;
+            $tahunPeriode = $request->input('tahun_periode');
             $tglAwal = $request->input('tgl_awal');
             $tglAkhir = $request->input('tgl_akhir');
             $jenisPelayanan = $request->input('jenis_pelayanan');
@@ -46,11 +51,15 @@ class PendapatanPelayananController extends Controller
             $nama = $request->input('pasien_nama');
             $caraBayar = $request->input('carabayar_nama');
             $penjamin = $request->input('penjamin_nama');
+            $total = data_get($request->input('total'), 'value');
             $status = $request->input('is_valid');
             $penjaminLebih1 = $request->input('is_penjaminlebih1');
 
             $query = DataPendapatanPelayanan::query();
 
+            if (!empty($tahunPeriode)) {
+                $query->whereYear('tgl_pelayanan', $tahunPeriode);
+            }
             if (!empty($tglAwal) && !empty($tglAkhir)) {
                 $startDate = Carbon::parse($tglAwal)->startOfDay();
                 $endDate = Carbon::parse($tglAkhir)->endOfDay();
@@ -74,11 +83,44 @@ class PendapatanPelayananController extends Controller
             if (!empty($penjamin)) {
                 $query->where('penjamin_nama', 'ILIKE', "%$penjamin%");
             }
-            if (!empty($status)) {
-                $query->where('is_valid', (bool) $status);
+            if (!empty($total)) {
+                $matchMode = data_get($request->input('total'), 'matchMode');
+
+                $mapMatchMode = [
+                    'equals' => '=',
+                    'notEquals' => '!=',
+                    'gt' => '>',
+                    'gte' => '>=',
+                    'lt' => '<',
+                    'lte' => '<=',
+                ];
+
+                if (isset($mapMatchMode[$matchMode])) {
+                    $query->whereRaw(
+                        "total {$mapMatchMode[$matchMode]} ?",
+                        [$total]
+                    );
+                }
             }
-            if (!empty($penjaminLebih1)) {
-                $query->where('is_penjaminlebih1', (bool) $status);
+            if (!is_null($status)) {
+                if (filter_var($status, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) === false) {
+                    $query->where(function ($q) {
+                        $q->where('is_valid', false)
+                        ->orWhereNull('is_valid');
+                    });
+                } else {
+                    $query->where('is_valid', true);
+                }
+            }
+            if (!is_null($penjaminLebih1)) {
+                if (filter_var($penjaminLebih1, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) === false) {
+                    $query->where(function ($q) {
+                        $q->where('is_penjaminlebih1', false)
+                        ->orWhereNull('is_penjaminlebih1');
+                    });
+                } else {
+                    $query->where('is_penjaminlebih1', true);
+                }
             }
 
             $sortField = $request->input('sortField', 'tgl_pendaftaran');
@@ -266,7 +308,7 @@ class PendapatanPelayananController extends Controller
         }
     }
 
-    public function sinkron_fase1(string $id)
+    public function sinkronFase1(string $id)
     {
         try {
             $pendapatanPelayanan = DataPendapatanPelayanan::where('id', $id)->first();
@@ -316,7 +358,7 @@ class PendapatanPelayananController extends Controller
         }
     }
 
-    public function sinkron_fase2(string $id)
+    public function sinkronFase2(string $id)
     {
         try {
             $pendapatanPelayanan = DataPendapatanPelayanan::where('id', $id)->first();
@@ -390,6 +432,36 @@ class PendapatanPelayananController extends Controller
             $pendapatanPelayanan->update([
                 'is_valid' => strtolower($pendapatanPelayanan->status_fase1) == 'valid' && strtolower($pendapatanPelayanan->status_fase2) == 'valid'
             ]);
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'success'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error: ' . $e->getMessage(),
+                'data' => null
+            ], 500);
+        }
+    }
+
+    public function cancelValidasi(string $id)
+    {
+        try {
+            $pendapatanPelayanan = DataPendapatanPelayanan::where('id', $id)->first();
+            if (!$pendapatanPelayanan) {
+                return response()->json([
+                    'message' => 'Not found'
+                ], 404);
+            }
+
+            if (!$pendapatanPelayanan->is_valid) {
+                return response()->json([
+                    'message' => 'Data cannot be edited because its not valid.'
+                ], 422);
+            }
+
+            $pendapatanPelayanan->update(['is_valid' => false]);
 
             return response()->json([
                 'status' => 200,

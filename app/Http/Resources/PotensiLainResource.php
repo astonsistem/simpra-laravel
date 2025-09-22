@@ -29,9 +29,15 @@ class PotensiLainResource extends JsonResource
             'total_piutang' => (int) $this->total_piutang,
             'reklas_pdd' => (int) $this->reklas_pdd,
             'pembayaran_piutang' => (int) $this->pembayaran_piutang,
-            'monev_id' => (int) $this->monev_id ?? null,
-            'terbayar' => (string) $this->terbayar,
-            'is_web_change' => (bool) $this->is_web_change
+            'monev_id' => (int) $this->monev_id,
+            'no_putus' => (string) $this->no_putus,
+            'tgl_putus' => (string) $this->tgl_putus,
+            'tgl_berlakuputus' => (string) $this->tgl_berlakuputus,
+            'nilai_reklasputus' => (int) $this->nilai_reklasputus,
+            'is_buktitagihan' => $this->is_buktitagihan,
+            'induk_id' => (string) $this->induk_id,
+            'terbayar' => (int) $this->terbayar,
+            'sisa_potensi' => (int) $this->sisa_potensi
         ];
     }
 }

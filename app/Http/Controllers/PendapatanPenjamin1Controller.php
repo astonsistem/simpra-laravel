@@ -12,6 +12,7 @@ use App\Models\Instalasi;
 use App\Models\Kasir;
 use App\Models\Loket;
 use App\Models\Penjamin;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
@@ -25,20 +26,22 @@ class PendapatanPenjamin1Controller extends Controller
             $request->validate([
                 'page' => 'nullable|integer|min:1',
                 'size' => 'nullable|integer|min:1',
+                'tahun_periode' => 'nullable|string',
                 'tgl_awal' => 'nullable|string',
                 'tgl_akhir' => 'nullable|string',
                 'pelayanan_id' => 'nullable|string',
                 'jenis_pelayanan' => 'nullable|string',
                 'no_pendaftaran' => 'nullable|string',
-                'no_rm' => 'nullable|string',
-                'nama' => 'nullable|string',
-                'cara_bayar' => 'nullable|int',
-                'penjamin' => 'nullable|int',
+                'no_rekam_medik' => 'nullable|string',
+                'pasien_nama' => 'nullable|string',
+                'carabayar_nama' => 'nullable|string',
+                'penjamin_nama' => 'nullable|string',
                 'status' => 'nullable|string',
             ]);
 
             $page = $request->input('page', 1) ?? 1;
             $size = $request->input('size', 100) ?? 100;
+            $tahunPeriode = $request->input('tahun_periode');
             $tglAwal = $request->input('tgl_awal');
             $tglAkhir = $request->input('tgl_akhir');
             $pelayananId = $request->input('pelayanan_id');
@@ -52,6 +55,9 @@ class PendapatanPenjamin1Controller extends Controller
 
             $query = DataPendapatanPenjamin1::query();
 
+            if (!empty($tahunPeriode)) {
+                $query->whereYear('tgl_pelayanan', $tahunPeriode);
+            }
             if (!empty($tglAwal) && !empty($tglAkhir)) {
                 $startDate = Carbon::parse($tglAwal)->startOfDay();
                 $endDate = Carbon::parse($tglAkhir)->endOfDay();
@@ -81,6 +87,10 @@ class PendapatanPenjamin1Controller extends Controller
             if (!empty($status)) {
                 $query->where('status', 'ILIKE', "%$status%");
             }
+
+            $sortField = $request->input('sortField', 'tgl_pendaftaran');
+            $sortOrder = $request->input('sortOrder', 'asc');
+            $query->orderBy($sortField, $sortOrder);
 
             $totalItems = $query->count();
             $items = $query->skip(($page - 1) * $size)->take($size)->get();
@@ -147,56 +157,58 @@ class PendapatanPenjamin1Controller extends Controller
 
     public function store(PendapatanPenjamin1Request $request)
     {
-        $data = $request->validated();
-        
-        $pendapatanPelayanan = DataPendapatanPelayanan::where('id', $data['pelayanan_id'])->first();
-        if (!$pendapatanPelayanan) {
+        try {
+            $data = $request->validated();
+            
+            $pendapatanPelayanan = DataPendapatanPelayanan::where('id', $data['pelayanan_id'])->first();
+            if (!$pendapatanPelayanan) {
+                return response()->json([
+                    'message' => 'Data Pendapatan Pelayanan selected not found'
+                ], 404);
+            }
+
+            $caraBayar = CaraBayar::where('carabayar_id', $data['carabayar_id'])->first();
+            if ($caraBayar) {
+                $data['carabayar_nama'] = $caraBayar->carabayar_nama;
+            }
+            $penjamin = Penjamin::where('penjamin_id', $data['penjamin_id'])->first();
+            if ($penjamin) {
+                $data['penjamin_nama'] = $penjamin->penjamin_nama;
+            }
+            $instalasi = Instalasi::where('instalasi_id', $data['instalasi_id'])->first();
+            if ($instalasi) {
+                $data['instalasi_nama'] = $instalasi->instalasi_nama;
+            }
+            $kasir = Kasir::where('kasir_id', $data['kasir_id'])->first();
+            if ($kasir) {
+                $data['kasir_nama'] = $kasir->kasir_nama;
+            }
+            $loket = Loket::where('loket_id', $data['loket_id'])->first();
+            if ($loket) {
+                $data['loket_nama'] = $loket->loket_nama;
+            }
+
+            $pendapatanPenjamin1New = DataPendapatanPenjamin1::create([
+                'id' => Str::uuid()->toString(),
+                ...$data,
+            ]);
+
+            $pendapatanPelayanan->update([
+                'is_penjaminlebih1' => true
+            ]);
+
             return response()->json([
-                'message' => 'Data Pendapatan Pelayanan selected not found'
-            ], 404);
-        }
-
-        if (!$pendapatanPelayanan->is_valid) {
+                'status' => 200,
+                'message' => 'Data berhasil ditambahkan',
+                'data' => $pendapatanPenjamin1New,
+            ], 200);
+        } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Penjamin cannot be added because data pendapatan pelayanan is not valid.'
-            ], 422);
+                'status'  => 500,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+                'data'    => null
+            ], 500);
         }
-
-        $caraBayar = CaraBayar::where('carabayar_id', $data['carabayar_id'])->first();
-        if ($caraBayar) {
-            $data['carabayar_nama'] = $caraBayar->carabayar_nama;
-        }
-        $penjamin = Penjamin::where('penjamin_id', $data['penjamin_id'])->first();
-        if ($penjamin) {
-            $data['penjamin_nama'] = $penjamin->penjamin_nama;
-        }
-        $instalasi = Instalasi::where('instalasi_id', $data['instalasi_id'])->first();
-        if ($instalasi) {
-            $data['instalasi_nama'] = $instalasi->instalasi_nama;
-        }
-        $kasir = Kasir::where('kasir_id', $data['kasir_id'])->first();
-        if ($kasir) {
-            $data['kasir_nama'] = $kasir->kasir_nama;
-        }
-        $loket = Loket::where('loket_id', $data['loket_id'])->first();
-        if ($loket) {
-            $data['loket_nama'] = $loket->loket_nama;
-        }
-
-        $akun = DataPendapatanPenjamin1::create([
-            'id' => Str::uuid()->toString(),
-            ...$data,
-        ]);
-
-        $pendapatanPelayanan->update([
-            'is_penjaminlebih1' => true
-        ]);
-
-        return response()->json([
-            'status' => 200,
-            'message' => 'Data berhasil ditambahkan',
-            'data' => $akun,
-        ], 200);
     }
 
     public function update(PendapatanPenjamin1Request $request, string $id)
@@ -249,6 +261,50 @@ class PendapatanPenjamin1Controller extends Controller
                 'status'  => 500,
                 'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
                 'data'    => null
+            ], 500);
+        }
+    }
+
+    public function sinkron(string $id)
+    {
+        try {
+            $pendapatanPenjamin1 = DataPendapatanPenjamin1::where('id', $id)->first();
+            if (!$pendapatanPenjamin1) {
+                return response()->json([
+                    'message' => 'Not found'
+                ], 404);
+            }
+
+            $pendaftaranId = $pendapatanPenjamin1->pendaftaran_id;
+
+            $sql = "
+                SELECT p.pendaftaran_id, s.status_nama AS status
+                FROM data_potensi_pelayanan p
+                LEFT JOIN master_status s ON p.status_id = s.status_id
+                WHERE p.pendaftaran_id = :id
+                UNION ALL
+                SELECT r.pendaftaran_id, s.status_nama AS status
+                FROM data_potensi_pelayanan p
+                JOIN rincian_potensi_pelayanan r ON p.id::text = r.piutang_id::text
+                LEFT JOIN master_status s ON p.status_id = s.status_id
+                WHERE r.pendaftaran_id = :id
+            ";
+            $result = DB::select($sql, ['id' => $pendaftaranId]);
+            $statusNama = $result[0]->status ?? null;
+
+            if ($statusNama) {
+                $pendapatanPenjamin1->status = $statusNama;
+                $pendapatanPenjamin1->save();
+            }
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'success'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error: ' . $e->getMessage(),
+                'data' => null
             ], 500);
         }
     }
