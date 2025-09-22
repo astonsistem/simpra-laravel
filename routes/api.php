@@ -42,7 +42,7 @@ use App\Http\Controllers\SelisihKasDataTransaksiController;
 
 Route::post('auth/login_token', [AuthController::class, 'login']);
 Route::post('auth/logintoken', [AuthController::class, 'loginToken']);
-Route::post('refresh', [AuthController::class, 'refresh']);
+Route::post('auth/refresh', [AuthController::class, 'refresh']);
 
 Route::middleware([
     'middleware' => 'auth:jwt',
