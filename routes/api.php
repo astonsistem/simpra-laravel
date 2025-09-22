@@ -36,17 +36,13 @@ use App\Http\Controllers\SumberTransaksiController;
 use App\Http\Controllers\SelisihKasController;
 use App\Http\Controllers\DataPenerimaanSelisihController;
 use App\Http\Controllers\PendapatanPenjamin1Controller;
-
 use App\Http\Controllers\RincianPotensiPelayananController;
-=======
-use App\Http\Controllers\PenerimaanLainSetorController;
 
 Route::post('auth/login_token', [AuthController::class, 'login']);
 Route::post('auth/logintoken', [AuthController::class, 'loginToken']);
-Route::post('auth/refresh', [AuthController::class, 'refresh']);
-
 Route::middleware([
-    'middleware' => 'jwt.auth',
+    'middleware' => 'api',
+    'prefix' => 'auth'
 ])->group(function () {
     Route::get('auth/user/me', [AuthController::class, 'me']);
     Route::get('auth/users', [AuthController::class, 'list']);
@@ -54,11 +50,9 @@ Route::middleware([
     Route::get('auth/users/{id}', [AuthController::class, 'show']);
     Route::post('auth/user', [AuthController::class, 'register']);
     Route::post('auth/logout', [AuthController::class, 'logout']);
+    Route::post('auth/refresh', [AuthController::class, 'refresh']);
     Route::put('auth/user/{id}', [AuthController::class, 'update']);
     Route::delete('auth/user/{id}', [AuthController::class, 'destroy']);
-    // Profile routes
-    Route::get('auth/profile', [AuthController::class, 'getProfile']);
-    Route::put('auth/profile/change-password', [AuthController::class, 'changePassword']);
 });
 
 Route::get('akun', [AkunController::class, 'index']);
@@ -150,7 +144,8 @@ Route::get('bukti_setor', [BuktiSetorController::class, 'index']);
 Route::get('bukti_setor/{id}', [BuktiSetorController::class, 'show']);
 
 Route::middleware([
-    'middleware' => 'jwt.auth',
+    'middleware' => 'api',
+    'prefix' => 'auth'
 ])->group(function () {
     Route::get('billing_kasir', [BillingKasirController::class, 'index']);
     Route::get('billing_kasir/statistik', [BillingKasirController::class, 'statistik']);
@@ -168,7 +163,8 @@ Route::middleware([
 });
 
 Route::middleware([
-    'middleware' => 'jwt.auth',
+    'middleware' => 'api',
+    'prefix' => 'auth'
 ])->group(function () {
     Route::get('billing_swa', [BillingSwaController::class, 'index']);
     Route::get('billing_swa/statistik', [BillingSwaController::class, 'statistik']);
@@ -184,35 +180,22 @@ Route::middleware([
     Route::get('billing_swa/setor/{rc_id}', [BilllingSwaSetorController::class, 'show']);
 });
 
-
 Route::get('penerimaan_lain', [PenerimaanLainController::class, 'index']);
-=======
-Route::get('potensi_pelayanan', [PotensiPelayananController::class, 'index']);
-Route::get('potensi_pelayanan/getdata', [PotensiPelayananController::class, 'getdata']);
-Route::get('potensi_pelayanan/statistik', [PotensiPelayananController::class, 'statistik']);
-Route::get('potensi_pelayanan/{id}', [PotensiPelayananController::class, 'index']);
-
-Route::group(['middleware' => 'jwt.auth'], function () {
-    Route::get('penerimaan_lain', [PenerimaanLainController::class, 'index']);
-    Route::get('penerimaan_lain/create', [PenerimaanLainController::class, 'create']);
-    Route::get('penerimaan_lain/{id}', [PenerimaanLainController::class, 'show']);
-    Route::post('penerimaan_lain', [PenerimaanLainController::class, 'store']);
-    Route::put('penerimaan_lain/{id}', [PenerimaanLainController::class, 'update']);
-    Route::post('penerimaan_lain/validasi/penerimaan_lain', [PenerimaanLainController::class, 'updateValidasi']);
-    Route::post('penerimaan_lain/cancel_validasi/penerimaan_lain', [PenerimaanLainController::class, 'cancelValidasi']);
-    Route::delete('penerimaan_lain/{id}', [PenerimaanLainController::class, 'destroy']);
-    Route::get('penerimaan_lain/setor/{rc_id}', [PenerimaanLainSetorController::class, 'show']);
-});
-
 Route::get('penerimaan_lain/getdata', [PenerimaanLainController::class, 'getdata']);
 Route::get('penerimaan_lain/statistik', [PenerimaanLainController::class, 'statistik']);
+Route::get('penerimaan_lain/{id}', [PenerimaanLainController::class, 'show']);
 Route::get('penerimaan_lain/validasi/filter/{id}', [PenerimaanLainController::class, 'validasiFilter']);
 Route::get('penerimaan_lain/validasi/filteruraian/{id}', [PenerimaanLainController::class, 'validasiFilterUraian']);
 Route::get('penerimaan_lain/validasi/filterjumlah/{id}', [PenerimaanLainController::class, 'validasiFilterJumlah']);
 Route::get('penerimaan_lain/validasi/{id}', [PenerimaanLainController::class, 'validasi']);
+Route::post('penerimaan_lain', [PenerimaanLainController::class, 'store']);
 Route::post('penerimaan_lain/list', [PenerimaanLainController::class, 'list']);
 Route::post('penerimaan_lain/createdata', [PenerimaanLainController::class, 'createData']);
 Route::put('penerimaan_lain/editdata/{id}', [PenerimaanLainController::class, 'updateEditData']);
+Route::put('penerimaan_lain/validasi/penerimaan_lain', [PenerimaanLainController::class, 'updateValidasi']);
+Route::put('penerimaan_lain/cancel_validasi/penerimaan_lain', [PenerimaanLainController::class, 'cancelValidasi']);
+Route::put('penerimaan_lain/{id}', [PenerimaanLainController::class, 'update']);
+Route::delete('penerimaan_lain/{id}', [PenerimaanLainController::class, 'destroy']);
 
 Route::get('data_closing', [DataClosingController::class, 'index']);
 Route::post('data_closing/list_closing', [DataClosingController::class, 'list']);
@@ -224,7 +207,7 @@ Route::get('temp_penerimaan_swa', [TempPenerimaanSwaController::class, 'index'])
 Route::get('temp_penerimaan_swa/{id}', [TempPenerimaanSwaController::class, 'show']);
 
 Route::group([
-    'middleware' => 'jwt.auth',
+    'middleware' => 'api',
 ], function() {
     Route::get('rekening_koran', [RekeningKoranController::class, 'index']);
     Route::get('rekening_koran/list', [RekeningKoranController::class, 'list']);

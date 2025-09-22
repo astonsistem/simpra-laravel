@@ -131,17 +131,12 @@ class SumberTransaksiController extends Controller
         }
     }
 
-    public function list(Request $request)
+    public function list()
     {
         try {
-            $sumberTransaksi = MasterSumberTransaksi::query();
+            $sumberTransaksi = MasterSumberTransaksi::get();
 
-            if ($request->has('sumber_jenis')) {
-                $sumberJenis = $request->input('sumber_jenis');
-                $sumberTransaksi->where('sumber_jenis', $sumberJenis);
-            }
-
-            $data = $sumberTransaksi->get()->map(function ($st) {
+            $data = $sumberTransaksi->map(function ($st) {
                 return [
                     'sumber_id' => $st->sumber_id,
                     'sumber_nama' => $st->sumber_nama,

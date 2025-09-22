@@ -68,8 +68,7 @@ class DataPenerimaanLayanan extends Model
     ];
 
     protected $appends = [
-        'tervalidasi',
-        'total_jumlah_netto',
+        'tervalidasi'
     ];
 
     protected $casts = [
@@ -81,25 +80,12 @@ class DataPenerimaanLayanan extends Model
         return $this->belongsTo(DataRekeningKoran::class, 'rc_id', 'rc_id');
     }
 
-    public function rekeningDpa(): BelongsTo
-    {
-        return $this->belongsTo(MasterRekeningView::class, 'rek_id', 'rek_id');
-    }
-
     protected function tervalidasi(): Attribute
     {
         return Attribute::make(
             get: fn () => $this->rc_id !== null || $this->rc_id !== ''
         );
     }
-
-    protected function totalJumlahNetto(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => ($this->total ?? 0) - ($this->admin_kredit ?? 0) - ($this->admin_debit ?? 0) + ($this->selisih ?? 0)
-        );
-    }
-
 
     public static function sumTotal(): float
     {

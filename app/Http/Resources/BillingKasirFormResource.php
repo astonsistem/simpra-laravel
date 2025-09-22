@@ -21,7 +21,7 @@ class BillingKasirFormResource extends JsonResource
             'total'                 => $this->total,
             'admin_kredit'          => $this->admin_kredit,
             'admin_debit'           => $this->admin_debit,
-            'selisih'               => $this->selisih ?? 0,
+            'selisih'               => $this->selisih,
             'jumlah_netto'          => $this->jumlah_netto,
             'cara_pembayaran'       => $this->cara_pembayaran,
             'bank_tujuan'           => $this->bank_tujuan,
@@ -51,7 +51,6 @@ class BillingKasirFormResource extends JsonResource
             'rek_id'                => (string) $this->rek_id,
             //
             'tervalidasi'           => (bool) $this->tervalidasi,
-            'total_jumlah_netto'    => (int) $this->jumlah_netto > 0 ? $this->jumlah_netto :  $this->total_jumlah_netto,
         ];
     }
 }
