@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class DataPotensiPelayanan extends Model
 {
     protected $table = "data_potensi_pelayanan";
+    protected $keyType = 'string';
+    public $incrementing = false;
     public $timestamps = false;
 
     protected $fillable = [
@@ -41,6 +43,23 @@ class DataPotensiPelayanan extends Model
         'is_web_change',
     ];
 
+    protected $casts = [
+        'id' => 'string',
+    ];
+
     // carabayar_data = relationship("CaraBayarModel", foreign_keys=[carabayar_id])
     // penjamin_data = relationship("PenjaminModel", foreign_keys=[penjamin_id])
+
+    // Accessor for terbayar
+    public function getTerbayarAttribute()
+    {
+        return \DB::table('data_penerimaan_lain')
+            ->where('piutang_id', $this->id)
+            ->sum('jumlah_netto');
+    }
+    // Accessor for sisa_potensi
+    public function getSisaPotensiAttribute()
+    {
+        return $this->total - $this->terbayar;
+    }
 }
