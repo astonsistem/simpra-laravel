@@ -21,6 +21,7 @@ class RekeningKoranListResource extends JsonResource
             'nominal'   => $this->debit > 0 ? $this->debit : $this->kredit,
             'tgl_rc'    => date('d/m/Y', strtotime($this->tgl_rc)),
             'bank'      => strtoupper($this->bank),
+            'bank_tujuan'      => strtoupper($this->bank),
             'uraian'    => $this->uraian
         ];
     }
