@@ -72,6 +72,7 @@ class AuthController extends Controller
     {
          try {
             $newToken = JWTAuth::parseToken()->refresh();
+            Log::info('Refreshed token: ' . $newToken);
             return $this->respondWithToken($newToken);
         } catch (JWTException $e) {
             Log::error('Error refreshing token: ' . $e->getMessage());
@@ -237,7 +238,7 @@ class AuthController extends Controller
     public function getProfile()
     {
         $user = auth()->user();
-        
+
         return response()->json([
             'status' => 200,
             'message' => 'Berhasil mengambil data profil',
