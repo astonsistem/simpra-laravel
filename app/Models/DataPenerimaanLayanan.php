@@ -80,6 +80,11 @@ class DataPenerimaanLayanan extends Model
         return $this->belongsTo(DataRekeningKoran::class, 'rc_id', 'rc_id');
     }
 
+    public function rekeningDpa(): BelongsTo
+    {
+        return $this->belongsTo(MasterRekeningView::class, 'rek_id', 'rek_id');
+    }
+
     protected function tervalidasi(): Attribute
     {
         return Attribute::make(

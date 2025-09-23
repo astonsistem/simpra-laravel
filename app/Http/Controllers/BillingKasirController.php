@@ -24,7 +24,7 @@ class BillingKasirController extends Controller
     public function index(Request $request)
     {
         try {
-            $request->validate([
+            $params = $request->validate([
                 'page' => 'nullable|integer|min:1',
                 'size' => 'nullable|integer|min:1',
                 'tahunPeriode' => 'nullable|string',
