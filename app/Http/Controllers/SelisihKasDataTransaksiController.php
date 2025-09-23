@@ -8,26 +8,128 @@ use App\Models\DataPenerimaanSelisih;
 use App\Models\DataRekeningKoran;
 use Dflydev\DotAccessData\Data;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class SelisihKasDataTransaksiController extends Controller
 {
-    public function index (Request $request) {
+    public function index(Request $request)
+    {
         try {
-            $params = $request->validate([]);
+            $params = $request->validate([
+                'periode'           => 'nullable|string',
+                'tgl_awal'          => 'nullable|date',
+                'tgl_akhir'         => 'nullable|date',
+                'page'              => 'nullable|integer|min:1',
+                'per_page'          => 'nullable|integer|min:1',
+                'sort_field'        => 'nullable|string',
+                'sort_order'        => 'nullable|numeric|in:1,-1',
+                //
+                'is_valid'          => 'nullable|boolean',
+                'tgl_setor'         => 'nullable|date',
+                'no_buktibayar'     => 'nullable|string',
+                'tgl_buktibayar'    => 'nullable|date',
+                'penyetor'          => 'nullable|string',
+                'jenis'             => 'nullable|string',
+                'rekening_dpa'      => 'nullable|string',
+                'jumlah'            => 'nullable|numeric',
+                'sumber_transaksi'  => 'nullable|string',
+                'bank_tujuan'       => 'nullable|string',
+                'cara_pembayaran'   => 'nullable|string',
+            ]);
 
             $query = DataPenerimaanSelisih::query();
 
-            $query->orderBy('created_at', 'desc');
+            // Filter periode tanggal
+            if ($this->isPeriodeHarian($request)) {
+                $query->whereBetween('tgl_setor', [
+                    Carbon::parse($params['tgl_awal'])->startOfDay(),
+                    Carbon::parse($params['tgl_akhir'])->endOfDay()
+                ]);
+            } else if ($this->isPeriodeBulanan($request)) {
+                $query->whereBetween('tgl_setor', [
+                    Carbon::parse($params['tgl_awal'])->startOfMonth(),
+                    Carbon::parse($params['tgl_akhir'])->endOfMonth()
+                ]);
+            }
 
-            if( $request->has('export')) {
+            if ($request->has('is_valid')) {
+                $query->where(function ($query) use ($params) {
+                    $validated = $params['is_valid'] ?? null;
+                    if ($validated == true) {
+                        $query->whereNotNull('rc_id')->where('rc_id', '>', 0);
+                    } elseif ($validated == '0') {
+                        $query->whereNull('rc_id');
+                    }
+                });
+            };
+
+            if ($request->filled('tgl_setor')) {
+                $query->where('tgl_setor', 'ILIKE', "%{$params['tgl_setor']}%");
+            }
+
+            if ($request->filled('no_buktibayar')) {
+                $query->where('no_buktibayar', 'ILIKE', "%{$params['no_buktibayar']}%");
+            }
+
+            if ($request->filled('tgl_buktibayar')) {
+                $query->where('tgl_buktibayar', 'ILIKE', "%{$params['tgl_buktibayar']}%");
+            }
+
+            if ($request->filled('penyetor')) {
+                $query->where('penyetor', 'ILIKE', "%{$params['penyetor']}%");
+            }
+
+            if ($request->filled('jenis')) {
+                $query->where('jenis', 'ILIKE', "%{$params['jenis']}%");
+            }
+
+            if ($request->filled('rekening_dpa')) {
+                $query->whereHas('rekening_dpa', function ($sub) use ($params) {
+                    $sub->where('rek_nama', 'ILIKE', "%{$params['rekening_dpa']}%");
+                });
+            }
+
+            if ($request->filled('jumlah')) {
+                $query->where('jumlah', 'ILIKE', "%{$params['jumlah']}%");
+            }
+
+            if ($request->filled('sumber_transaksi')) {
+                $query->where('sumber_transaksi', 'ILIKE', "%{$params['sumber_transaksi']}%");
+            }
+
+            if ($request->filled('bank_tujuan')) {
+                $query->where('bank_tujuan', 'ILIKE', "%{$params['bank_tujuan']}%");
+            }
+
+            if ($request->filled('cara_pembayaran')) {
+                $query->where('cara_pembayaran', 'ILIKE', "%{$params['cara_pembayaran']}%");
+            }
+
+
+            // Sort order
+            if ($request->has('sort_field') && $request->has('sort_order')) {
+                $sortField = $params['sort_field'];
+
+                switch ($sortField) {
+                    case 'is_valid':
+                        $sortField = 'rc_id';
+                        break;
+                }
+
+                $query->orderBy($sortField, $params['sort_order'] == -1 ? 'desc' : 'asc');
+            } else {
+                $query->orderBy('created_at', 'desc');
+            }
+
+
+            if ($request->has('export')) {
                 return DataTransaksiResource::collection($query->get());
             }
 
-            return DataTransaksiResource::collection($query->paginate());
-        }
-        catch (\Exception $e) {
+            return DataTransaksiResource::collection($query->paginate($params['per_page'] ?? 10));
+        } catch (\Exception $e) {
             Log::error('Error in SelisihKasDataTransaksiController@index: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Terjadi kesalahan pada server.',
@@ -36,7 +138,23 @@ class SelisihKasDataTransaksiController extends Controller
         }
     }
 
-    public function create ()
+    private function isPeriodeBulanan(Request $request)
+    {
+        return $request->has('periode')
+            && $request->has('tgl_awal')
+            && $request->has('tgl_akhir')
+            && $request->periode === 'BULANAN';
+    }
+
+    private function isPeriodeHarian(Request $request)
+    {
+        return $request->has('periode')
+            && $request->has('tgl_awal')
+            && $request->has('tgl_akhir')
+            && $request->periode === 'TANGGAL';
+    }
+
+    public function create()
     {
         return new DataTransaksiResource(new DataPenerimaanSelisih());
     }
@@ -48,7 +166,7 @@ class SelisihKasDataTransaksiController extends Controller
 
             $data = DataPenerimaanSelisih::create($validated);
 
-            if(!$data) {
+            if (!$data) {
                 throw new \Exception('Data gagal disimpan', 500);
             }
 
@@ -71,12 +189,11 @@ class SelisihKasDataTransaksiController extends Controller
         try {
             $data = DataPenerimaanSelisih::where('id', $id)->first();
 
-            if(!$data) {
+            if (!$data) {
                 throw new \Exception('Data tidak ditemukan.[404]', 404);
             }
 
             return new DataTransaksiResource($data);
-
         } catch (\Exception $e) {
             Log::error('Error in SelisihKasDataTransaksiController@show: ' . $e->getMessage());
 
@@ -95,13 +212,13 @@ class SelisihKasDataTransaksiController extends Controller
             $validated = $request->validated();
             $data = DataPenerimaanSelisih::where('id', $id)->first();
 
-            if(!$data) {
+            if (!$data) {
                 throw new \Exception('Data tidak ditemukan.[404]', 404);
             }
 
-            $updated =$data->update($validated);
+            $updated = $data->update($validated);
 
-            if(!$updated) {
+            if (!$updated) {
                 throw new \Exception('Data gagal diubah', 500);
             }
 
@@ -189,8 +306,7 @@ class SelisihKasDataTransaksiController extends Controller
                 'message' => 'Berhasil validasi penerimaan lain',
                 'status'  => 200,
             ], 200);
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             Log::error('Error in SelisihKasDataTransaksiController@validasi: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Terjadi kesalahan saat validasi penerimaan lain.',
