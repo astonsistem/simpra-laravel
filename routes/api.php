@@ -314,6 +314,8 @@ Route::group([
     Route::get('kurangbayar/data_selisih/{id}', [DataSelisihController::class, 'show']);
 
     Route::resource('kurangbayar/data_transaksi', SelisihKasDataTransaksiController::class);
+    Route::post('kurangbayar/data_transaksi/validation', [SelisihKasDataTransaksiController::class, 'validasi']);
+    Route::post('kurangbayar/data_transaksi/cancel_validation', [SelisihKasDataTransaksiController::class, 'cancelValidasi']);
 });
 
 Route::get('selisih-kas', [SelisihKasController::class, 'index']);

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 class SelisihKas extends Model
 {
     protected $table = 'data_penerimaan_selisih';
-    public $timestamps = false;
+    public $timestamps = true;
 
     protected $fillable = [
         'tgl_setor',
