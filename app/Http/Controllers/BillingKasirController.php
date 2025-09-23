@@ -75,12 +75,12 @@ class BillingKasirController extends Controller
             if (!empty($tglAwal) && !empty($tglAkhir && $periode == "TANGGAL")) {
                 $startDate = Carbon::parse($tglAwal)->startOfDay();
                 $endDate = Carbon::parse($tglAkhir)->endOfDay();
-                $query->whereBetween('tgl_pelayanan', [$startDate, $endDate]);
+                $query->whereBetween('tgl_buktibayar', [$startDate, $endDate]);
             }
             if (!empty($tglAwal) && !empty($tglAkhir) && $periode === "BULANAN") {
-                $startMonth = Carbon::parse($tglAwal)->format('m');
-                $endMonth = Carbon::parse($tglAkhir)->format('m');
-                $query->whereBetween('bulan_pelayanan', [$startMonth, $endMonth]);
+                $startDate = Carbon::parse($tglAwal)->startOfMonth();
+                $endDate = Carbon::parse($tglAkhir)->endOfMonth();
+                $query->whereBetween('tgl_buktibayar', [$startDate, $endDate]);
             }
             if (!empty($noBayar)) {
                 $query->where('no_buktibayar', 'ILIKE', "%$noBayar%");
