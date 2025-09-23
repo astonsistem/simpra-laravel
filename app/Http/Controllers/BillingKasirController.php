@@ -40,12 +40,15 @@ class BillingKasirController extends Controller
                 'sumberTransaksi' => 'nullable|string',
                 'instalasi' => 'nullable|string',
                 'metodeBayar' => 'nullable|string',
+                'caraPembayaran' => 'nullable|string',
                 'caraBayar' => 'nullable|string',
                 'rekeningDpa' => 'nullable|string',
                 'bank' => 'nullable|string',
-                'jumlahBruto' => 'nullable|string',
+                'kasir' => 'nullable|string',
                 'validated' => 'nullable|in:0,1',
                 'noClosingKasir' => 'nullable|string',
+                'jumlahBrutoMin' => 'nullable|numeric',
+                'jumlahBrutoMax' => 'nullable|numeric',
             ]);
 
             $page = $request->input('page', 1) ?? 1;
@@ -63,7 +66,7 @@ class BillingKasirController extends Controller
             $sumberTransaksi = $request->input('sumberTransaksi');
             $instalasi = $request->input('instalasi');
             $metodeBayar = $request->input('metodeBayar');
-            $caraBayar = $request->input('caraBayar');
+            $caraPembayaran = $request->input('caraPembayaran');
             $bank = $request->input('bank');
             $jumlahNetto = $request->input('jumlahNetto');
 
@@ -75,12 +78,12 @@ class BillingKasirController extends Controller
             if (!empty($tglAwal) && !empty($tglAkhir && $periode == "TANGGAL")) {
                 $startDate = Carbon::parse($tglAwal)->startOfDay();
                 $endDate = Carbon::parse($tglAkhir)->endOfDay();
-                $query->whereBetween('tgl_pelayanan', [$startDate, $endDate]);
+                $query->whereBetween('tgl_buktibayar', [$startDate, $endDate]);
             }
             if (!empty($tglAwal) && !empty($tglAkhir) && $periode === "BULANAN") {
-                $startMonth = Carbon::parse($tglAwal)->format('m');
-                $endMonth = Carbon::parse($tglAkhir)->format('m');
-                $query->whereBetween('bulan_pelayanan', [$startMonth, $endMonth]);
+                $startDate = Carbon::parse($tglAwal)->startOfMonth();
+                $endDate = Carbon::parse($tglAkhir)->endOfMonth();
+                $query->whereBetween('tgl_buktibayar', [$startDate, $endDate]);
             }
             if (!empty($noBayar)) {
                 $query->where('no_buktibayar', 'ILIKE', "%$noBayar%");
@@ -95,7 +98,7 @@ class BillingKasirController extends Controller
                 $query->where('uraian', 'ILIKE', "%$uraian%");
             }
             if (!empty($noDokumen)) {
-                $query->where('no_dokumen', 'ILIKE', "%$noDokumen%");
+                $query->where('no_pendaftaran', 'ILIKE', "%$noDokumen%");
             }
             if (!empty($tglDokumen)) {
                 $query->where('tgl_pelayanan', $tglDokumen);
@@ -109,14 +112,20 @@ class BillingKasirController extends Controller
             if (!empty($metodeBayar)) {
                 $query->where('metode_bayar', 'ILIKE', "%$metodeBayar%");
             }
-            if (!empty($caraBayar)) {
-                $query->where('carabayar_nama', 'ILIKE', "%$caraBayar%");
+            if (!empty($caraPembayaran)) {
+                $query->where('cara_pembayaran', 'ILIKE', "%$caraPembayaran%");
+            }
+            if ($request->has('caraBayar') && !empty($params['caraBayar'])) {
+                $query->where('carabayar_nama', 'ILIKE', "%$params[caraBayar]%");
             }
             if (!empty($rekeningDpa)) {
                 $query->where('rek_dpa', 'ILIKE', "%$rekeningDpa%");
             }
             if (!empty($bank)) {
                 $query->where('bank_tujuan', 'ILIKE', "%$bank%");
+            }
+            if ($request->has('kasir') && !empty( $params['kasir'] )) {
+                $query->where('kasir_nama', 'ILIKE', "%$params[kasir]%");
             }
             if (!empty($jumlahNetto)) {
                 $query->where('jumlah_netto', 'LIKE', "%$jumlahNetto%");
@@ -132,6 +141,28 @@ class BillingKasirController extends Controller
                       ->orWhere('rek_id', $params['rekeningDpa']);
                 });
             });
+
+            $query->when(!empty($params['jumlahBrutoMin']), function ($q) use ($params) {
+                $operator = empty($params['jumlahBrutoMax']) ? '=' : '>=';
+                $q->where('total', $operator, $params['jumlahBrutoMin']);
+            });
+
+            $query->when(!empty($params['jumlahBrutoMax']), function ($q) use ($params) {
+                $operator = empty($params['jumlahBrutoMin']) ? '=' : '<=';
+                $q->where('total', $operator, $params['jumlahBrutoMax']);
+            });
+
+            // Filter Netto
+            $query->when(!empty($params['jumlahNettoMin']), function ($q) use ($params) {
+                $operator = empty($params['jumlahNettoMax']) ? '=' : '>=';
+                $q->where('jumlah_netto', $operator, $params['jumlahNettoMin']);
+            });
+
+            $query->when(!empty($params['jumlahNettoMax']), function ($q) use ($params) {
+                $operator = empty($params['jumlahNettoMin']) ? '=' : '<=';
+                $q->where('jumlah_netto', $operator, $params['jumlahNettoMax']);
+            });
+
             if($request->has('validated')) {
                 $query->where(function($query) use ($params) {
                     $validated = $params['validated'] ?? null;
@@ -144,7 +175,7 @@ class BillingKasirController extends Controller
             }
 
             $query->with('rekeningKoran', 'rekeningDpa');
-            $query->orderBy('tgl_buktibayar', 'desc')->orderBy('no_buktibayar', 'desc');
+            $query->orderBy('tgl_buktibayar', 'desc');
 
             return BillingKasirResource::collection(
                 $query->paginate($size)
