@@ -30,6 +30,7 @@ class BillingSwaController extends Controller
                 'periode' => 'nullable|string',
                 'noBayar' => 'nullable|string',
                 'tglBayar' => 'nullable|string',
+                'pihak3' => 'nullable|string',
                 'pasien' => 'nullable|string',
                 'uraian' => 'nullable|string',
                 'noDokumen' => 'nullable|string',
@@ -121,6 +122,10 @@ class BillingSwaController extends Controller
             if (!empty($jumlahNetto)) {
                 $query->where('jumlah_netto', 'LIKE', "%$jumlahNetto%");
             }
+
+            $query->when(!empty($params['pihak3']), function ($q) use ($params) {
+                $q->where('pihak3', 'ILIKE', '%' . $params['pihak3'] . '%');
+            });
 
             $query->when(!empty($params['rekeningDpa']), function ($q) use ($params) {
                 $q->whereHas('rekeningDpa', function ($q) use ($params) {

@@ -22,6 +22,7 @@ class BillingKasirResource extends JsonResource
             'metodeBayar' => (string) $this->metode_bayar,
             'caraBayarId' => (string) $this->carabayar_id,
             'caraBayar' => (string) $this->carabayar_nama,
+            'caraPembayaran' => (string) $this->cara_pembayaran,
             'bank' => (string) $this->bank_tujuan,
             'jumlahBruto' => (string) $this->total,
             'biayaAdminEdc' => (string) $this->admin_kredit,
