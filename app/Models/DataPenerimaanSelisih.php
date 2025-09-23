@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DataPenerimaanSelisih extends Model
 {
@@ -45,13 +47,27 @@ class DataPenerimaanSelisih extends Model
         'updated_at',
     ];
 
-    protected $casts = [
-        'id' => 'string',
-    ];
+    // protected $casts = [
+    //     'id' => 'string',
+    // ];
 
     protected $appends = [
+        'is_valid',
         'total_jumlah_netto'
     ];
+
+
+    public function rekeningDpa(): BelongsTo
+    {
+        return $this->belongsTo(MasterRekeningView::class, 'rek_id', 'rek_id');
+    }
+
+    protected function isValid(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => !empty($this->rc_id) && $this->rc_id > 0
+        );
+    }
 
     protected function totalJumlahNetto(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
