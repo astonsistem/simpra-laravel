@@ -12,7 +12,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -47,9 +46,7 @@ class AuthController extends Controller
     public function loginToken(LoginUserRequest $request)
     {
         $credentials = $request->validated();
-
-        if (!$token = JWTAuth::attempt($credentials))
-        {
+        if (!$token = JWTAuth::attempt($credentials)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 

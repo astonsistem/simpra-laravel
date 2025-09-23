@@ -21,7 +21,7 @@ class BillingSwaController extends Controller
     public function index(Request $request)
     {
         try {
-            $params = $request->validate([
+            $request->validate([
                 'page' => 'nullable|integer|min:1',
                 'size' => 'nullable|integer|min:1',
                 'tahunPeriode' => 'nullable|string',
@@ -41,9 +41,7 @@ class BillingSwaController extends Controller
                 'caraBayar' => 'nullable|string',
                 'rekeningDpa' => 'nullable|string',
                 'bank' => 'nullable|string',
-                'jumlahBrutoMin' => 'nullable|numeric',
-                'jumlahBrutoMax' => 'nullable|numeric',
-                'validated' => 'nullable|in:0,1',
+                'jumlahBruto' => 'nullable|string',
             ]);
 
             $page = $request->input('page', 1) ?? 1;
@@ -115,6 +113,9 @@ class BillingSwaController extends Controller
             }
             if (!empty($caraBayar)) {
                 $query->where('cara_pembayaran', 'ILIKE', "%$caraBayar%");
+            }
+            if (!empty($rekeningDpa)) {
+                $query->where('rek_dpa', 'ILIKE', "%$rekeningDpa%");
             }
             if (!empty($bank)) {
                 $query->where('bank_tujuan', 'ILIKE', "%$bank%");
@@ -195,17 +196,17 @@ class BillingSwaController extends Controller
     public function show(string $id)
     {
         try {
-            // if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $id)) {
-            //     return response()->json([
-            //         'detail' => [
-            //             [
-            //                 'loc' => ['path', 'id'],
-            //                 'msg' => 'ID must be a valid UUID format.',
-            //                 'type' => 'validation'
-            //             ]
-            //         ]
-            //     ], 422);
-            // }
+            if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $id)) {
+                return response()->json([
+                    'detail' => [
+                        [
+                            'loc' => ['path', 'id'],
+                            'msg' => 'ID must be a valid UUID format.',
+                            'type' => 'validation'
+                        ]
+                    ]
+                ], 422);
+            }
 
             $billingSwa = DataPenerimaanLain::with('masterAkun')->where('id', $id)->first();
 

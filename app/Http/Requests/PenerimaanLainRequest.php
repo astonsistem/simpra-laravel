@@ -2,65 +2,72 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Validation\Rule;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
-class PenerimaanLainRequest extends BillingSwaRequest
+class PenerimaanLainRequest extends FormRequest
 {
     public function authorize(): bool
     {
         return true;
     }
 
-    protected function prepareForValidation()
-    {
-        foreach(['tgl_bayar', 'tgl_dokumen'] as $key) {
-            if(request()->has($key) && request($key))
-            {
-                $date = normalize_date(request($key));
-
-                request()->merge([$key => $date]);
-            }
-        }
-
-        // Default bank tujuan jika kosong dan cara pembayaran tunai maka diisi bank JATIM
-        if(request()->has('cara_pembayaran') && strtoupper(request('cara_pembayaran')) == 'TUNAI' && (!request()->has('bank_tujuan') || !request('bank_tujuan')))
-        {
-            request()->merge(['bank_tujuan' => 'JATIM']);
-        }
-    }
-
     public function rules(): array
     {
         return [
-            'admin_debit'           => 'required|numeric',          // Biaya Admin QRIS
-            'admin_kredit'          => 'required|numeric',          // Biaya Admin EDC
-            'akun_id'               => 'required|numeric',          // Jenis Penerimaan
-            'bank_tujuan'           => 'required|string',           // Bank Tujuan
-            'cara_pembayaran'       => 'required|string',           // Cara Pembayaran
-            'jumlah_netto'          => 'required|numeric',          // Jumlah Netto
-            // 'metode_pembayaran'     => 'nullable|numeric',
-            'no_bayar'              => ['nullable', Rule::unique('data_penerimaan_lain', 'no_bayar')->ignore( request()->id )],
-            'no_dokumen'            => 'nullable|string',
-            'pdd'                   => 'required|numeric',          // PDD
-            'pendapatan'            => 'required|numeric',          // Pendapatan
-            'pihak3'                => 'nullable|string',
-            'piutang'               => 'required|numeric',           // Piutang
-            'rek_id'                => 'nullable|numeric',
-            'selisih'               => 'required|numeric',          // selisih
-            'sumber_transaksi'      => 'required|string',             // sumber transaksi
-            'tgl_bayar'             => 'required|date',             // tgl. bayar
-            'tgl_dokumen'           => 'nullable|date',
-            'total'                 => 'required|numeric',          // Jumlah Bruto
-            'uraian'                => 'nullable|string',
-
+            'no_dokumen' => 'required|string',
+            'tgl_dokumen' => 'required|date',
+            'akun_id' => 'required|string',
+            'pihak3' => 'nullable|string|max:255',
+            'pihak3_alamat' => 'nullable|string|max:255',
+            'pihak3_telp' => 'nullable|string|max:50',
+            'uraian' => 'nullable|string',
+            'tgl_bayar' => 'nullable|date',
+            'no_bayar' => 'nullable|string',
+            'sumber_transaksi' => 'nullable|string',
+            'transaksi_id' => 'nullable|string',
+            'metode_pembayaran' => 'nullable|string',
+            'total' => 'nullable|numeric',
+            'pendapatan' => 'nullable|numeric',
+            'pdd' => 'nullable|string',
+            'piutang' => 'nullable|string',
+            'cara_pembayaran' => 'nullable|string',
+            'bank_tujuan' => 'nullable|string',
+            'admin_kredit' => 'nullable|numeric',
+            'admin_debit' => 'nullable|numeric',
+            'kartubank' => 'nullable|string',
+            'no_kartubank' => 'nullable|string',
+            'rc_id' => 'nullable|integer',
+            'selisih' => 'nullable|numeric',
+            'jumlah_netto' => 'nullable|numeric',
+            'desc_piutang_pelayanan' => 'nullable|string',
+            'desc_piutang_lain' => 'nullable|string',
+            'piutang_id' => 'nullable|string',
+            'piutanglain_id' => 'nullable|string',
+            'akun_data' => 'nullable|array',
+            'akun_data.akun_id' => 'nullable|string',
+            'akun_data.akun_kode' => 'nullable|string',
+            'akun_data.akun_nama' => 'nullable|string',
+            'is_web_change' => 'nullable|boolean',
         ];
     }
 
-    public function attributes(): array
+    public function messages(): array
     {
-        return array_merge(config('attributes'), [
-            'total'     => 'Jumlah Bruto',
-            'pihak3'    => 'Pihak 3',
-        ]);
+        return [];
+    }
+
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(response()->json([
+            'detail' => collect($validator->errors())->map(function ($message, $field) {
+                return [
+                    'loc' => [$field, 0],
+                    'msg' => $message[0],
+                    'type' => 'validation_error'
+                ];
+            })->values()
+        ], 422));
     }
 }

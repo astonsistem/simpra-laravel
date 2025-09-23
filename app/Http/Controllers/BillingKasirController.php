@@ -24,7 +24,7 @@ class BillingKasirController extends Controller
     public function index(Request $request)
     {
         try {
-            $params = $request->validate([
+            $request->validate([
                 'page' => 'nullable|integer|min:1',
                 'size' => 'nullable|integer|min:1',
                 'tahunPeriode' => 'nullable|string',
@@ -66,6 +66,8 @@ class BillingKasirController extends Controller
             $sumberTransaksi = $request->input('sumberTransaksi');
             $instalasi = $request->input('instalasi');
             $metodeBayar = $request->input('metodeBayar');
+            $caraBayar = $request->input('caraBayar');
+            $rekeningDpa = $request->input('rekeningDpa');
             $caraPembayaran = $request->input('caraPembayaran');
             $bank = $request->input('bank');
             $jumlahNetto = $request->input('jumlahNetto');
