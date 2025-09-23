@@ -31,10 +31,9 @@ class BillingSwaSimpleResource extends JsonResource
             'piutang'               => $this->piutang,
             'rek_id'                => $this->rek_id,
             'selisih'               => $this->selisih,
-            'sumber_transaksi'      => $this->sumber_transaksi,
-            'tgl_bayar'             => $this->tgl_bayar ? date('d/m/Y', strtotime($this->tgl_bayar)) : null,
-            'tgl_dokumen'           => $this->tgl_dokumen ? date('d/m/Y', strtotime($this->tgl_dokumen)) : null,
-            'total'                 => $this->total,
+            'tgl_bayar'             => $this->tgl_bayar, // ? date('d/m/Y', strtotime($this->tgl_bayar)) : null,
+            'tgl_dokumen'           => $this->tgl_dokumen, // ? date('d/m/Y', strtotime($this->tgl_dokumen)) : null,
+            'total'                 => (int)$this->total,
             'uraian'                => $this->uraian,
             //
             'akun_nama'             => $this->masterAkun? $this->masterAkun->akun_nama : null,
