@@ -26,7 +26,7 @@ class SelisihKasDataTransaksiController extends Controller
                 'sort_field'        => 'nullable|string',
                 'sort_order'        => 'nullable|numeric|in:1,-1',
                 //
-                'is_valid'          => 'nullable|boolean',
+                'is_valid'          => 'nullable',
                 'tgl_setor'         => 'nullable|date',
                 'no_buktibayar'     => 'nullable|string',
                 'tgl_buktibayar'    => 'nullable|date',
@@ -134,7 +134,7 @@ class SelisihKasDataTransaksiController extends Controller
             return response()->json([
                 'message' => 'Terjadi kesalahan pada server.',
                 'error' => $e->getMessage()
-            ], $e->getCode() ?? 500);
+            ], 500);
         }
     }
 

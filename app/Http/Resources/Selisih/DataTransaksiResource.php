@@ -34,7 +34,11 @@ class DataTransaksiResource extends JsonResource
                 'rek_nama'   => (string) $this->rekeningDpa->rek_nama,
             ] : null,
             'rc_id'             => (string) $this->rc_id,
-            'is_valid'          => (bool) $this->is_valid
+            'is_valid'          => (bool) $this->is_valid,
+            'kasir_id'          => (int) $this->kasir_id,
+            'kasir_nama'        => (string) $this->kasir_nama,
+            'loket_id'          => (int) $this->loket_id,
+            'loket_nama'        => (string) $this->loket_nama,
         ];
     }
 }
