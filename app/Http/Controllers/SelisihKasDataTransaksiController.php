@@ -37,6 +37,7 @@ class SelisihKasDataTransaksiController extends Controller
                 'sumber_transaksi'  => 'nullable|string',
                 'bank_tujuan'       => 'nullable|string',
                 'cara_pembayaran'   => 'nullable|string',
+                'export'            => 'nullable',
             ]);
 
             $query = DataPenerimaanSelisih::query();
