@@ -34,6 +34,7 @@ class SelisihKasDataTransaksiController extends Controller
                 'jenis'             => 'nullable|string',
                 'rekening_dpa'      => 'nullable|string',
                 'jumlah'            => 'nullable|numeric',
+                'nilai'             => 'nullable|numeric',
                 'sumber_transaksi'  => 'nullable|string',
                 'bank_tujuan'       => 'nullable|string',
                 'cara_pembayaran'   => 'nullable|string',
@@ -90,6 +91,10 @@ class SelisihKasDataTransaksiController extends Controller
                 $query->whereHas('rekening_dpa', function ($sub) use ($params) {
                     $sub->where('rek_nama', 'ILIKE', "%{$params['rekening_dpa']}%");
                 });
+            }
+
+            if ($request->filled('nilai')) {
+                $query->where('nilai', 'ILIKE', "%{$params['nilai']}%");
             }
 
             if ($request->filled('jumlah')) {

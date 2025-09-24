@@ -30,7 +30,7 @@ class DataTransaksiStoreRequest extends FormRequest
 
     private function prepareFromId($id, $name, $table)
     {
-        if(request()->has($id) && $value = DB::table($table)->where($id, $this->$id)->value($name)) {
+        if (request()->has($id) && $value = DB::table($table)->where($id, $this->$id)->value($name)) {
             request()->merge([$name => $value]);
         }
     }
@@ -43,34 +43,36 @@ class DataTransaksiStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'tgl_setor'             => 'required|date',
-            'tgl_buktibayar'        => 'nullable|date',
-            'no_buktibayar'         => 'nullable|string',
-            'jenis'                 => 'required|string',
-            'cara_pembayaran'       => 'required|string',
-            'bank_tujuan'           => 'required|string',
-            'jumlah'                => 'required|numeric',
-            'admin_kredit'          => 'required|numeric',
             'admin_debit'           => 'required|numeric',
-            'selisih'               => 'nullable|numeric',
+            'admin_kredit'          => 'required|numeric',
+            'bank_tujuan'           => 'required|string',
+            'cara_pembayaran'       => 'required|string',
+            'jenis'                 => 'required|string',
+            'jumlah'                => 'required|numeric',
             'jumlah_netto'          => 'required|numeric',
+            'kasir_id'              => 'nullable',
+            'kasir_nama'            => 'nullable',
+            'klasifikasi'           => 'nullable',
+            'loket_id'              => 'nullable',
+            'loket_nama'            => 'nullable',
+            'nilai'                 => 'nullable|numeric',
+            'no_buktibayar'         => 'nullable|string',
             'penyetor'              => 'nullable|string',
             'rek_id'                => 'nullable',
             'sumber_transaksi'      => 'nullable',
-            'klasifikasi'           => 'nullable',
-            'kasir_id'              => 'nullable',
-            'kasir_nama'            => 'nullable',
-            'loket_id'              => 'nullable',
-            'loket_nama'            => 'nullable',
+            'tgl_buktibayar'        => 'nullable|date',
+            'tgl_setor'             => 'required|date',
+
         ];
     }
 
     public function attributes()
     {
         return array_merge(config('attributes'), [
-            'jumlah' => 'Jumlah Setor',
-            'no_buktibayar' => 'No. Bukti Bayar',
-            'tgl_buktibayar' => 'Tgl. Bukti Bayar',
+            'jumlah'            => 'Jumlah Setor',
+            'no_buktibayar'     => 'No. Bukti Bayar',
+            'tgl_buktibayar'    => 'Tgl. Bukti Bayar',
+            'nilai'             => 'Selisih Kurang',
         ]);
     }
 }
