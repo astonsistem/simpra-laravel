@@ -23,10 +23,11 @@ class DataTransaksiResource extends JsonResource
             'jenis'             => (string) $this->jenis,
             'cara_pembayaran'   => (string) $this->cara_pembayaran,
             'bank_tujuan'       => (string) $this->bank_tujuan,
-            'jumlah'            => $this->jumlah,
+            'nilai'             => (int) $this->nilai,              // selisih kurang
+            'jumlah'            => (int) $this->jumlah,
             'admin_kredit'      => (int) $this->admin_kredit ?? 0,
             'admin_debit'       => (int) $this->admin_debit ?? 0,
-            'jumlah_netto'      => (int) $this->jumlah - (int) $this->admin_kredit,
+            'jumlah_netto'      => (int) $this->jumlah_netto,
             'sumber_transaksi'  => (string) $this->sumber_transaksi,
             'klasifikasi'       => (string) $this->klasifikasi,
             'rekening_dpa'      => $this->rekeningDpa ? [
@@ -39,6 +40,7 @@ class DataTransaksiResource extends JsonResource
             'kasir_nama'        => (string) $this->kasir_nama,
             'loket_id'          => (int) $this->loket_id,
             'loket_nama'        => (string) $this->loket_nama,
+            'total_jumlah_netto' => (int) $this->jumlah > 0 ? $this->jumlah : (int)$this->total_jumlah_netto
         ];
     }
 }

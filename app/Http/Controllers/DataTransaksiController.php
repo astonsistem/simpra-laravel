@@ -6,13 +6,12 @@ use App\Http\Requests\KurangBayar\DataTransaksiStoreRequest;
 use App\Http\Resources\Selisih\DataTransaksiResource;
 use App\Models\DataPenerimaanSelisih;
 use App\Models\DataRekeningKoran;
-use Dflydev\DotAccessData\Data;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class SelisihKasDataTransaksiController extends Controller
+class DataTransaksiController extends Controller
 {
     public function index(Request $request)
     {
@@ -34,9 +33,11 @@ class SelisihKasDataTransaksiController extends Controller
                 'jenis'             => 'nullable|string',
                 'rekening_dpa'      => 'nullable|string',
                 'jumlah'            => 'nullable|numeric',
+                'nilai'             => 'nullable|numeric',
                 'sumber_transaksi'  => 'nullable|string',
                 'bank_tujuan'       => 'nullable|string',
                 'cara_pembayaran'   => 'nullable|string',
+                'export'            => 'nullable',
             ]);
 
             $query = DataPenerimaanSelisih::query();
@@ -89,6 +90,10 @@ class SelisihKasDataTransaksiController extends Controller
                 $query->whereHas('rekening_dpa', function ($sub) use ($params) {
                     $sub->where('rek_nama', 'ILIKE', "%{$params['rekening_dpa']}%");
                 });
+            }
+
+            if ($request->filled('nilai')) {
+                $query->where('nilai', 'ILIKE', "%{$params['nilai']}%");
             }
 
             if ($request->filled('jumlah')) {
