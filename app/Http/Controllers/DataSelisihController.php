@@ -13,122 +13,154 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class DataSelisihController extends Controller
 {
     public function index(Request $request)
     {
         try {
-            $request->validate([
-                'page' => 'nullable|integer|min:1',
-                'size' => 'nullable|integer|min:1',
-                'tahunPeriode' => 'nullable|string',
-                'periode' => 'nullable|string',
-                'tglAwal' => 'nullable|string',
-                'tglAkhir' => 'nullable|string',
-                'noBukti' => 'nullable|string',
-                'tglBukti' => 'nullable|string',
-                // 'tglSetor' => 'nullable|string',
-                'noSetor' => 'nullable|string',
-                'nominal' => 'nullable|string',
-                'rekeningDpa' => 'nullable|string',
-                'loketKasir' => 'nullable|string',
-                'caraPembayaran' => 'nullable|string',
-                'bank' => 'nullable|string',
-                'jenis' => 'nullable|string',
+            $params = $request->validate([
+                'periode'           => 'nullable|string',
+                'tgl_awal'          => 'nullable|date',
+                'tgl_akhir'         => 'nullable|date',
+                'page'              => 'nullable|integer|min:1',
+                'per_page'          => 'nullable|integer|min:1',
+                'sort_field'        => 'nullable|string',
+                'sort_order'        => 'nullable|numeric|in:1,-1',
+                //
+                'is_valid'          => 'nullable',
+                'tgl_setor'         => 'nullable|date',
+                'no_buktibayar'     => 'nullable|string',
+                'tgl_buktibayar'    => 'nullable|date',
+                'penyetor'          => 'nullable|string',
+                'jenis'             => 'nullable|string',
+                'rekening_dpa'      => 'nullable|string',
+                'jumlah'            => 'nullable|numeric',
+                'nilai'             => 'nullable|numeric',
+                'sumber_transakasi'  => 'nullable|string',
+                'bank_tujuan'       => 'nullable|string',
+                'cara_pembayaran'   => 'nullable|string',
+                'export'            => 'nullable',
             ]);
-
-            $page = $request->input('page', 1) ?? 1;
-            $size = $request->input('size', 100) ?? 100;
-            $tahunPeriode = $request->input('tahunPeriode');
-            $periode = $request->input('periode');
-            $tglAwal = $request->input('tglAwal');
-            $tglAkhir = $request->input('tglAkhir');
-            $noBukti = $request->input('noBukti');
-            $tglBukti = $request->input('tglBukti');
-            // $tglSetor = $request->input('tglSetor');
-            $noSetor = $request->input('noSetor');
-            $nominal = $request->input('nominal');
-            $rekeningDpa = $request->input('rekeningDpa');
-            $loketKasir = $request->input('loketKasir');
-            $caraPembayaran = $request->input('caraPembayaran');
-            $bank = $request->input('bank');
-            $jenis = $request->input('jenis');
 
             $query = DataSelisihView::query();
 
-            if (!empty($tahunPeriode)) {
-                $query->whereYear('tgl_bayar', (int)$tahunPeriode);
-            }
-            if (!empty($tglAwal) && !empty($tglAkhir) && $periode == "TANGGAL") {
-                $startDate = Carbon::parse($tglAwal)->startOfDay();
-                $endDate = Carbon::parse($tglAkhir)->endOfDay();
-                $query->whereBetween('tgl_bukti', [$startDate, $endDate]);
-            }
-            if (!empty($tglAwal) && !empty($tglAkhir) && $periode === "BULANAN") {
-                $startMonth = Carbon::parse($tglAwal)->format('m');
-                $endMonth = Carbon::parse($tglAkhir)->format('m');
-                $query->whereBetween('tgl_bukti', [$startMonth, $endMonth]);
-            }
-            if (!empty($noBukti)) {
-                $query->where('no_buktibayar', 'ILIKE', "%$noBukti%");
-            }
-            if (!empty($tglBukti)) {
-                $query->whereDate('tgl_bukti', $tglBukti);
-            }
-            // if (!empty($tglSetor)) {
-            //     $query->where('tgl_setor', $tglSetor);
-            // }
-            if (!empty($noSetor)) {
-                $query->where('no_setor', 'ILIKE', "%$noSetor%");
-            }
-            if (!empty($nominal)) {
-                $query->where('nilai', 'ILIKE', "%$nominal%");
-            }
-            if (!empty($rekeningDpa)) {
-                $query->where('rek_id', 'ILIKE', "%$rekeningDpa%");
-            }
-            if (!empty($loketKasir)) {
-                $query->where('loket_nama', 'ILIKE', "%$loketKasir%");
-            }
-            if (!empty($caraPembayaran)) {
-                $query->where('cara_pembayaran', $caraPembayaran);
-            }
-            if (!empty($bank)) {
-                $query->where('bank_tujuan', 'ILIKE', "%$bank%");
-            }
-            if (!empty($jenis)) {
-                $query->where('jenis', 'ILIKE', "%$jenis%");
+            // Filter periode tanggal
+            if ($this->isPeriodeHarian($request)) {
+                $query->whereBetween('tgl_setor', [
+                    Carbon::parse($params['tgl_awal'])->startOfDay(),
+                    Carbon::parse($params['tgl_akhir'])->endOfDay()
+                ]);
+            } else if ($this->isPeriodeBulanan($request)) {
+                $query->whereBetween('tgl_setor', [
+                    Carbon::parse($params['tgl_awal'])->startOfMonth(),
+                    Carbon::parse($params['tgl_akhir'])->endOfMonth()
+                ]);
             }
 
-            $totalItems = $query->count();
-            $items = $query->skip(($page - 1) * $size)->take($size)->orderBy('tgl_bukti', 'desc')->orderBy('tgl_bukti', 'desc')->get();
+            if ($request->has('is_valid')) {
+                $query->where(function ($query) use ($params) {
+                    $validated = $params['is_valid'] ?? null;
+                    if ($validated == true) {
+                        $query->whereNotNull('rc_id')->where('rc_id', '>', 0);
+                    } elseif ($validated == '0') {
+                        $query->whereNull('rc_id');
+                    }
+                });
+            };
 
-            $totalPages = ceil($totalItems / $size);
+            if ($request->filled('tgl_setor')) {
+                $query->where('tgl_setor', 'ILIKE', "%{$params['tgl_setor']}%");
+            }
 
-            return response()->json(
-                new DataSelisihCollection($items, $totalItems, $page, $size, $totalPages)
-            );
-        } catch (ValidationException $e) {
-            $errors = [];
-            foreach ($e->errors() as $field => $messages) {
-                foreach ($messages as $message) {
-                    $errors[] = [
-                        'loc' => ['query', $field],
-                        'msg' => $message,
-                        'type' => 'validation',
-                    ];
+            if ($request->filled('no_buktibayar')) {
+                $query->where('no_buktibayar', 'ILIKE', "%{$params['no_buktibayar']}%");
+            }
+
+            if ($request->filled('tgl_buktibayar')) {
+                $query->where('tgl_buktibayar', 'ILIKE', "%{$params['tgl_buktibayar']}%");
+            }
+
+            if ($request->filled('penyetor')) {
+                $query->where('penyetor', 'ILIKE', "%{$params['penyetor']}%");
+            }
+
+            if ($request->filled('jenis')) {
+                $query->where('jenis', 'ILIKE', "%{$params['jenis']}%");
+            }
+
+            if ($request->filled('rekening_dpa')) {
+                $query->whereHas('rekening_dpa', function ($sub) use ($params) {
+                    $sub->where('rek_nama', 'ILIKE', "%{$params['rekening_dpa']}%");
+                });
+            }
+
+            if ($request->filled('nilai')) {
+                $query->where('nilai', 'ILIKE', "%{$params['nilai']}%");
+            }
+
+            if ($request->filled('jumlah')) {
+                $query->where('jumlah', 'ILIKE', "%{$params['jumlah']}%");
+            }
+
+            if ($request->filled('sumber_transaksi')) {
+                $query->where('sumber_transaksi', 'ILIKE', "%{$params['sumber_transaksi']}%");
+            }
+
+            if ($request->filled('bank_tujuan')) {
+                $query->where('bank_tujuan', 'ILIKE', "%{$params['bank_tujuan']}%");
+            }
+
+            if ($request->filled('cara_pembayaran')) {
+                $query->where('cara_pembayaran', 'ILIKE', "%{$params['cara_pembayaran']}%");
+            }
+
+
+            // Sort order
+            if ($request->has('sort_field') && $request->has('sort_order')) {
+                $sortField = $params['sort_field'];
+
+                switch ($sortField) {
+                    case 'is_valid':
+                        $sortField = 'rc_id';
+                        break;
                 }
+
+                $query->orderBy($sortField, $params['sort_order'] == -1 ? 'desc' : 'asc');
+            } else {
+                $query->orderBy('created_at', 'desc');
             }
-            return response()->json([
-                'detail' => $errors
-            ], 422);
+
+
+            if ($request->has('export')) {
+                return response()->json($query->get());
+            }
+
+            return response()->json($query->paginate($params['per_page'] ?? 10));
         } catch (\Exception $e) {
+            Log::error('Error in DataSelisihController@index: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Terjadi kesalahan pada server.',
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    private function isPeriodeBulanan(Request $request)
+    {
+        return $request->has('periode')
+            && $request->has('tgl_awal')
+            && $request->has('tgl_akhir')
+            && $request->periode === 'BULANAN';
+    }
+
+    private function isPeriodeHarian(Request $request)
+    {
+        return $request->has('periode')
+            && $request->has('tgl_awal')
+            && $request->has('tgl_akhir')
+            && $request->periode === 'TANGGAL';
     }
 
     public function show(string $id)

@@ -38,7 +38,7 @@ use App\Http\Controllers\DataPenerimaanSelisihController;
 use App\Http\Controllers\PendapatanPenjamin1Controller;
 use App\Http\Controllers\RincianPotensiPelayananController;
 use App\Http\Controllers\PenerimaanLainSetorController;
-use App\Http\Controllers\SelisihKasDataTransaksiController;
+use App\Http\Controllers\DataTransaksiController;
 
 Route::post('auth/login_token', [AuthController::class, 'login']);
 Route::post('auth/logintoken', [AuthController::class, 'loginToken']);
@@ -311,13 +311,12 @@ Route::delete('kurangbayar/penerimaan_selisih/{id}', [PenerimaanSelisihControlle
 Route::group([
     'middleware' => 'auth:jwt',
 ], function() {
-
     Route::get('kurangbayar/data_selisih', [DataSelisihController::class, 'index']);
     Route::get('kurangbayar/data_selisih/{id}', [DataSelisihController::class, 'show']);
 
-    Route::resource('kurangbayar/data_transaksi', SelisihKasDataTransaksiController::class);
-    Route::post('kurangbayar/data_transaksi/validation', [SelisihKasDataTransaksiController::class, 'validasi']);
-    Route::post('kurangbayar/data_transaksi/cancel_validation', [SelisihKasDataTransaksiController::class, 'cancelValidasi']);
+    Route::resource('kurangbayar/data_transaksi',DataTransaksiController::class);
+    Route::post('kurangbayar/data_transaksi/validation', [DataTransaksiController::class, 'validasi']);
+    Route::post('kurangbayar/data_transaksi/cancel_validation', [DataTransaksiController::class, 'cancelValidasi']);
 });
 
 Route::get('selisih-kas', [SelisihKasController::class, 'index']);

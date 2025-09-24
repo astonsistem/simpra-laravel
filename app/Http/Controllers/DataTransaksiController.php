@@ -6,13 +6,12 @@ use App\Http\Requests\KurangBayar\DataTransaksiStoreRequest;
 use App\Http\Resources\Selisih\DataTransaksiResource;
 use App\Models\DataPenerimaanSelisih;
 use App\Models\DataRekeningKoran;
-use Dflydev\DotAccessData\Data;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class SelisihKasDataTransaksiController extends Controller
+class DataTransaksiController extends Controller
 {
     public function index(Request $request)
     {
