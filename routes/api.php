@@ -313,6 +313,7 @@ Route::group([
 ], function() {
     Route::get('kurangbayar/data_selisih', [DataSelisihController::class, 'index']);
     Route::get('kurangbayar/data_selisih/{id}', [DataSelisihController::class, 'show']);
+    Route::post('kurangbayar/data_selisih', [DataSelisihController::class, 'store']);
 
     Route::resource('kurangbayar/data_transaksi',DataTransaksiController::class);
     Route::post('kurangbayar/data_transaksi/validation', [DataTransaksiController::class, 'validasi']);

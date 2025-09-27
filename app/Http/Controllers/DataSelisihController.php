@@ -2,18 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\CreateDataSelisihRequest;
-use App\Http\Resources\DataSelisihCollection;
-use App\Http\Resources\DataSelisihResource;
-use App\Models\DataPenerimaanSelisih;
-use App\Models\DataSelisihView;
+use Carbon\Carbon;
 use App\Models\Kasir;
 use App\Models\Loket;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
-use Carbon\Carbon;
+use App\Models\DataSelisihView;
 use Illuminate\Support\Facades\Log;
+use App\Models\DataPenerimaanSelisih;
+use Illuminate\Support\Facades\Validator;
+use App\Http\Resources\Selisih\DataSelisihResource;
+use App\Http\Resources\DataSelisihCollection;
+use Illuminate\Validation\ValidationException;
+use App\Http\Requests\CreateDataSelisihRequest;
+use App\Http\Requests\KurangBayar\DataTransaksiStoreRequest;
+use App\Http\Resources\Selisih\DataTransaksiResource;
 
 class DataSelisihController extends Controller
 {
@@ -116,6 +119,7 @@ class DataSelisihController extends Controller
                 $query->where('cara_pembayaran', 'ILIKE', "%{$params['cara_pembayaran']}%");
             }
 
+            $query->withExists('dataTransaksi');
 
             // Sort order
             if ($request->has('sort_field') && $request->has('sort_order')) {
@@ -129,7 +133,7 @@ class DataSelisihController extends Controller
 
                 $query->orderBy($sortField, $params['sort_order'] == -1 ? 'desc' : 'asc');
             } else {
-                $query->orderBy('created_at', 'desc');
+                $query->orderBy('tgl_bukti', 'desc');
             }
 
 
@@ -137,9 +141,74 @@ class DataSelisihController extends Controller
                 return response()->json($query->get());
             }
 
-            return response()->json($query->paginate($params['per_page'] ?? 10));
+            return DataSelisihResource::collection( $query->paginate($params['per_page'] ?? 10) );
         } catch (\Exception $e) {
             Log::error('Error in DataSelisihController@index: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Terjadi kesalahan pada server.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function show(Request $request,string $id)
+    {
+        try {
+            if(Str::isUuid($id === false)) {
+                throw new \Exception('ID tidak valid.');
+            }
+
+            $dataSelisih = DataSelisihView::where('id', $id)->first();
+
+            if (!$dataSelisih) {
+               throw new \Exception('Data selisih tidak ditemukan.');
+            }
+
+            $dataTransaksi = DataPenerimaanSelisih::where('sumber_id', $id)->exists();
+
+            return response()->json([
+                'success' => true,
+                'data' => new DataSelisihResource($dataSelisih),
+                'exists_data_transaksi' => $dataTransaksi
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan pada server.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function store(DataTransaksiStoreRequest $request)
+    {
+        try {
+            // if empty sumber_id
+            if (empty($request->sumber_id) || !$request->sumber_id) {
+                throw new \Exception('Sumber ID tidak boleh kosong.');
+            }
+
+            $validatedData = $request->validated();
+
+
+            if(isset($validatedData['id'])) {
+                unset($validatedData['id']);
+            }
+
+            if(isset($validatedData['nilai'])) {
+                $validatedData['selisih'] = $validatedData['nilai'];
+            }
+            Log::info('Validated Data: ' . json_encode($validatedData));
+
+            $dataSelisih = DataPenerimaanSelisih::where('sumber_id', $request->sumber_id)->updateOrCreate([
+                'sumber_id' => $request->sumber_id
+            ], $validatedData);
+
+            return response()->json([
+                'success' => true,
+                'data' => new DataSelisihResource($dataSelisih)
+            ]);
+        }  catch (\Exception $e) {
+            Log::error('Error in DataSelisihController@store: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Terjadi kesalahan pada server.',
                 'error' => $e->getMessage()
@@ -161,113 +230,5 @@ class DataSelisihController extends Controller
             && $request->has('tgl_awal')
             && $request->has('tgl_akhir')
             && $request->periode === 'TANGGAL';
-    }
-
-    public function show(string $id)
-    {
-        try {
-            $validator = Validator::make(['id' => $id], [
-                'id' => 'required',
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'detail' => [
-                        [
-                            'loc' => ['path', 'id'],
-                            'msg' => 'ID is required.',
-                            'type' => 'validation'
-                        ]
-                    ]
-                ], 422);
-            }
-
-            $dataSelisih = DataSelisihView::where('id', $id)->first();
-
-            if (!$dataSelisih) {
-                return response()->json([
-                    'message' => 'Not found.'
-                ], 404);
-            }
-            return response()->json(
-                new DataSelisihResource($dataSelisih)
-            );
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Terjadi kesalahan pada server.',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    public function store(CreateDataSelisihRequest $request, string $id)
-    {
-        try {
-            $validator = Validator::make(['id' => $id], [
-                'id' => 'required',
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'detail' => [
-                        [
-                            'loc' => ['path', 'id'],
-                            'msg' => 'ID is required.',
-                            'type' => 'validation'
-                        ]
-                    ]
-                ], 422);
-            }
-
-            // Seharusnya ini adalah update, bukan create.
-            // Cek kembali fungsionalitas yang diinginkan.
-            $dataSelisih = DataPenerimaanSelisih::find($id);
-
-            if (!$dataSelisih) {
-                return response()->json([
-                    'message' => 'Not found.'
-                ], 404);
-            }
-
-            $data = $request->validated();
-
-            $kasir = null;
-            $loket = null;
-            if ($request->has('kasir_id')) {
-                $kasir = Kasir::find($request->input('kasir_id'));
-                $data['kasir_nama'] = $kasir ? $kasir->nama : null;
-            }
-            if ($request->has('loket_id')) {
-                $loket = Loket::find($request->input('loket_id'));
-                $data['loket_nama'] = $loket ? $loket->nama : null;
-            }
-
-            // Metode 'create' pada instance model yang ada tidak valid.
-            // Seharusnya menggunakan 'update' atau 'fill' lalu 'save'.
-            $dataSelisih->update($data);
-
-            return response()->json(
-                new DataSelisihResource($dataSelisih)
-            );
-        } catch (ValidationException $e) {
-            $errors = [];
-            foreach ($e->errors() as $field => $messages) {
-                foreach ($messages as $message) {
-                    $errors[] = [
-                        'loc' => ['body', $field],
-                        'msg' => $message,
-                        'type' => 'validation',
-                    ];
-                }
-            }
-            return response()->json([
-                'detail' => $errors
-            ], 422);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Terjadi kesalahan pada server.',
-                'error' => $e->getMessage()
-            ], 500);
-        }
     }
 }

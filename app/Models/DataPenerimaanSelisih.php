@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class DataPenerimaanSelisih extends Model
 {
@@ -14,7 +15,6 @@ class DataPenerimaanSelisih extends Model
     protected $table = 'data_penerimaan_selisih';
 
     protected $fillable = [
-        'id',
         'admin_debit',
         'admin_kredit',
         'akun_id',
@@ -60,6 +60,12 @@ class DataPenerimaanSelisih extends Model
     public function rekeningDpa(): BelongsTo
     {
         return $this->belongsTo(MasterRekeningView::class, 'rek_id', 'rek_id');
+    }
+
+    // selisih view
+    public function selisihView(): HasOne
+    {
+        return $this->hasOne(DataSelisihView::class, 'sumber_id', 'id');
     }
 
     protected function isValid(): Attribute

@@ -104,6 +104,8 @@ class PenerimaanSelisihController extends Controller
                 $query->where('jenis', 'ILIKE', "%$jenis%");
             }
 
+            $query->with(['rekeningDpa']);
+
             $totalItems = $query->count();
             $items = $query->skip(($page - 1) * $size)->take($size)->orderBy('tgl_setor', 'desc')->orderBy('tgl_setor', 'desc')->get();
 
