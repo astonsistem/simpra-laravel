@@ -60,6 +60,7 @@ class DataTransaksiStoreRequest extends FormRequest
             'penyetor'              => 'nullable|string',
             'rek_id'                => 'nullable',
             'sumber_transaksi'      => 'nullable',
+            'sumber_id'             => 'nullable',
             'tgl_buktibayar'        => 'nullable|date',
             'tgl_setor'             => 'required|date',
 

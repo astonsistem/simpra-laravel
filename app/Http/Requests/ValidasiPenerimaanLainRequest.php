@@ -18,29 +18,16 @@ class ValidasiPenerimaanLainRequest extends FormRequest
         return [
             'id'    => 'required|string',
             'rc_id' => 'required',
-            'akun_id' => 'required',
+            'akun_id' => 'nullable',
         ];
     }
 
-    public function messages(): array
+    public function attributes(): array
     {
         return [
-            'id.required'       => 'ID penerimaan layanan is required.',
-            'rc_id.required'    => 'RC ID is required.',
-            'akun_id.required'  => 'AKUN ID is required.',
+            'id'    => 'ID penerimaan layanan',
+            'rc_id' => 'RC ID',
+            'akun_id' => 'AKUN ID',
         ];
-    }
-
-    protected function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(response()->json([
-            'detail' => collect($validator->errors())->map(function ($message, $field) {
-                return [
-                    'loc' => [$field, 0],
-                    'msg' => $message[0],
-                    'type' => 'validation_error'
-                ];
-            })->values()
-        ], 422));
     }
 }
