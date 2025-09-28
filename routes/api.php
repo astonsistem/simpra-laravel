@@ -209,7 +209,6 @@ Route::post('penerimaan_lain', [PenerimaanLainController::class, 'store']);
 Route::post('penerimaan_lain/list', [PenerimaanLainController::class, 'list']);
 Route::post('penerimaan_lain/createdata', [PenerimaanLainController::class, 'createData']);
 Route::put('penerimaan_lain/editdata/{id}', [PenerimaanLainController::class, 'updateEditData']);
-Route::put('penerimaan_lain/validasi/penerimaan_lain', [PenerimaanLainController::class, 'updateValidasi']);
 Route::put('penerimaan_lain/cancel_validasi/penerimaan_lain', [PenerimaanLainController::class, 'cancelValidasi']);
 Route::put('penerimaan_lain/{id}', [PenerimaanLainController::class, 'update']);
 Route::delete('penerimaan_lain/{id}', [PenerimaanLainController::class, 'destroy']);
