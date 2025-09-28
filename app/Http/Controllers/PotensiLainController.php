@@ -216,6 +216,38 @@ class PotensiLainController extends Controller
         }
     }
 
+    public function tarik(Request $request)
+    {
+        try {
+            $request->validate([
+                'tgl_dokumen' => 'nullable|string',
+            ]);
+
+            $potensiLainSiesta = (new DokumenNonlayanan)->setTable('simpra_potensilain_ft')->whereDate('tgl_dokumen', $request->tgl_dokumen)->get();
+            $count = 0;
+            foreach ($potensiLainSiesta as $pl) {
+                // Check if data already exist in table dokumen_nonlayanan (based on id)
+                $exist = DokumenNonlayanan::where('id', $pl->id)->exists();
+                // Insert if data not exist yet
+                if (!$exist) {
+                    DokumenNonlayanan::create($pl->toArray());
+                    $count++;
+                }
+            }
+
+            return response()->json([
+                'status' => 200,
+                'count' => $count,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => 500,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+                'data'    => null
+            ], 500);
+        }
+    }    
+
     public function store(PotensiLainRequest $request)
     {
         try {

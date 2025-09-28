@@ -10,23 +10,25 @@ class BkuResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            "bku_id" => $this->bku_id,
-            "tgl" => $this->tgl,
-            "ket" => $this->ket,
-            "no_bku" => $this->no_bku,
-            "tgl_bku" => $this->tgl_bku,
-            "tgl_valid" => $this->tgl_valid,
-            "jenis" => $this->jenis,
-            "pad_id" => $this->pad_id,
-            "pad_tgl" => $this->pad_tgl,
-            "uraian" => $this->uraian,
-            "nourut_bku" => $this->nourut_bku,
-            "jumlah" => $this->jumlah,
-            "pendapatan" => $this->pendapatan,
-            "pdd" => $this->pdd,
-            "piutang" => $this->piutang,
-            "is_web_change" => $this->is_web_change,
-            "rincian" => []
+            'bku_id'        => (int) $this->bku_id,
+            'tgl'           => (string) $this->tgl,
+            'ket'           => (string) $this->ket,
+            'no_bku'        => (string) $this->no_bku,
+            'tgl_bku'       => (string) $this->tgl_bku,
+            'tgl_valid'     => (string) $this->tgl_valid,
+            'jenis'         => (int) $this->jenis,
+            'jenisbku_id'   => (int) $this->jenisbku_id,
+            'jenisbku_nama' => (string) $this->jenisbku_nama,
+            'pad_id'        => (int) $this->pad_id,
+            'pad_tgl'       => (string) $this->pad_tgl,
+            'uraian'        => (string) $this->uraian,
+            'nourut_bku'    => (int) $this->nourut_bku,
+            'total'         => (int) $this->total,
+            'pendapatan'    => (int) $this->pendapatan,
+            'pdd'           => (int) $this->pdd,
+            'piutang'       => (int) $this->piutang,
+            'status'        => (string) $this->status,
+            'rincian'       => RincianBKUResource::collection($this->rincian)
         ];
     }
 }

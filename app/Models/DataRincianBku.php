@@ -7,13 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class DataRincianBku extends Model
 {
     protected $table = "data_rincian_bku";
-    protected $keyType = 'string';
     protected $primaryKey = 'rincian_id';
-    public $incrementing = false;
     public $timestamps = false;
 
     protected $fillable = [
-        'rincian_id',
         'bku_id',
         'ket',
         'uraian',
@@ -24,11 +21,23 @@ class DataRincianBku extends Model
         'pdd',
         'piutang',
         'pad_rinci',
-        'no_bku',
         'is_web_change',
     ];
 
-    protected $casts = [
-        'id' => 'string',
+    protected $with = [
+        'akun',
     ];
+
+    protected $appends = [
+        'akun_nama',
+    ];
+
+    public function akun()
+    {
+        return $this->belongsTo(MasterAkun::class, 'akun_id', 'akun_id');
+    }
+    public function getAkunNamaAttribute()
+    {
+        return $this->akun?->akun_nama;
+    }
 }
