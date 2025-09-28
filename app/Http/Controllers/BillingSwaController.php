@@ -30,6 +30,7 @@ class BillingSwaController extends Controller
                 'periode' => 'nullable|string',
                 'noBayar' => 'nullable|string',
                 'tglBayar' => 'nullable|string',
+                'pihak3' => 'nullable|string',
                 'pasien' => 'nullable|string',
                 'uraian' => 'nullable|string',
                 'noDokumen' => 'nullable|string',
@@ -121,6 +122,49 @@ class BillingSwaController extends Controller
             }
             if (!empty($jumlahNetto)) {
                 $query->where('jumlah_netto', 'LIKE', "%$jumlahNetto%");
+            }
+
+            $query->when(!empty($params['pihak3']), function ($q) use ($params) {
+                $q->where('pihak3', 'ILIKE', '%' . $params['pihak3'] . '%');
+            });
+
+            $query->when(!empty($params['rekeningDpa']), function ($q) use ($params) {
+                $q->whereHas('rekeningDpa', function ($q) use ($params) {
+                    $q->where('rek_nama', 'ILIKE', '%' . $params['rekeningDpa'] . '%')
+                      ->orWhere('rek_id', $params['rekeningDpa']);
+                });
+            });
+
+            $query->when(!empty($params['jumlahBrutoMin']), function ($q) use ($params) {
+                $operator = empty($params['jumlahBrutoMax']) ? '=' : '>=';
+                $q->where('total', $operator, $params['jumlahBrutoMin']);
+            });
+
+            $query->when(!empty($params['jumlahBrutoMax']), function ($q) use ($params) {
+                $operator = empty($params['jumlahBrutoMin']) ? '=' : '<=';
+                $q->where('total', $operator, $params['jumlahBrutoMax']);
+            });
+
+            // Filter Netto
+            $query->when(!empty($params['jumlahNettoMin']), function ($q) use ($params) {
+                $operator = empty($params['jumlahNettoMax']) ? '=' : '>=';
+                $q->where('jumlah_netto', $operator, $params['jumlahNettoMin']);
+            });
+
+            $query->when(!empty($params['jumlahNettoMax']), function ($q) use ($params) {
+                $operator = empty($params['jumlahNettoMin']) ? '=' : '<=';
+                $q->where('jumlah_netto', $operator, $params['jumlahNettoMax']);
+            });
+
+            if($request->has('validated')) {
+                $query->where(function($query) use ($params) {
+                    $validated = $params['validated'] ?? null;
+                    if($validated == '1') {
+                        $query->whereNotNull('rc_id')->where('rc_id', '>', 0);
+                    } elseif($validated == '0') {
+                        $query->whereNull('rc_id');
+                    }
+                });
             }
 
             $query->orderBy('tgl_bayar', 'desc')->orderBy('no_bayar', 'desc')->with('masterAkun');
