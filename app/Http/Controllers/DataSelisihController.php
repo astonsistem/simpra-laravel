@@ -164,12 +164,15 @@ class DataSelisihController extends Controller
                throw new \Exception('Data selisih tidak ditemukan.');
             }
 
-            $dataTransaksi = DataPenerimaanSelisih::where('sumber_id', $id)->exists();
+            $dataTransaksi = DataPenerimaanSelisih::where('sumber_id', $id);
+
+
 
             return response()->json([
                 'success' => true,
                 'data' => new DataSelisihResource($dataSelisih),
-                'exists_data_transaksi' => $dataTransaksi
+                'exists_data_transaksi' => $dataTransaksi->exists(),
+                'data_transaksi' => DataTransaksiResource::collection($dataTransaksi->get())
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -182,12 +185,13 @@ class DataSelisihController extends Controller
     public function store(DataTransaksiStoreRequest $request)
     {
         try {
+            $validatedData = $request->validated();
+
             // if empty sumber_id
-            if (empty($request->sumber_id) || !$request->sumber_id) {
+            if (empty($validatedData['sumber_id']) || !$validatedData['sumber_id']) {
                 throw new \Exception('Sumber ID tidak boleh kosong.');
             }
 
-            $validatedData = $request->validated();
 
 
             if(isset($validatedData['id'])) {
@@ -199,9 +203,7 @@ class DataSelisihController extends Controller
             }
             Log::info('Validated Data: ' . json_encode($validatedData));
 
-            $dataSelisih = DataPenerimaanSelisih::where('sumber_id', $request->sumber_id)->updateOrCreate([
-                'sumber_id' => $request->sumber_id
-            ], $validatedData);
+            $dataSelisih = DataPenerimaanSelisih::create($validatedData);
 
             return response()->json([
                 'success' => true,
@@ -210,7 +212,7 @@ class DataSelisihController extends Controller
         }  catch (\Exception $e) {
             Log::error('Error in DataSelisihController@store: ' . $e->getMessage());
             return response()->json([
-                'message' => 'Terjadi kesalahan pada server.',
+                'message' => $e->getMessage() ?? 'Terjadi kesalahan pada server.',
                 'error' => $e->getMessage()
             ], 500);
         }

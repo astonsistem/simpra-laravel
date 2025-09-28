@@ -135,7 +135,7 @@ class DataTransaksiController extends Controller
 
             return DataTransaksiResource::collection($query->paginate($params['per_page'] ?? 10));
         } catch (\Exception $e) {
-            Log::error('Error in SelisihKasDataTransaksiController@index: ' . $e->getMessage());
+            Log::error('Error in DataTransaksiController@index: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Terjadi kesalahan pada server.',
                 'error' => $e->getMessage()
@@ -180,7 +180,7 @@ class DataTransaksiController extends Controller
                 'data' => $data
             ]);
         } catch (\Exception $e) {
-            Log::error('Error in SelisihKasDataTransaksiController@store: ' . $e->getMessage());
+            Log::error('Error in DataTransaksiController@store: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Terjadi kesalahan pada server.',
                 'error' => $e->getMessage()
@@ -200,7 +200,7 @@ class DataTransaksiController extends Controller
 
             return new DataTransaksiResource($data);
         } catch (\Exception $e) {
-            Log::error('Error in SelisihKasDataTransaksiController@show: ' . $e->getMessage());
+            Log::error('Error in DataTransaksiController@show: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'Terjadi kesalahan pada server.',
@@ -232,7 +232,7 @@ class DataTransaksiController extends Controller
                 'data' => $data
             ]);
         } catch (\Exception $e) {
-            Log::error('Error in SelisihKasDataTransaksiController@update: ' . $e->getMessage());
+            Log::error('Error in DataTransaksiController@update: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Terjadi kesalahan pada server.',
                 'error' => $e->getMessage()
@@ -260,7 +260,7 @@ class DataTransaksiController extends Controller
                 'message' => 'Berhasil menghapus data'
             ], 200);
         } catch (\Exception $e) {
-            Log::error('Error in SelisihKasDataTransaksiController@destroy: ' . $e->getMessage());
+            Log::error('Error in DataTransaksiController@destroy: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Terjadi kesalahan pada server.',
                 'error' => $e->getMessage()
@@ -312,7 +312,7 @@ class DataTransaksiController extends Controller
                 'status'  => 200,
             ], 200);
         } catch (\Exception $e) {
-            Log::error('Error in SelisihKasDataTransaksiController@validasi: ' . $e->getMessage());
+            Log::error('Error in DataTransaksiController@validasi: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Terjadi kesalahan saat validasi penerimaan lain.',
                 'error'   => $e->getMessage(),
@@ -365,7 +365,7 @@ class DataTransaksiController extends Controller
                 'status'  => 200,
             ], 200);
         } catch (\Exception $e) {
-            Log::error('Error in SelisihKasDataTransaksiController@cancelValidasi: ' . $e->getMessage());
+            Log::error('Error in DataTransaksiController@cancelValidasi: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Terjadi kesalahan saat membatalkan validasi penerimaan lain.',
                 'error'   => $e->getMessage(),
