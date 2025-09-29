@@ -37,6 +37,7 @@ use App\Http\Controllers\SelisihKasController;
 use App\Http\Controllers\DataPenerimaanSelisihController;
 use App\Http\Controllers\PendapatanPenjamin1Controller;
 use App\Http\Controllers\RincianPotensiPelayananController;
+use App\Http\Controllers\RincianBkuController;
 use App\Http\Controllers\PenerimaanLainSetorController;
 use App\Http\Controllers\DataTransaksiController;
 
@@ -133,6 +134,7 @@ Route::put('rincian_potensi_pelayanan/daftarkan/{id}', [RincianPotensiPelayananC
 Route::get('potensi_lainnya', [PotensiLainController::class, 'index']);
 Route::get('potensi_lainnya/{id}', [PotensiLainController::class, 'show']);
 Route::post('potensi_lainnya', [PotensiLainController::class, 'store']);
+Route::post('potensi_lainnya/tarik', [PotensiLainController::class, 'tarik']);
 Route::post('potensi_lainnya/terima', [PotensiLainController::class, 'terima']);
 Route::put('potensi_lainnya/{id}', [PotensiLainController::class, 'update']);
 Route::delete('potensi_lainnya/{id}', [PotensiLainController::class, 'destroy']);
@@ -143,6 +145,25 @@ Route::put('rincian_potensi_lainnya/daftarkan/{id}', [PotensiLainController::cla
 
 Route::get('bukti_setor', [BuktiSetorController::class, 'index']);
 Route::get('bukti_setor/{id}', [BuktiSetorController::class, 'show']);
+
+Route::get('bku', [BkuController::class, 'index']);
+Route::get('bku/validasi/{id}', [BkuController::class, 'validasi']);
+Route::get('bku/batal_validasi/{id}', [BkuController::class, 'batalValidasi']);
+Route::get('bku/kirim_pad/{id}', [BkuController::class, 'kirimPAD']);
+Route::get('bku/{id}', [BkuController::class, 'show']);
+Route::post('bku', [BkuController::class, 'store']);
+Route::put('bku/{id}', [BkuController::class, 'update']);
+Route::delete('bku/{id}', [BkuController::class, 'destroy']);
+
+Route::get('jenis_bku/list', [BkuController::class, 'list_jenisbku']);
+
+Route::get('rincian_bku', [RincianBkuController::class, 'index']);
+Route::get('rincian_bku/{id}', [RincianBkuController::class, 'show']);
+Route::post('rincian_bku', [RincianBkuController::class, 'store']);
+Route::put('rincian_bku/{id}', [RincianBkuController::class, 'update']);
+Route::delete('rincian_bku/{id}', [RincianBkuController::class, 'destroy']);
+
+Route::get('rekening/list', [RincianBkuController::class, 'list_rekening']);
 
 Route::middleware([
     'middleware' => 'auth:jwt',
@@ -243,26 +264,6 @@ Route::post('rekening_koran/sinkronisasi-api/{bank}', [RekeningKoranController::
 Route::put('rekening_koran/{id}', [RekeningKoranController::class, 'update']);
 Route::put('rekening_koran/pb/{id}', [RekeningKoranController::class, 'updatePb']);
 Route::put('rekening_koran/pb_cancel/{id}', [RekeningKoranController::class, 'updatePbCancel']);
-
-Route::get('bku', [BkuController::class, 'index']);
-Route::get('bku/list', [BkuController::class, 'list']);
-Route::get('bku/bku', [BkuController::class, 'bku']);
-Route::get('bku/statistik', [BkuController::class, 'statistik']);
-Route::get('bku/rincian/{id}', [BkuController::class, 'rincian']);
-Route::get('bku/rincian/detail/{id}', [BkuController::class, 'detailRincian']);
-Route::get('bku/{id}', [BkuController::class, 'show']);
-Route::post('bku', [BkuController::class, 'store']);
-Route::post('bku/listbku', [BkuController::class, 'listbku']);
-Route::post('bku/bku_post', [BkuController::class, 'listbku']);
-Route::post('bku/all_bku', [BkuController::class, 'listbku']);
-Route::post('bkurincian', [BkuController::class, 'bkurincian']);
-Route::put('bku/{id}', [BkuController::class, 'index']);
-Route::put('bku/bku_put/{id}', [BkuController::class, 'index']);
-Route::put('bku/rincian/{id}', [BkuController::class, 'index']);
-Route::put('bku/validasi/{id}', [BkuController::class, 'updateValidasi']);
-Route::put('bku/cancel-validasi/{id}', [BkuController::class, 'cancelValidasi']);
-Route::delete('bku/{id}', [BkuController::class, 'destroy']);
-Route::delete('bku/rincian/{id}', [BkuController::class, 'destroyRincian']);
 
 Route::get('statistik/dashboard', [StatistikController::class, 'index']);
 

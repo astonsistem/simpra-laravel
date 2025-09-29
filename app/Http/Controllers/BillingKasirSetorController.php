@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\BillingKasirFormResource;
 use App\Http\Resources\PenerimaanLainResource;
+use App\Http\Resources\PenerimaanSelisihSimpleResource;
 use App\Http\Resources\RekeningKoranListResource;
 use App\Http\Resources\Selisih\DataTransaksiResource;
 use App\Models\DataPenerimaanLain;
@@ -61,12 +62,20 @@ class BillingKasirSetorController extends Controller
             }
 
             $billingKasirItems = DataPenerimaanLayanan::where('rc_id', $rcId)->get();
+            $dataPenerimaanSelisih = DataPenerimaanSelisih::where('rc_id', $rcId)->get();
+            $dataPenerimaanLain = DataPenerimaanLain::where('rc_id', $rcId)
+                ->with('sumber')
+                ->get();
 
             return response()->json([
                 'status' => 200,
-                'rekening_koran' => new RekeningKoranListResource($rc),
-                'billing_kasir' => BillingKasirFormResource::collection($billingKasirItems),
-                'message' => 'Success.'
+                'message' => 'Success.',
+                'data' => [
+                    'rekening_koran' => new RekeningKoranListResource($rc),
+                    'billing_kasir' => BillingKasirFormResource::collection($billingKasirItems),
+                    'penerimaan_selisih' => PenerimaanSelisihSimpleResource::collection($dataPenerimaanSelisih),
+                    'penerimaan_lain' => PenerimaanLainResource::collection($dataPenerimaanLain),
+                ],
             ]);
         } catch (\Exception $e) {
             return response()->json([

@@ -165,7 +165,7 @@ class PotensiPelayananController extends Controller
             $potensiPelayananSiesta = (new DataPotensiPelayanan)->setTable('simpra_potensipelayanan_ft')->whereDate('tgl_pelayanan', $request->tgl_pelayanan)->get();
             $count = 0;
             foreach ($potensiPelayananSiesta as $pp) {
-                // Check if data already exist in table dokumen_nonlayanan (based on id)
+                // Check if data already exist in table data_potensi_pelayanan (based on pendaftaran_id)
                 $exist = DataPotensiPelayanan::where('pendaftaran_id', $pp->pendaftaran_id)->exists();
                 // Insert if data not exist yet
                 if (!$exist) {
