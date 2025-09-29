@@ -70,7 +70,7 @@ class RekeningKoranController extends Controller
                 $query->where('debit', $debit);
             }
             if (!empty($kredit)) {
-                $query->where('kredit$kredit', $kredit);
+                $query->where('kredit', $kredit);
             }
             if (!empty($kualifikasi) && $kualifikasi == 1) {
                 $query->whereNotNull('debit');
@@ -82,20 +82,22 @@ class RekeningKoranController extends Controller
             if ($request->has('search') && !empty($request->input('search'))) {
                 $search = $request->input('search');
                 $query->where(function ($q) use ($search) {
-                    $q->where('no_rc', 'LIKE', "%$search%")
-                        ->orWhere('rc_id', 'LIKE', "%$search%")
-                        ->orWhere('rek_dari', 'LIKE', "%$search%")
-                        ->orWhere('nama_dari', 'LIKE', "%$search%")
-                        ->orWhere('bank', 'LIKE', "%$search%");
+                    $q->where('no_rc', 'ILIKE', "%$search%")
+                        ->orWhere('rc_id', 'ILIKE', "%$search%")
+                        ->orWhere('rek_dari', 'ILIKE', "%$search%")
+                        ->orWhere('nama_dari', 'ILIKE', "%$search%")
+                        ->orWhere('bank', 'ILIKE', "%$search%");
                 });
             }
 
-            $totalItems = $query->count();
-            $items = $query->skip(($page - 1) * $size)->take($size)->orderBy('tgl_rc', 'desc')->orderBy('no_rc', 'asc')->get();
+            if($request->has('sort_field') && $request->has('sort_order')) {
+                $query->orderBy($request->input('sort_field'), $request->input('sort_order') == -1 ? 'desc' : 'asc');
+            }
+            else{
+                $query->orderBy('tgl_rc', 'desc');
+            }
 
-            $totalPages = ceil($totalItems / $size);
-
-            return new RekeningKoranCollection($items, $totalItems, $page, $size, $totalPages);
+            return RekeningKoranResource::collection($query->paginate( $request->input('per_page', 10) ));
         } catch (ValidationException $e) {
             $errors = [];
             foreach ($e->errors() as $field => $messages) {

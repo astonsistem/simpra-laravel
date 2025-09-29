@@ -35,6 +35,7 @@ use App\Http\Controllers\PenerimaanSelisihController;
 use App\Http\Controllers\SumberTransaksiController;
 use App\Http\Controllers\SelisihKasController;
 use App\Http\Controllers\DataPenerimaanSelisihController;
+use App\Http\Controllers\DataRekeningKoranController;
 use App\Http\Controllers\PendapatanPenjamin1Controller;
 use App\Http\Controllers\RincianPotensiPelayananController;
 use App\Http\Controllers\RincianBkuController;
