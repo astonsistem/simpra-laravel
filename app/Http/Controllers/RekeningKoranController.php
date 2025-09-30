@@ -6,6 +6,7 @@ use App\Http\Resources\RekeningKoranCollection;
 use App\Http\Resources\RekeningKoranListResource;
 use App\Http\Resources\RekeningKoranResource;
 use App\Models\DataRekeningKoran;
+use App\Services\RequestBankJatim;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -119,6 +120,7 @@ class RekeningKoranController extends Controller
             ], 500);
         }
     }
+
     public function list(Request $request)
     {
         try {
@@ -178,6 +180,14 @@ class RekeningKoranController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function requestBankJatim(Request $request)
+    {
+        return response()->json([
+            'success' => true,
+            'data' => RequestBankJatim::handle($request)
+        ]);
     }
 
     public function sum(Request $request)
