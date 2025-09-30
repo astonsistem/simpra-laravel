@@ -90,7 +90,7 @@ class PotensiLainController extends Controller
                     $query->whereRaw(
                         "(total - COALESCE(
                             (SELECT SUM(jumlah_netto) FROM data_penerimaan_lain dpl 
-                            WHERE dpl.piutanglain_id = dokumen_nonlayanan.id), 0
+                            WHERE dpl.piutanglain_id = CAST(dokumen_nonlayanan.id AS VARCHAR)), 0
                         )) {$mapMatchMode[$matchMode]} ?",
                         [$sisaPotensi]
                     );

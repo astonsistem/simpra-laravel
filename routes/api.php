@@ -202,11 +202,6 @@ Route::middleware([
 
 Route::get('penerimaan_lain', [PenerimaanLainController::class, 'index']);
 
-Route::get('potensi_pelayanan', [PotensiPelayananController::class, 'index']);
-Route::get('potensi_pelayanan/getdata', [PotensiPelayananController::class, 'getdata']);
-Route::get('potensi_pelayanan/statistik', [PotensiPelayananController::class, 'statistik']);
-Route::get('potensi_pelayanan/{id}', [PotensiPelayananController::class, 'index']);
-
 Route::group(['middleware' => 'jwt.auth'], function () {
     Route::get('penerimaan_lain', [PenerimaanLainController::class, 'index']);
     Route::get('penerimaan_lain/create', [PenerimaanLainController::class, 'create']);

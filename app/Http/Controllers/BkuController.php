@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\BKURequest;
 use App\Http\Resources\BkuCollection;
 use App\Http\Resources\BkuResource;
-use App\Models\MasterJenisBKU;
+use App\Models\MasterJenisBku;
 use App\Models\DataBku;
 use App\Models\DataRincianBku;
 use App\Models\DataRekeningKoran;
@@ -130,7 +130,7 @@ class BkuController extends Controller
     public function list_jenisbku()
     {
         try {
-            $jenisBKU = MasterJenisBKU::select('jenisbku_id', 'jenisbku_nama')->get();
+            $jenisBKU = MasterJenisBku::select('jenisbku_id', 'jenisbku_nama')->get();
 
             $data = $jenisBKU->map(function ($p) {
                 return [
