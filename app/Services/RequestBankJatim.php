@@ -4,7 +4,7 @@ namespace App\Services;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use Illuminate\Log\LogManager;
+use Illuminate\Log\Logger;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -37,7 +37,7 @@ class RequestBankJatim
         }
 
         // save to cache
-        self::setCacheData( $response->json() );
+        self::setCacheData( $response->object()->history );
 
         return [
             "success" => true,
@@ -83,15 +83,15 @@ class RequestBankJatim
         $key = $user->id.":request_bank_jatim";
 
         if( Cache::has($key) ) {
-            $data = Cache::get( $key );
-            $data = $data && is_string($data) ? json_decode($data) : $data;
+            $data = Cache::get( $key);
+            $data = $data && Str::isJson($data) ? json_decode($data, true) : $data;
             self::log()->info("Data cache:  {data} ", ['data' => $data]);
             return $data;
         }
 
         $response = self::fetchData($request);
 
-        return $response->object();
+        return $response->object()->history;
     }
 
     public static function setCacheData($data)
@@ -99,7 +99,7 @@ class RequestBankJatim
         $user = Auth::user();
 
         Cache::remember($user->id.":request_bank_jatim", self::TTL, function () use ($data) {
-            return $data->json();
+            return $data;
         });
     }
 
@@ -113,7 +113,7 @@ class RequestBankJatim
         return date('Ymd', strtotime($date));
     }
 
-    public static function log(): LogManager
+    public static function log(): Logger
     {
         return Log::build([
             'driver' => 'single',

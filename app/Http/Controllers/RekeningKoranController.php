@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use App\Models\DataRekeningKoran;
+use PhpParser\Node\Stmt\TryCatch;
+use App\Services\RequestBankJatim;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use App\Http\Resources\RekeningKoranResource;
+use Illuminate\Validation\ValidationException;
 use App\Http\Resources\RekeningKoranCollection;
 use App\Http\Resources\RekeningKoranListResource;
-use App\Http\Resources\RekeningKoranResource;
-use App\Models\DataRekeningKoran;
-use App\Services\RequestBankJatim;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
-use PhpParser\Node\Stmt\TryCatch;
 
 class RekeningKoranController extends Controller
 {
@@ -204,9 +205,13 @@ class RekeningKoranController extends Controller
                 ]);
 
                 $data = RequestBankJatim::getCacheData($request);
+
+                $collection = collect($data);
+                $existingData = DataRekeningKoran::whereIn('no_rc', $collection->pluck('reffno')->toArray())->get();
+                $existingDataIds = $existingData->pluck('no_rc')->toArray();
                 $items = [];
 
-                foreach($data as $item) {
+                foreach($collection as $item) {
                     $insertData = [
                         'tgl_rc'    => $item?->dateTime,
                         'no_rc'     => $item?->reffno,
@@ -232,19 +237,25 @@ class RekeningKoranController extends Controller
                             $insertData['debit'] = 0;
                             break;
                     }
-
-                    $items[] = $insertData;
+                    if(!in_array($insertData['no_rc'], $existingDataIds)) {
+                        $items[] = $insertData;
+                    }
+                    else{
+                        DataRekeningKoran::where('no_rc', $insertData['no_rc'])->update($insertData);
+                    }
                 }
 
                 DataRekeningKoran::insert( $items );
 
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Berhasil sinkronisasi data rekening koran'
-                ]);
 
             });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Berhasil sinkronisasi data rekening koran'
+            ]);
         } catch (\Exception $e) {
+            Log::error($e->getMessage());
             return response()->json([
                 'success' => false,
                 'error' => true,
