@@ -35,6 +35,7 @@ use App\Http\Controllers\PenerimaanSelisihController;
 use App\Http\Controllers\SumberTransaksiController;
 use App\Http\Controllers\SelisihKasController;
 use App\Http\Controllers\DataPenerimaanSelisihController;
+use App\Http\Controllers\DataRekeningKoranController;
 use App\Http\Controllers\PendapatanPenjamin1Controller;
 use App\Http\Controllers\RincianPotensiPelayananController;
 use App\Http\Controllers\RincianBkuController;
@@ -243,6 +244,8 @@ Route::group([
 ], function() {
     Route::get('rekening_koran', [RekeningKoranController::class, 'index']);
     Route::get('rekening_koran/list', [RekeningKoranController::class, 'list']);
+    Route::post('rekening_koran/request_bank_jatim', [RekeningKoranController::class, 'requestBankJatim']);
+    Route::post('rekening_koran/sync', [RekeningKoranController::class, 'sinkronisasi']);
 });
 
 Route::get('rekening_koran/statistik', [RekeningKoranController::class, 'statistik']);

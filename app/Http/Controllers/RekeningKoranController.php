@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use App\Models\DataRekeningKoran;
+use PhpParser\Node\Stmt\TryCatch;
+use App\Services\RequestBankJatim;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use App\Http\Resources\RekeningKoranResource;
+use Illuminate\Validation\ValidationException;
 use App\Http\Resources\RekeningKoranCollection;
 use App\Http\Resources\RekeningKoranListResource;
-use App\Http\Resources\RekeningKoranResource;
-use App\Models\DataRekeningKoran;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
-use Carbon\Carbon;
 
 class RekeningKoranController extends Controller
 {
@@ -70,7 +74,7 @@ class RekeningKoranController extends Controller
                 $query->where('debit', $debit);
             }
             if (!empty($kredit)) {
-                $query->where('kredit$kredit', $kredit);
+                $query->where('kredit', $kredit);
             }
             if (!empty($kualifikasi) && $kualifikasi == 1) {
                 $query->whereNotNull('debit');
@@ -82,20 +86,22 @@ class RekeningKoranController extends Controller
             if ($request->has('search') && !empty($request->input('search'))) {
                 $search = $request->input('search');
                 $query->where(function ($q) use ($search) {
-                    $q->where('no_rc', 'LIKE', "%$search%")
-                        ->orWhere('rc_id', 'LIKE', "%$search%")
-                        ->orWhere('rek_dari', 'LIKE', "%$search%")
-                        ->orWhere('nama_dari', 'LIKE', "%$search%")
-                        ->orWhere('bank', 'LIKE', "%$search%");
+                    $q->where('no_rc', 'ILIKE', "%$search%")
+                        ->orWhere('rc_id', 'ILIKE', "%$search%")
+                        ->orWhere('rek_dari', 'ILIKE', "%$search%")
+                        ->orWhere('nama_dari', 'ILIKE', "%$search%")
+                        ->orWhere('bank', 'ILIKE', "%$search%");
                 });
             }
 
-            $totalItems = $query->count();
-            $items = $query->skip(($page - 1) * $size)->take($size)->orderBy('tgl_rc', 'desc')->orderBy('no_rc', 'asc')->get();
+            if($request->has('sort_field') && $request->has('sort_order')) {
+                $query->orderBy($request->input('sort_field'), $request->input('sort_order') == -1 ? 'desc' : 'asc');
+            }
+            else{
+                $query->orderBy('tgl_rc', 'desc');
+            }
 
-            $totalPages = ceil($totalItems / $size);
-
-            return new RekeningKoranCollection($items, $totalItems, $page, $size, $totalPages);
+            return RekeningKoranResource::collection($query->paginate( $request->input('per_page', 10) ));
         } catch (ValidationException $e) {
             $errors = [];
             foreach ($e->errors() as $field => $messages) {
@@ -117,6 +123,7 @@ class RekeningKoranController extends Controller
             ], 500);
         }
     }
+
     public function list(Request $request)
     {
         try {
@@ -174,6 +181,85 @@ class RekeningKoranController extends Controller
             return response()->json([
                 'message' => 'Terjadi kesalahan pada server.',
                 'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function requestBankJatim(Request $request)
+    {
+        $request->validate([
+            'tglawal' => 'required',
+            'tglakhir' => 'required|after_or_equal:tglawal'
+        ]);
+
+        return response()->json( RequestBankJatim::handle($request));
+    }
+
+    public function sinkronisasi(Request $request)
+    {
+        try {
+            DB::transaction(function () use ($request) {
+                $request->validate([
+                    'tglawal' => 'required',
+                    'tglakhir' => 'required|after_or_equal:tglawal'
+                ]);
+
+                $data = RequestBankJatim::getCacheData($request);
+
+                $collection = collect($data);
+                $existingData = DataRekeningKoran::whereIn('no_rc', $collection->pluck('reffno')->toArray())->get();
+                $existingDataIds = $existingData->pluck('no_rc')->toArray();
+                $items = [];
+
+                foreach($collection as $item) {
+                    $insertData = [
+                        'tgl_rc'    => $item?->dateTime,
+                        'no_rc'     => $item?->reffno,
+                        'uraian'    => $item?->description,
+                        'tgl'       => date('Y-m-d'),
+                        'rek_dari'  => $item?->transactionCode,
+                        'bank'      => 'JATIM',
+                    ];
+
+                    switch ( strtoupper($item->flag) ) {
+                        case 'D':
+                            $insertData['kredit'] = 0;
+                            $insertData['debit'] = $item?->amount;
+                            break;
+
+                        case 'C':
+                            $insertData['kredit'] = $item?->amount;
+                            $insertData['debit'] = 0;
+                            break;
+
+                        default:
+                            $insertData['kredit'] = 0;
+                            $insertData['debit'] = 0;
+                            break;
+                    }
+                    if(!in_array($insertData['no_rc'], $existingDataIds)) {
+                        $items[] = $insertData;
+                    }
+                    else{
+                        DataRekeningKoran::where('no_rc', $insertData['no_rc'])->update($insertData);
+                    }
+                }
+
+                DataRekeningKoran::insert( $items );
+
+
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Berhasil sinkronisasi data rekening koran'
+            ]);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => true,
+                'message' => $e->getMessage(),
             ], 500);
         }
     }

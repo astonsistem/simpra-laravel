@@ -3,18 +3,12 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
-use App\Models\Kasir;
-use App\Models\Loket;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\DataSelisihView;
 use Illuminate\Support\Facades\Log;
 use App\Models\DataPenerimaanSelisih;
-use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\Selisih\DataSelisihResource;
-use App\Http\Resources\DataSelisihCollection;
-use Illuminate\Validation\ValidationException;
-use App\Http\Requests\CreateDataSelisihRequest;
 use App\Http\Requests\KurangBayar\DataTransaksiStoreRequest;
 use App\Http\Resources\Selisih\DataTransaksiResource;
 
