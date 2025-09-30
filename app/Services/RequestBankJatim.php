@@ -1,16 +1,127 @@
 <?php
 namespace App\Services;
 
+use Illuminate\Http\Client\Response;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Log\LogManager;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 
 class RequestBankJatim
 {
-    public static function getToken()
-    {
-        return env('BANK_JATIM_TOKEN', 'bank_jatim_token');
-    }
+    const TTL = 300; // 5 menit
 
     public static function handle(Request $request)
+    {
+        $log = Log::build([
+            'driver' => 'single',
+            'path' => storage_path('logs/request_bank_jatim.log')
+        ]);
+
+        $response = self::fetchData($request);
+
+        if ($response->failed()) {
+            $log->error('Error in RequestBankJatim: ' . $response->body());
+
+            return [
+                "success" => false,
+                "data" => [
+                    "responseCode" => "99",
+                    "responseDesc" => "Failed",
+                    "history" => []
+                ],
+            ];
+        }
+
+        // save to cache
+        self::setCacheData( $response->json() );
+
+        return [
+            "success" => true,
+            "expired_time" => now()->addSeconds( self::TTL ),
+            "data" => $response->json(),
+        ];
+    }
+
+    public static function fetchData($request): Response
+    {
+        $setting = config('settings');
+
+        // create file log for own
+        $log = Log::build([
+            'driver' => 'single',
+            'path' => storage_path('logs/request_bank_jatim.log')
+        ]);
+
+        $log->info("Auth: ". json_encode(Auth::user()));
+
+        $data = [
+            'tglawal' => self::formatDate($request->tglawal),
+            'tglakhir' => self::formatDate($request->tglakhir),
+            'url' => self::mask($setting['sync_url_jatim']),
+            'key' => self::mask($setting['sync_key_jatim']),
+        ];
+
+        $log->info('RequestBankJatim: '. json_encode($data));
+
+        return Http::post($setting['sync_url_jatim'], [
+            'key' => $setting['sync_key_jatim'],
+            'tglawal' => $data['tglawal'],
+            'tglakhir' => $data['tglakhir'],
+        ]);
+    }
+    /**
+     * $request->tglawal
+     * $request->tglakhir
+     */
+    public static function getCacheData($request)
+    {
+        $user = Auth::user();
+        $key = $user->id.":request_bank_jatim";
+
+        if( Cache::has($key) ) {
+            $data = Cache::get( $key );
+            $data = $data && is_string($data) ? json_decode($data) : $data;
+            self::log()->info("Data cache:  {data} ", ['data' => $data]);
+            return $data;
+        }
+
+        $response = self::fetchData($request);
+
+        return $response->object();
+    }
+
+    public static function setCacheData($data)
+    {
+        $user = Auth::user();
+
+        Cache::remember($user->id.":request_bank_jatim", self::TTL, function () use ($data) {
+            return $data->json();
+        });
+    }
+
+    public static function mask($string)
+    {
+        return Str::mask(Str::take($string, 12) , '*', 8);
+    }
+
+    public static function formatDate($date)
+    {
+        return date('Ymd', strtotime($date));
+    }
+
+    public static function log(): LogManager
+    {
+        return Log::build([
+            'driver' => 'single',
+            'path' => storage_path('logs/request_bank_jatim.log')
+        ]);
+    }
+
+    private function exampleResponse()
     {
         return json_decode('{
             "responseCode": "00",

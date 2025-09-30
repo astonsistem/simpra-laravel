@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use PhpParser\Node\Stmt\TryCatch;
 
 class RekeningKoranController extends Controller
 {
@@ -184,10 +186,71 @@ class RekeningKoranController extends Controller
 
     public function requestBankJatim(Request $request)
     {
-        return response()->json([
-            'success' => true,
-            'data' => RequestBankJatim::handle($request)
+        $request->validate([
+            'tglawal' => 'required',
+            'tglakhir' => 'required|after_or_equal:tglawal'
         ]);
+
+        return response()->json( RequestBankJatim::handle($request));
+    }
+
+    public function sinkronisasi(Request $request)
+    {
+        try {
+            DB::transaction(function () use ($request) {
+                $request->validate([
+                    'tglawal' => 'required',
+                    'tglakhir' => 'required|after_or_equal:tglawal'
+                ]);
+
+                $data = RequestBankJatim::getCacheData($request);
+                $items = [];
+
+                foreach($data as $item) {
+                    $insertData = [
+                        'tgl_rc'    => $item?->dateTime,
+                        'no_rc'     => $item?->reffno,
+                        'uraian'    => $item?->description,
+                        'tgl'       => date('Y-m-d'),
+                        'rek_dari'  => $item?->transactionCode,
+                        'bank'      => 'JATIM',
+                    ];
+
+                    switch ( strtoupper($item->flag) ) {
+                        case 'D':
+                            $insertData['kredit'] = 0;
+                            $insertData['debit'] = $item?->amount;
+                            break;
+
+                        case 'C':
+                            $insertData['kredit'] = $item?->amount;
+                            $insertData['debit'] = 0;
+                            break;
+
+                        default:
+                            $insertData['kredit'] = 0;
+                            $insertData['debit'] = 0;
+                            break;
+                    }
+
+                    $items[] = $insertData;
+                }
+
+                DataRekeningKoran::insert( $items );
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Berhasil sinkronisasi data rekening koran'
+                ]);
+
+            });
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => true,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function sum(Request $request)
