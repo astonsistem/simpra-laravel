@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Support\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
 class RekeningKoranImportRequest extends FormRequest
@@ -15,6 +14,21 @@ class RekeningKoranImportRequest extends FormRequest
         return true;
     }
 
+    public function prepareForValidation()
+    {
+        // change tgl_rc date format to Y-m-d
+        $this->merge([
+            'data' => array_map(function ($item) {
+                $item['tgl_rc'] = normalize_date($item['tgl_rc']);
+                $item['tgl'] = date('Y-m-d');
+                $item['sync_at'] = date('Y-m-d H:i:s');
+                // remove id
+                unset($item['id']);
+                return $item;
+            }, $this->data),
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -25,6 +39,7 @@ class RekeningKoranImportRequest extends FormRequest
         return [
             'data' => 'required|array',
             'data.*.tgl_rc' => 'required|date_format:Y-m-d',
+            'data.*.tgl' => 'nullable|date_format:Y-m-d',
             'data.*.no_rc' => 'required|string',
             'data.*.uraian' => 'nullable|string',
             'data.*.rek_dari' => 'nullable|string',
@@ -32,6 +47,7 @@ class RekeningKoranImportRequest extends FormRequest
             'data.*.bank' => 'nullable|string',
             'data.*.debit' => 'nullable|numeric',
             'data.*.kredit' => 'nullable|numeric',
+            'data.*.sync_at' => 'nullable|date_format:Y-m-d H:i:s',
         ];
     }
 }

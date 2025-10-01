@@ -544,23 +544,12 @@ class RekeningKoranController extends Controller
                 $items = [];
 
                 foreach ($importData as $item) {
-                    $insertData = [
-                        'tgl_rc' => $item['tgl_rc'],
-                        'no_rc' => $item['no_rc'],
-                        'uraian' => $item['uraian'] ?? null,
-                        'tgl' => date('Y-m-d'),
-                        'rek_dari' => $item['rek_dari'] ?? null,
-                        'nama_dari' => $item['nama_dari'] ?? null,
-                        'bank' => $item['bank'],
-                        'debit' => $item['debit'] ?? 0,
-                        'kredit' => $item['kredit'] ?? 0,
-                    ];
 
-                    if (!in_array($insertData['no_rc'], $existingDataIds)) {
-                        $items[] = $insertData;
+                    if (!in_array($item['no_rc'], $existingDataIds)) {
+                        $items[] = $item;
                     } else {
                         // Update existing data
-                        DataRekeningKoran::where('no_rc', $insertData['no_rc'])->update($insertData);
+                        DataRekeningKoran::where('no_rc', $item['no_rc'])->update($item);
                     }
                 }
 
