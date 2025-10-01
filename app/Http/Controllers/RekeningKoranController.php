@@ -25,18 +25,29 @@ class RekeningKoranController extends Controller
             $request->validate([
                 'page' => 'nullable|integer|min:1',
                 'size' => 'nullable|integer|min:1',
+                'per_page' => 'nullable|integer|min:1',
                 'tgl_awal' => 'nullable|string',
                 'tgl_akhir' => 'nullable|string',
                 'bulan_awal' => 'nullable|string',
                 'bulan_akhir' => 'nullable|string',
                 'year' => 'nullable|string',
                 'periode' => 'nullable|string',
+                'no_rc' => 'nullable|string',
+                'tgl_rc' => 'nullable|string',
                 'uraian' => 'nullable|string',
-                'bank' => 'nullable|integer',
-                'debit' => 'nullable|integer',
-                'kredit' => 'nullable|integer',
+                'akun_data' => 'nullable|string',
+                'akunls_data' => 'nullable|string',
+                'bank' => 'nullable|string',
+                'pb' => 'nullable|string',
+                'debit' => 'nullable|numeric',
+                'kredit' => 'nullable|numeric',
+                'terklarifikasi' => 'nullable|numeric',
+                'belum_terklarifikasi' => 'nullable|numeric',
+                'rekening_dpa' => 'nullable|string',
                 'kualifikasi' => 'nullable|integer',
                 'export' => 'nullable',
+                'sort_field' => 'nullable|string',
+                'sort_order' => 'nullable|integer',
             ]);
 
             $page = $request->input('page', 1) ?? 1;
@@ -47,38 +58,83 @@ class RekeningKoranController extends Controller
             $bulanAkhir = $request->input('bulan_akhir');
             $year = $request->input('year');
             $periode = $request->input('periode');
+            $noRc = $request->input('no_rc');
+            $tglRc = $request->input('tgl_rc');
             $uraian = $request->input('uraian');
+            $akunData = $request->input('akun_data');
+            $akunlsData = $request->input('akunls_data');
             $bank = $request->input('bank');
+            $pb = $request->input('pb');
             $debit = $request->input('debit');
             $kredit = $request->input('kredit');
+            $terklarifikasi = $request->input('terklarifikasi');
+            $belumTerklarifikasi = $request->input('belum_terklarifikasi');
+            $rekeningDpa = $request->input('rekening_dpa');
             $kualifikasi = $request->input('kualifikasi');
             $isExport = $request->input('export', false);
 
             $query = DataRekeningKoran::with(['akunData', 'akunlsData', 'rekeningDpa']);
 
+            // Filter by date range
             if (!empty($tglAwal) && !empty($tglAkhir)) {
                 $startDate = Carbon::parse($tglAwal)->startOfDay();
                 $endDate = Carbon::parse($tglAkhir)->endOfDay();
                 $query->whereBetween('tgl_rc', [$startDate, $endDate]);
             }
-            if (!empty($bulanAwal) && !empty($bulanAkhir) && $periode === "bulan") {
+            
+            // Filter by month range (BULANAN)
+            if (!empty($bulanAwal) && !empty($bulanAkhir) && $periode === "BULANAN") {
                 $query->whereMonth('tgl_rc', '>=', (int)$bulanAwal);
                 $query->whereMonth('tgl_rc', '<=', (int)$bulanAkhir);
             }
+            
+            // Filter by year
             if (!empty($year)) {
                 $query->whereYear('tgl_rc', (int)$year);
+            }
+            
+            // Column filters
+            if (!empty($noRc)) {
+                $query->where('no_rc', 'ILIKE', "%$noRc%");
+            }
+            if (!empty($tglRc)) {
+                $query->whereDate('tgl_rc', Carbon::parse($tglRc)->format('Y-m-d'));
             }
             if (!empty($uraian)) {
                 $query->where('uraian', "ILIKE", "%$uraian%");
             }
+            if (!empty($akunData)) {
+                $query->whereHas('akunData', function($q) use ($akunData) {
+                    $q->where('akun_nama', 'ILIKE', "%$akunData%");
+                });
+            }
+            if (!empty($akunlsData)) {
+                $query->whereHas('akunlsData', function($q) use ($akunlsData) {
+                    $q->where('akun_nama', 'ILIKE', "%$akunlsData%");
+                });
+            }
             if (!empty($bank)) {
                 $query->where('bank', 'ILIKE', "%$bank%");
+            }
+            if (!empty($pb)) {
+                $query->where('pb', 'ILIKE', "%$pb%");
             }
             if (!empty($debit)) {
                 $query->where('debit', $debit);
             }
             if (!empty($kredit)) {
                 $query->where('kredit', $kredit);
+            }
+            if (!empty($terklarifikasi)) {
+                $query->whereRaw('(COALESCE(klarif_layanan, 0) + COALESCE(klarif_lain, 0)) = ?', [$terklarifikasi]);
+            }
+            if (!empty($belumTerklarifikasi)) {
+                $query->whereRaw('(COALESCE(kredit, 0) - COALESCE(klarif_layanan, 0) - COALESCE(klarif_lain, 0)) = ?', [$belumTerklarifikasi]);
+            }
+            if (!empty($rekeningDpa)) {
+                $query->whereHas('rekeningDpa', function($q) use ($rekeningDpa) {
+                    $q->where('rek_nama', 'ILIKE', "%$rekeningDpa%");
+                });
             }
             if (!empty($kualifikasi) && $kualifikasi == 1) {
                 $query->whereNotNull('debit');
@@ -98,8 +154,38 @@ class RekeningKoranController extends Controller
                 });
             }
 
+            // Sorting
             if($request->has('sort_field') && $request->has('sort_order')) {
-                $query->orderBy($request->input('sort_field'), $request->input('sort_order') == -1 ? 'desc' : 'asc');
+                $sortField = $request->input('sort_field');
+                $sortOrder = $request->input('sort_order') == -1 ? 'desc' : 'asc';
+                
+                // Handle special sort fields that need joins or raw SQL
+                switch($sortField) {
+                    case 'akun_data':
+                        $query->leftJoin('master_akun as ma', 'data_rekening_koran.akun_id', '=', 'ma.akun_id')
+                              ->orderBy('ma.akun_nama', $sortOrder)
+                              ->select('data_rekening_koran.*');
+                        break;
+                    case 'akunls_data':
+                        $query->leftJoin('master_akun as ma2', 'data_rekening_koran.akunls_id', '=', 'ma2.akun_id')
+                              ->orderBy('ma2.akun_nama', $sortOrder)
+                              ->select('data_rekening_koran.*');
+                        break;
+                    case 'rekening_dpa':
+                        $query->leftJoin('master_rekening_view as mrv', 'data_rekening_koran.rek_id', '=', 'mrv.rek_id')
+                              ->orderBy('mrv.rek_nama', $sortOrder)
+                              ->select('data_rekening_koran.*');
+                        break;
+                    case 'terklarifikasi':
+                        $query->orderByRaw('(COALESCE(klarif_layanan, 0) + COALESCE(klarif_lain, 0)) ' . $sortOrder);
+                        break;
+                    case 'belum_terklarifikasi':
+                        $query->orderByRaw('(COALESCE(kredit, 0) - COALESCE(klarif_layanan, 0) - COALESCE(klarif_lain, 0)) ' . $sortOrder);
+                        break;
+                    default:
+                        $query->orderBy($sortField, $sortOrder);
+                        break;
+                }
             }
             else{
                 $query->orderBy('tgl_rc', 'desc');
