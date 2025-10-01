@@ -327,4 +327,9 @@ class DataRekeningKoran extends Model
     {
         return $this->belongsTo(MasterAkun::class, 'akunls_id', 'akun_id');
     }
+
+    public function rekeningDpa()
+    {
+        return $this->belongsTo(MasterRekeningView::class, 'rek_id', 'rek_id');
+    }
 }

@@ -36,6 +36,7 @@ class RekeningKoranController extends Controller
                 'debit' => 'nullable|integer',
                 'kredit' => 'nullable|integer',
                 'kualifikasi' => 'nullable|integer',
+                'export' => 'nullable',
             ]);
 
             $page = $request->input('page', 1) ?? 1;
@@ -51,8 +52,9 @@ class RekeningKoranController extends Controller
             $debit = $request->input('debit');
             $kredit = $request->input('kredit');
             $kualifikasi = $request->input('kualifikasi');
+            $isExport = $request->input('export', false);
 
-            $query = DataRekeningKoran::with(['akunData', 'akunlsData']);
+            $query = DataRekeningKoran::with(['akunData', 'akunlsData', 'rekeningDpa']);
 
             if (!empty($tglAwal) && !empty($tglAkhir)) {
                 $startDate = Carbon::parse($tglAwal)->startOfDay();
@@ -101,6 +103,12 @@ class RekeningKoranController extends Controller
             }
             else{
                 $query->orderBy('tgl_rc', 'desc');
+            }
+
+            // If export, return all data without pagination
+            if ($request->has('export')) {
+                $data = $query->get();
+                return RekeningKoranResource::collection($data);
             }
 
             return RekeningKoranResource::collection($query->paginate( $request->input('per_page', 10) ));
