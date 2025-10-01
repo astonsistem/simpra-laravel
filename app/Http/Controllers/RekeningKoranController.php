@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\RekeningKoranResource;
 use Illuminate\Validation\ValidationException;
 use App\Http\Resources\RekeningKoranCollection;
+use App\Http\Requests\RekeningKoranImportRequest;
 use App\Http\Resources\RekeningKoranListResource;
 
 class RekeningKoranController extends Controller
@@ -519,6 +520,70 @@ class RekeningKoranController extends Controller
     public function buktiSetor(string $id)
     {
         return "";
+    }
+
+    public function importBank(RekeningKoranImportRequest $request)
+    {
+        try {
+            $request->validate([
+                'data' => 'required|array',
+                'data.*.tgl_rc' => 'required|date',
+                'data.*.no_rc' => 'required|string',
+                'data.*.uraian' => 'nullable|string',
+                'data.*.rek_dari' => 'nullable|string',
+                'data.*.nama_dari' => 'nullable|string',
+                'data.*.bank' => 'required|string',
+                'data.*.debit' => 'nullable|numeric|min:0',
+                'data.*.kredit' => 'nullable|numeric|min:0',
+            ]);
+
+            DB::transaction(function () use ($request) {
+                $importData = $request->input('data');
+                $existingData = DataRekeningKoran::whereIn('no_rc', collect($importData)->pluck('no_rc')->toArray())->get();
+                $existingDataIds = $existingData->pluck('no_rc')->toArray();
+                $items = [];
+
+                foreach ($importData as $item) {
+                    $insertData = [
+                        'tgl_rc' => $item['tgl_rc'],
+                        'no_rc' => $item['no_rc'],
+                        'uraian' => $item['uraian'] ?? null,
+                        'tgl' => date('Y-m-d'),
+                        'rek_dari' => $item['rek_dari'] ?? null,
+                        'nama_dari' => $item['nama_dari'] ?? null,
+                        'bank' => $item['bank'],
+                        'debit' => $item['debit'] ?? 0,
+                        'kredit' => $item['kredit'] ?? 0,
+                    ];
+
+                    if (!in_array($insertData['no_rc'], $existingDataIds)) {
+                        $items[] = $insertData;
+                    } else {
+                        // Update existing data
+                        DataRekeningKoran::where('no_rc', $insertData['no_rc'])->update($insertData);
+                    }
+                }
+
+                // Insert new data
+                if (!empty($items)) {
+                    DataRekeningKoran::insert($items);
+                }
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Berhasil mengimpor data rekening koran',
+                'imported_count' => count($request->input('data'))
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error importing bank data: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => true,
+                'message' => 'Gagal mengimpor data: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function update(Request $request, string $id)

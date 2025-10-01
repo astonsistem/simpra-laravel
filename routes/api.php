@@ -246,6 +246,7 @@ Route::group([
     Route::get('rekening_koran/list', [RekeningKoranController::class, 'list']);
     Route::post('rekening_koran/request_bank_jatim', [RekeningKoranController::class, 'requestBankJatim']);
     Route::post('rekening_koran/sync', [RekeningKoranController::class, 'sinkronisasi']);
+    Route::post('rekening_koran/import', [RekeningKoranController::class, 'importBank']);
 });
 
 Route::get('rekening_koran/statistik', [RekeningKoranController::class, 'statistik']);
