@@ -316,4 +316,15 @@ class DataRekeningKoran extends Model
     {
         return $this->total_kwitansi - $this->admin_kredit + $this->selisih;
     }
+
+    // Relationships
+    public function akunData()
+    {
+        return $this->belongsTo(MasterAkun::class, 'akun_id', 'akun_id');
+    }
+
+    public function akunlsData()
+    {
+        return $this->belongsTo(MasterAkun::class, 'akunls_id', 'akun_id');
+    }
 }

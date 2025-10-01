@@ -36,16 +36,28 @@ class RekeningKoranResource extends JsonResource
             'pb_dari' => (string) $this->pb_dari,
             'file_upload' => (string) $this->file_upload,
             'sync_at' => (string) $this->sync_at,
-            'akun_data' => [
-                'akun_id' => (string) $this->akun_id,
-                'akun_kode' => (string) $this->akun_kode,
-                'akun_nama' => (string) $this->akun_nama
-            ],
-            'akunls_data' => [
-                'akun_id' => (string) $this->akun_id,
-                'akun_kode' => (string) $this->akun_kode,
-                'akun_nama' => (string) $this->akun_nama
-            ],
+            'akun_data' => $this->whenLoaded('akunData', function () {
+                return [
+                    'akun_id' => $this->akunData->akun_id,
+                    'akun_kode' => $this->akunData->akun_kode,
+                    'akun_nama' => $this->akunData->akun_nama
+                ];
+            }),
+            'akunls_data' => $this->whenLoaded('akunlsData', function () {
+                return [
+                    'akunls_id' => $this->akunlsData->akun_id,
+                    'akunls_kode' => $this->akunlsData->akun_kode,
+                    'akunls_nama' => $this->akunlsData->akun_nama
+                ];
+            }),
+            'terklarifikasi' => (int) ($this->klarif_layanan + $this->klarif_lain),
+            'belum_terklarifikasi' => (int) (($this->debit > 0 ? $this->debit : $this->kredit) - ($this->klarif_layanan + $this->klarif_lain)),
+            'rekening_dpa' => $this->whenLoaded('rekeningDpa', function () {
+                return [
+                    'rek_id' => $this->rekeningDpa->rek_id ?? null,
+                    'rek_nama' => $this->rekeningDpa->rek_nama ?? null
+                ];
+            }),
             'status' => (string) $this->status,
             'is_web_change' => (string) $this->is_web_change,
         ];

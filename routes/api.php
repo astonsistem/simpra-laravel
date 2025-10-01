@@ -41,6 +41,7 @@ use App\Http\Controllers\RincianPotensiPelayananController;
 use App\Http\Controllers\RincianBkuController;
 use App\Http\Controllers\PenerimaanLainSetorController;
 use App\Http\Controllers\DataTransaksiController;
+use App\Http\Controllers\MasterAkunController;
 
 Route::post('auth/login_token', [AuthController::class, 'login']);
 Route::post('auth/logintoken', [AuthController::class, 'loginToken']);
@@ -263,6 +264,9 @@ Route::post('rekening_koran/sinkronisasi-api/{bank}', [RekeningKoranController::
 Route::put('rekening_koran/{id}', [RekeningKoranController::class, 'update']);
 Route::put('rekening_koran/pb/{id}', [RekeningKoranController::class, 'updatePb']);
 Route::put('rekening_koran/pb_cancel/{id}', [RekeningKoranController::class, 'updatePbCancel']);
+
+Route::get('master_akun/list', [MasterAkunController::class, 'list']);
+Route::get('master_akun/klarifikasi', [MasterAkunController::class, 'listForKlarifikasi']);
 
 Route::get('statistik/dashboard', [StatistikController::class, 'index']);
 

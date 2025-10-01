@@ -14,6 +14,7 @@ use App\Http\Resources\RekeningKoranResource;
 use Illuminate\Validation\ValidationException;
 use App\Http\Resources\RekeningKoranCollection;
 use App\Http\Requests\RekeningKoranImportRequest;
+use App\Http\Requests\RekeningKoranUpdateRequest;
 use App\Http\Resources\RekeningKoranListResource;
 
 class RekeningKoranController extends Controller
@@ -51,7 +52,7 @@ class RekeningKoranController extends Controller
             $kredit = $request->input('kredit');
             $kualifikasi = $request->input('kualifikasi');
 
-            $query = DataRekeningKoran::query();
+            $query = DataRekeningKoran::with(['akunData', 'akunlsData']);
 
             if (!empty($tglAwal) && !empty($tglAkhir)) {
                 $startDate = Carbon::parse($tglAwal)->startOfDay();
@@ -575,8 +576,100 @@ class RekeningKoranController extends Controller
         }
     }
 
-    public function update(Request $request, string $id)
+    public function update(RekeningKoranUpdateRequest $request, string $id)
     {
-        //
+        try {
+            // Validate ID
+            $validator = Validator::make(['id' => $id], [
+                'id' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'detail' => [
+                        [
+                            'loc' => ['path', 'id'],
+                            'msg' => 'ID is required.',
+                            'type' => 'validation'
+                        ]
+                    ]
+                ], 422);
+            }
+
+            // Find rekening koran
+            $rekeningKoran = DataRekeningKoran::where('rc_id', $id)->first();
+
+            if (!$rekeningKoran) {
+                return response()->json([
+                    'message' => 'Data rekening koran tidak ditemukan.'
+                ], 404);
+            }
+
+            // Check if data is locked
+            if ($rekeningKoran->kunci) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data sudah terkunci dan tidak dapat diubah.'
+                ], 403);
+            }
+
+            // Check if already in BKU
+            if ($rekeningKoran->bku_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data sudah masuk BKU dan tidak dapat diubah.'
+                ], 403);
+            }
+
+            // Get validated data
+            $validated = $request->validated();
+
+            // Additional validation: total klarifikasi should not exceed kredit/debit
+            $totalKlarifikasi = $validated['klarif_layanan'] + $validated['klarif_lain'];
+            $nominal = $rekeningKoran->kredit > 0 ? $rekeningKoran->kredit : $rekeningKoran->debit;
+
+            if ($totalKlarifikasi > $nominal) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Total klarifikasi tidak boleh melebihi nominal ' . ($rekeningKoran->kredit > 0 ? 'kredit' : 'debit') . '.',
+                    'detail' => [
+                        [
+                            'loc' => ['body', 'klarif_layanan'],
+                            'msg' => 'Total klarifikasi melebihi nominal.',
+                            'type' => 'validation'
+                        ]
+                    ]
+                ], 422);
+            }
+
+            // Update data
+            DB::transaction(function () use ($rekeningKoran, $validated) {
+                $rekeningKoran->update([
+                    'tgl_rc' => $validated['tgl_rc'],
+                    'no_rc' => $validated['no_rc'],
+                    'akunls_id' => $validated['akunls_id'],
+                    'klarif_layanan' => $validated['klarif_layanan'],
+                    'klarif_lain' => $validated['klarif_lain'],
+                    'is_web_change' => true,
+                ]);
+            });
+
+            // Reload with relationships
+            $rekeningKoran->load(['akunData', 'akunlsData']);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data rekening koran berhasil diubah.',
+                'data' => new RekeningKoranResource($rekeningKoran)
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error updating rekening koran: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan pada server.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }
