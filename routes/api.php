@@ -248,23 +248,23 @@ Route::group([
     Route::post('rekening_koran/request_bank_jatim', [RekeningKoranController::class, 'requestBankJatim']);
     Route::post('rekening_koran/sync', [RekeningKoranController::class, 'sinkronisasi']);
     Route::post('rekening_koran/import', [RekeningKoranController::class, 'importBank']);
+    Route::get('rekening_koran/pb/uncheck', [RekeningKoranController::class, 'pbUncheck']);
+    Route::get('rekening_koran/pb/check/{rc_id}', [RekeningKoranController::class, 'pbCheck']);
+    Route::put('rekening_koran/pb_link/{id}', [RekeningKoranController::class, 'linkPb']);
+    Route::put('rekening_koran/pb/{id}', [RekeningKoranController::class, 'updatePb']);
+    Route::put('rekening_koran/pb_cancel/{id}', [RekeningKoranController::class, 'updatePbCancel']);
 });
 
 Route::get('rekening_koran/statistik', [RekeningKoranController::class, 'statistik']);
 Route::get('rekening_koran/sum_rekening_koran', [RekeningKoranController::class, 'sum']);
 Route::get('rekening_koran/statistik', [RekeningKoranController::class, 'statistik']);
 Route::get('rekening_koran/{id}', [RekeningKoranController::class, 'show']);
-Route::get('rekening_koran/pb/uncheck', [RekeningKoranController::class, 'pbUncheck']);
-Route::get('rekening_koran/pb/check/{rc_id}', [RekeningKoranController::class, 'pbCheck']);
 Route::get('rekening_koran/bukti_setor/{rc_id}', [RekeningKoranController::class, 'buktiSetor']);
 Route::post('rekening_koran/{bank}/upload', [RekeningKoranController::class, 'index']);
 Route::post('rekening_koran/mutasi/{bank}', [RekeningKoranController::class, 'index']);
 Route::post('rekening_koran/sinkronisasi', [RekeningKoranController::class, 'index']);
 Route::post('rekening_koran/sinkronisasi-api/{bank}', [RekeningKoranController::class, 'index']);
 Route::put('rekening_koran/{id}', [RekeningKoranController::class, 'update']);
-Route::put('rekening_koran/pb/{id}', [RekeningKoranController::class, 'updatePb']);
-Route::put('rekening_koran/pb_cancel/{id}', [RekeningKoranController::class, 'updatePbCancel']);
-Route::put('rekening_koran/pb_link/{id}', [RekeningKoranController::class, 'linkPb']);
 
 Route::get('master_akun/list', [MasterAkunController::class, 'list']);
 Route::get('master_akun/klarifikasi', [MasterAkunController::class, 'listForKlarifikasi']);

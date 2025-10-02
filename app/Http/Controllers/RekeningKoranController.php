@@ -934,7 +934,7 @@ class RekeningKoranController extends Controller
     public function linkPb(Request $request, string $id)
     {
         try {
-            // Validate ID
+
             $validator = Validator::make(['id' => $id], [
                 'id' => 'required',
             ]);
@@ -951,9 +951,8 @@ class RekeningKoranController extends Controller
                 ], 422);
             }
 
-            // Validate request data
-            $request->validate([
-                'pb_rc_id' => 'required|string', // The Bank Jatim rc_id to link to
+            $validated = $request->validate([
+                'pb_rc_id' => 'required', // The Bank Jatim rc_id to link to
             ]);
 
             // Find the record to be linked
@@ -974,7 +973,7 @@ class RekeningKoranController extends Controller
             }
 
             // Find the Bank Jatim record
-            $pbRcId = $request->input('pb_rc_id');
+            $pbRcId = $validated['pb_rc_id'];
             $bankJatimRecord = DataRekeningKoran::where('rc_id', $pbRcId)->first();
 
             if (!$bankJatimRecord) {
