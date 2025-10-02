@@ -53,6 +53,7 @@ class DataBku extends Model
 
     public function rincian()
     {
+        //
         return $this->hasMany(DataRincianBku::class, 'bku_id', 'bku_id')->orderBy('rincian_id');
     }
     public function getTotalAttribute()
