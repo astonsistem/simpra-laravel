@@ -232,9 +232,23 @@ class RekeningKoranController extends Controller
                 'filters.no_rc.value' => 'nullable',
                 'sortField' => 'nullable|string',
                 'sortOrder' => 'nullable|string',
+                'bank' => 'nullable|string',
+                'tgl_rc' => 'nullable|string',
             ]);
 
-            $query = DataRekeningKoran::query();
+            $query = DataRekeningKoran::query()->where('kredit', '>', 0);
+
+            // FILTER BANK
+            $query->when($request->has('bank') && !empty($params['bank']), function ($q) use ($params) {
+                $bank = $params['bank'];
+                $q->where('bank', $bank);
+            });
+            // FILTER TGL_RC
+            $query->when($request->has('tgl_rc') && !empty($params['tgl_rc'] ), function ($q) use ($params) {
+                $tgl_rc = Carbon::createFromFormat('d/m/Y', str_replace('-', '/', $params['tgl_rc']));
+                $q->where('tgl_rc', '>=', $tgl_rc->format('Y-m-d'));
+            });
+
 
             // FILTER NOMINAL
             $query->when($request->has('filters.nominal.min') && $request->has('filters.nominal.max'), function ($q) use ($params) {
@@ -246,6 +260,7 @@ class RekeningKoranController extends Controller
                         ->orWhereBetween('kredit', [$min, $max]);
                 });
             });
+
             // FILTER no_rc
             $query->when($request->has('filters.no_rc.value'), function ($q) use ($params) {
                 $no_rc = $params['filters']['no_rc']['value'];
@@ -269,6 +284,10 @@ class RekeningKoranController extends Controller
             else {
                 $query->orderBy($params['sortField'] ?? 'no_rc', $params['sortOrder'] ?? 'asc');
             }
+
+
+            Log::info("Raw Sql : ". $query->toSql() ."  ");
+            Log::info("Bindings : ". implode(", ", $query->getBindings()) ."  ");
 
             return RekeningKoranListResource::collection(
                 $query->paginate( $params['per_page']?? 10)
