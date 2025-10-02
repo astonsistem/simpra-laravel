@@ -42,6 +42,17 @@ class DataRekeningKoran extends Model
         'is_web_change',
     ];
 
+    // event booted
+    protected static function booted()
+    {
+        static::created(function ($model) {
+            if (is_null($model->sync_at)) {
+                $model->sync_at = Carbon::now();
+                $model->save();
+            }
+        });
+    }
+
     public static function getTanggalRc(?int $rcId = null, ?string $tglRc = null, ?string $bankTujuan = null, int $skip = 0, int $limit = 1000)
     {
         $query = self::query();

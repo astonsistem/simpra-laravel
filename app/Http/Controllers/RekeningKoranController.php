@@ -81,18 +81,18 @@ class RekeningKoranController extends Controller
                 $endDate = Carbon::parse($tglAkhir)->endOfDay();
                 $query->whereBetween('tgl_rc', [$startDate, $endDate]);
             }
-            
+
             // Filter by month range (BULANAN)
             if (!empty($bulanAwal) && !empty($bulanAkhir) && $periode === "BULANAN") {
                 $query->whereMonth('tgl_rc', '>=', (int)$bulanAwal);
                 $query->whereMonth('tgl_rc', '<=', (int)$bulanAkhir);
             }
-            
+
             // Filter by year
             if (!empty($year)) {
                 $query->whereYear('tgl_rc', (int)$year);
             }
-            
+
             // Column filters
             if (!empty($noRc)) {
                 $query->where('no_rc', 'ILIKE', "%$noRc%");
@@ -158,7 +158,7 @@ class RekeningKoranController extends Controller
             if($request->has('sort_field') && $request->has('sort_order')) {
                 $sortField = $request->input('sort_field');
                 $sortOrder = $request->input('sort_order') == -1 ? 'desc' : 'asc';
-                
+
                 // Handle special sort fields that need joins or raw SQL
                 switch($sortField) {
                     case 'akun_data':
@@ -188,7 +188,7 @@ class RekeningKoranController extends Controller
                 }
             }
             else{
-                $query->orderBy('tgl_rc', 'desc');
+                $query->orderBy('sync_at', 'desc');
             }
 
             // If export, return all data without pagination
@@ -563,21 +563,40 @@ class RekeningKoranController extends Controller
         ], 200);
     }
 
-    public function pbUncheck()
+    public function pbUncheck(Request $request)
     {
-        $rekeningKoran = DataRekeningKoran::whereNull('pb')->where('bank', '!=', "JATIM")->get();
+        try {
+            $request->validate([
+                'tgl_rc' => 'nullable|date',
+                'page' => 'nullable|integer|min:1',
+                'per_page' => 'nullable|integer|min:1|max:100',
+            ]);
 
-        if (!$rekeningKoran) {
+            $query = DataRekeningKoran::whereNull('pb')
+                ->where('bank', '!=', 'JATIM');
+
+            // Filter by tgl_rc if provided
+            if ($request->has('tgl_rc') && !empty($request->input('tgl_rc'))) {
+                $tglRc = $request->input('tgl_rc');
+                $query->where('tgl_rc', '<=', $tglRc);
+            }
+
+            $query->orderBy('tgl_rc', 'desc')
+                  ->orderBy('no_rc', 'asc');
+
+            $perPage = $request->input('per_page', 10);
+            $rekeningKoran = $query->paginate($perPage);
+
+            return response()->json($rekeningKoran);
+        } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Not found.'
-            ], 404);
+                'message' => 'Terjadi kesalahan pada server.',
+                'error' => $e->getMessage()
+            ], 500);
         }
-        return response()->json(
-            $rekeningKoran
-        );
     }
 
-    public function pbCheck(string $id)
+    public function pbCheck(Request $request, string $id)
     {
         try {
             $validator = Validator::make(['id' => $id], [
@@ -603,7 +622,17 @@ class RekeningKoranController extends Controller
                     'message' => 'Not found.'
                 ], 404);
             }
-            return response()->json(new RekeningKoranResource($rekeningKoran), 200);
+
+            // Get linked PB records (mutations that are PB to this record)
+            $linkedRecords = DataRekeningKoran::where('pb', $id)
+                ->orderBy('tgl_rc', 'desc')
+                ->orderBy('no_rc', 'asc')
+                ->get();
+
+            return response()->json([
+                'data' => new RekeningKoranResource($rekeningKoran),
+                'linked_records' => RekeningKoranResource::collection($linkedRecords)
+            ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Terjadi kesalahan pada server.',
@@ -759,6 +788,217 @@ class RekeningKoranController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Error updating rekening koran: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan pada server.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function updatePb(Request $request, string $id)
+    {
+        try {
+            // Validate ID
+            $validator = Validator::make(['id' => $id], [
+                'id' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'detail' => [
+                        [
+                            'loc' => ['path', 'id'],
+                            'msg' => 'ID is required.',
+                            'type' => 'validation'
+                        ]
+                    ]
+                ], 422);
+            }
+
+            // Validate request data
+            $request->validate([
+                'mutasi' => 'nullable|boolean',
+                'pb_dari' => 'nullable|string',
+            ]);
+
+            // Find rekening koran
+            $rekeningKoran = DataRekeningKoran::where('rc_id', $id)->first();
+
+            if (!$rekeningKoran) {
+                return response()->json([
+                    'message' => 'Data rekening koran tidak ditemukan.'
+                ], 404);
+            }
+
+            // Validate business rules
+            if ($rekeningKoran->kredit <= 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'PB hanya dapat dilakukan pada mutasi dengan kredit > 0.'
+                ], 422);
+            }
+
+            if ($rekeningKoran->akun_id !== null || $rekeningKoran->akunls_id !== null || $rekeningKoran->bku_id !== null) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'PB hanya dapat dilakukan pada mutasi yang belum terklarifikasi (akun_id, akunls_id, dan bku_id harus null).'
+                ], 422);
+            }
+
+            // Update data
+            DB::transaction(function () use ($rekeningKoran, $request) {
+                $updateData = [];
+
+                if ($request->has('mutasi')) {
+                    $updateData['mutasi'] = $request->input('mutasi');
+                }
+
+                if ($request->has('pb_dari')) {
+                    $updateData['pb_dari'] = $request->input('pb_dari');
+                }
+
+                if (!empty($updateData)) {
+                    $rekeningKoran->update($updateData);
+                }
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data PB berhasil diubah.',
+                'data' => new RekeningKoranResource($rekeningKoran)
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error updating PB: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan pada server.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function updatePbCancel(Request $request, string $id)
+    {
+        try {
+            // Validate ID
+            $validator = Validator::make(['id' => $id], [
+                'id' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'detail' => [
+                        [
+                            'loc' => ['path', 'id'],
+                            'msg' => 'ID is required.',
+                            'type' => 'validation'
+                        ]
+                    ]
+                ], 422);
+            }
+
+            // Find rekening koran
+            $rekeningKoran = DataRekeningKoran::where('rc_id', $id)->first();
+
+            if (!$rekeningKoran) {
+                return response()->json([
+                    'message' => 'Data rekening koran tidak ditemukan.'
+                ], 404);
+            }
+
+            // Update data - set pb to null
+            DB::transaction(function () use ($rekeningKoran) {
+                $rekeningKoran->update([
+                    'pb' => null
+                ]);
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Penandaan PB berhasil dibatalkan.',
+                'data' => new RekeningKoranResource($rekeningKoran)
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error canceling PB: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan pada server.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function linkPb(Request $request, string $id)
+    {
+        try {
+            // Validate ID
+            $validator = Validator::make(['id' => $id], [
+                'id' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'detail' => [
+                        [
+                            'loc' => ['path', 'id'],
+                            'msg' => 'ID is required.',
+                            'type' => 'validation'
+                        ]
+                    ]
+                ], 422);
+            }
+
+            // Validate request data
+            $request->validate([
+                'pb_rc_id' => 'required|string', // The Bank Jatim rc_id to link to
+            ]);
+
+            // Find the record to be linked
+            $rekeningKoran = DataRekeningKoran::where('rc_id', $id)->first();
+
+            if (!$rekeningKoran) {
+                return response()->json([
+                    'message' => 'Data rekening koran tidak ditemukan.'
+                ], 404);
+            }
+
+            // Validate that it's not Bank Jatim
+            if (strtoupper($rekeningKoran->bank) === 'JATIM') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tidak dapat menautkan mutasi Bank Jatim.'
+                ], 422);
+            }
+
+            // Find the Bank Jatim record
+            $pbRcId = $request->input('pb_rc_id');
+            $bankJatimRecord = DataRekeningKoran::where('rc_id', $pbRcId)->first();
+
+            if (!$bankJatimRecord) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data Bank Jatim tidak ditemukan.'
+                ], 404);
+            }
+
+            // Update data - set pb to the Bank Jatim rc_id
+            DB::transaction(function () use ($rekeningKoran, $pbRcId) {
+                $rekeningKoran->update([
+                    'pb' => $pbRcId
+                ]);
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Mutasi berhasil ditautkan dengan Bank Jatim.',
+                'data' => new RekeningKoranResource($rekeningKoran)
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error linking PB: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan pada server.',

@@ -264,6 +264,7 @@ Route::post('rekening_koran/sinkronisasi-api/{bank}', [RekeningKoranController::
 Route::put('rekening_koran/{id}', [RekeningKoranController::class, 'update']);
 Route::put('rekening_koran/pb/{id}', [RekeningKoranController::class, 'updatePb']);
 Route::put('rekening_koran/pb_cancel/{id}', [RekeningKoranController::class, 'updatePbCancel']);
+Route::put('rekening_koran/pb_link/{id}', [RekeningKoranController::class, 'linkPb']);
 
 Route::get('master_akun/list', [MasterAkunController::class, 'list']);
 Route::get('master_akun/klarifikasi', [MasterAkunController::class, 'listForKlarifikasi']);
