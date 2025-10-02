@@ -28,7 +28,7 @@ class BkuResource extends JsonResource
             'pdd'           => (int) $this->pdd,
             'piutang'       => (int) $this->piutang,
             'status'        => (string) $this->status,
-            'rincian'       => RincianBKUResource::collection($this->rincian)
+            'rincian'       => RincianBkuResource::collection($this->rincian)
         ];
     }
 }
