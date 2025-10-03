@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\RincianBKURequest;
+use App\Http\Requests\RincianBkuRequest;
 use App\Http\Resources\RincianBkuCollection;
 use App\Http\Resources\RincianBkuResource;
 use App\Models\MasterRekeningView;
