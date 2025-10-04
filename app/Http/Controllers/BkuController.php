@@ -204,9 +204,9 @@ class BkuController extends Controller
                 ], 404);
             }
 
-            if ($BKU->tgl_valid) {
+            if ($BKU->pad_id || $BKU->pad_tgl) {
                 return response()->json([
-                    'message' => 'Data cannot be edited because its valid.'
+                    'message' => 'Data cannot be edited because its already do kirim PAD.'
                 ], 422);
             }
 

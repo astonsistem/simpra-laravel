@@ -17,6 +17,7 @@ class BkuRequest extends FormRequest
     {
         return [
             'ket'     => 'nullable|string',
+            'no_bku'  => 'nullable|string',
             'tgl_bku' => 'required|string',
             'jenis'   => 'required|integer',
             'uraian'  => 'nullable|string',

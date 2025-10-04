@@ -35,6 +35,15 @@ class StatistikController extends Controller
         $komposisiTargetPendapatanNotLayanan = $this->statistikService->getKomposisiTargetPendapatanNotLayanan();
         $komposisiTargetPendapatanAll = $komposisiTargetPendapatanLayanan + $komposisiTargetPendapatanNotLayanan;
 
+        $jumlahPersonil = $this->statistikService->getJumlahPersonil();
+        $jumlahPenjamin = $this->statistikService->getJumlahPenjamin();
+        $jumlahLoket = $this->statistikService->getJumlahLoket();
+        $jumlahInstalasi = $this->statistikService->getJumlahInstalasi();
+
+        $pendapatanSelainRetribusi = $this->statistikService->getPendapatanSelainRetribusi();
+
+        $pendapatanDokumenPenerimaan = $this->statistikService->getpendapatanDokumenPenerimaan();
+
         return response()->json([
             'saldoKas' => $saldoKas,
             'penerimaan' => $penerimaan,
@@ -50,6 +59,12 @@ class StatistikController extends Controller
             'komposisiTargetPendapatanLayanan' => $komposisiTargetPendapatanLayanan,
             'komposisiTargetPendapatanNotLayanan' => $komposisiTargetPendapatanNotLayanan,
             'komposisiTargetPendapatanAll' => $komposisiTargetPendapatanAll,
+            'jumlahPersonil' => $jumlahPersonil,
+            'jumlahPenjamin' => $jumlahPenjamin,
+            'jumlahLoket' => $jumlahLoket,
+            'jumlahInstalasi' => $jumlahInstalasi,
+            'pendapatanSelainRetribusi' => $pendapatanSelainRetribusi,
+            'pendapatanDokumenPenerimaan' => $pendapatanDokumenPenerimaan,
         ]);
     }
 }
