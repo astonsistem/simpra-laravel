@@ -18,4 +18,9 @@ class DataSelisihView extends Model
     {
         return $this->belongsTo(DataPenerimaanSelisih::class, 'id', 'sumber_id');
     }
+
+    public function rekeningDpa(): BelongsTo
+    {
+        return $this->belongsTo(MasterRekeningView::class, 'rek_id', 'rek_id');
+    }
 }

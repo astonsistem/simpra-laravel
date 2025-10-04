@@ -21,7 +21,7 @@ class DataSelisihResource extends JsonResource
             'cara_pembayaran'    => (string) $this->cara_pembayaran,        // 4. Cara Pembayaran
             'id'                 => (string) $this->id,                     // 1. ID
             'jenis'              => (string) $this->jenis,                  // 3. Jenis
-            'jumlah'             => (int) $this->jumlah,                    // 6. Jumlah Setor
+            'jumlah'             => $this->jumlah ? (int) $this->jumlah : $this->tersetor,                    // 6. Jumlah Setor
             'jumlah_netto'       => (int) $this->jumlah_netto,              // 9. Jumlah Netto
             'kasir_id'           => (int) $this->kasir_id,
             'kasir_nama'         => (string) $this->kasir_nama,             // 17. Nama Kasir
@@ -29,6 +29,7 @@ class DataSelisihResource extends JsonResource
             'loket_id'           => (int) $this->loket_id,
             'loket_nama'         => (string) $this->loket_nama,             // 18. Loket Kasir
             'nilai'              => (int) $this->nilai,                     // 16. Selisih Kurang
+            'no_bukti'           => (string) $this->no_bukti,               // 15. No. Bukti
             'no_buktibayar'      => (string) $this->no_bukti,               // 15. No. Bukti
             'penyetor'           => (string) $this->penyetor,               // 10. Penyetor
             'rc_id'              => (string) $this->rc_id,
@@ -38,8 +39,10 @@ class DataSelisihResource extends JsonResource
             ] : null,
             'sumber_id'          => (string) $this->id,
             'sumber_transaksi'   => (string) $this->sumber_transakasi,      // 12. Sumber Transaksi
+            'tgl_bukti'          => (string) $this->tgl_bukti,              // 14. Tgl. Bukti
             'tgl_buktibayar'     => (string) $this->tgl_bukti,              // 14. Tgl. Bukti
             'tgl_setor'          => (string) $this->tgl_setor,              // 2. Tgl. Setor
+            'tersetor'           => (int) $this->tersetor,                 // 19. Tersetor
             'total_jumlah_netto' => (int) $this->jumlah > 0 ? $this->jumlah : (int) $this->total_jumlah_netto,
             'data_transaksi_exists'     => $this->data_transaksi_exists,
             'data_transaksi_id'         => $this->dataTransaksi?->id
