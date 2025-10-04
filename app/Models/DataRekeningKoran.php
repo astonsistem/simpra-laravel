@@ -41,6 +41,8 @@ class DataRekeningKoran extends Model
         'sync_at',
         'status',
         'is_web_change',
+        'pad_id',
+        'pad_tgl',
     ];
 
     protected $appends = [

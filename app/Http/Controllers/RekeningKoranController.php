@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Models\MasterJenisBku;
 use App\Models\DataRekeningKoran;
 use PhpParser\Node\Stmt\TryCatch;
 use App\Services\RequestBankJatim;
@@ -45,6 +46,7 @@ class RekeningKoranController extends Controller
                 'belum_terklarifikasi' => 'nullable|numeric',
                 'rekening_dpa' => 'nullable|string',
                 'kualifikasi' => 'nullable|integer',
+                'bku_filter' => 'nullable',
                 'export' => 'nullable',
                 'sort_field' => 'nullable|string',
                 'sort_order' => 'nullable|integer',
@@ -140,6 +142,13 @@ class RekeningKoranController extends Controller
                 $query->whereNotNull('debit');
             } elseif (!empty($kualifikasi) && $kualifikasi == 2) {
                 $query->whereNotNull('kredit');
+            }
+
+            // BKU Filter: akunls_id is not null and bku_id is null
+            $bkuFilter = $request->input('bku_filter', false);
+            if ($bkuFilter == true || $bkuFilter === 'true') {
+                $query->whereNotNull('akunls_id')
+                      ->whereNull('bku_id');
             }
 
             // search
@@ -1028,5 +1037,247 @@ class RekeningKoranController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Create BKU from Rekening Koran data and send to PAD Online
+     */
+    public function createBku(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'rekening_koran_id' => 'required|exists:data_rekening_koran,rc_id',
+                'bank' => 'required|string',
+                'mutasi' => 'required|boolean',
+                'no_bku' => 'required|string|max:255',
+                'ket_bku' => 'required|string',
+                'bku_type' => 'required|string|in:Penerimaan Kas,Pindah Kas,Pengeluaran Kas'
+            ]);
+
+            DB::beginTransaction();
+
+            // Get rekening koran data
+            $rekeningKoran = DataRekeningKoran::where('rc_id', $validated['rekening_koran_id'])->first();
+
+            if (!$rekeningKoran) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data Rekening Koran tidak ditemukan.'
+                ], 404);
+            }
+
+            // Check business rules: akunls_id is null and bku_id is null
+            if ($rekeningKoran->akunls_id !== null && $rekeningKoran->bku_id !== null) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data tidak memenuhi syarat untuk membuat BKU. akunls_id dan bku_id harus null.'
+                ], 422);
+            }
+
+            // Get BKU jenis ID 'jenisbku_id' based on type at table `master_jenisbku`
+            $jenisBku = MasterJenisBku::where('jenisbku_nama', $validated['bku_type'])->first();
+            if (!$jenisBku) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Jenis BKU tidak ditemukan.'
+                ], 404);
+            }
+            $jenisId = $jenisBku->jenisbku_id;
+
+            // Create BKU data
+            $bkuData = [
+                'tgl_bku' => $rekeningKoran->tgl_rc,
+                'jenis' => $jenisId,
+                'ket' => $validated['ket_bku'],
+                'uraian' => $rekeningKoran->uraian,
+                'tgl' => now()
+            ];
+
+            // Generate BKU number
+            [$noBKU, $noUrut] = $this->generateNoBku($jenisId, $rekeningKoran->tgl_rc);
+            $bkuData['no_bku'] = $validated['no_bku']; // Use user input instead of generated
+            $bkuData['nourut_bku'] = $noUrut;
+
+            // Create BKU record
+            $bku = \App\Models\DataBku::create($bkuData);
+
+            // Update rekening koran with BKU ID
+            $rekeningKoran->update([
+                'bku_id' => $bku->bku_id,
+                'no_bku' => $bku->no_bku,
+                'ket_bku' => $validated['ket_bku'],
+            ]);
+
+            // Send to PAD Online
+            $padResult = $this->sendBkuToPAD($bku, $rekeningKoran, $validated);
+
+            if ($padResult['success']) {
+                // Update BKU with PAD response
+                $bku->update([
+                    'pad_id' => $padResult['pad_id'],
+                    'pad_tgl' => now()
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'BKU berhasil dibuat dan dikirim ke PAD Online.',
+                'data' => [
+                    'bku_id' => $bku->bku_id,
+                    'no_bku' => $bku->no_bku,
+                    'pad_id' => $padResult['pad_id'] ?? null,
+                    'pad_status' => $padResult['success'] ? 'success' : 'failed'
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error creating BKU from Rekening Koran: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan pada server.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Send BKU data to PAD Online
+     */
+    private function sendBkuToPAD($bku, $rekeningKoran, $validated)
+    {
+        try {
+            // Get PAD settings
+            $settings = \App\Models\Setting::whereIn('key', [
+                'sync_pad_url',
+                'sync_pad_user',
+                'sync_pad_password',
+                'sync_tahun'
+            ])->pluck('value', 'key');
+
+            $padUrl = rtrim($settings['sync_pad_url'], '/');
+            $padUser = $settings['sync_pad_user'];
+            $padPassword = $settings['sync_pad_password'];
+            $padTahun = $settings['sync_tahun'];
+
+            // Get PAD token
+            $tokenResponse = \Illuminate\Support\Facades\Http::withHeaders([
+                'Content-Type' => 'application/json',
+            ])->post($padUrl . '/login', [
+                'username' => $padUser,
+                'password' => $padPassword,
+                'aplikasi' => 'pad',
+                'tahun' => $padTahun
+            ]);
+
+            if ($tokenResponse->failed()) {
+                return [
+                    'success' => false,
+                    'message' => 'PAD login failed',
+                    'error' => $tokenResponse->body()
+                ];
+            }
+
+            $tokenData = $tokenResponse->json();
+            $token = $tokenData['token'];
+
+            // Get kas ke and kas dari from master_jenisbku
+            $jenisBku = MasterJenisBku::where('jenisbku_id', $bku->jenis)->first();
+            if (!$jenisBku) {
+                return [
+                    'success' => false,
+                    'message' => 'Jenis BKU tidak ditemukan'
+                ];
+            }
+
+            $padKaske = $jenisBku->bku_kaske;
+            $padKasdari = $jenisBku->bku_kasdari;
+
+            // Prepare request body based on debit/credit
+            $headers = [
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer ' . $token
+            ];
+
+            if ($rekeningKoran->debit > 0) {
+                $body = [
+                    'id_jenis' => 2,
+                    'no_bukti' => $validated['no_bku'],
+                    'tgl_bukti' => $rekeningKoran->tgl_rc,
+                    'dr_kas' => $padKasdari,
+                    'ke_kas' => $padKaske,
+                    'jml' => $rekeningKoran->debit,
+                    'untuk' => $validated['ket_bku']
+                ];
+            } else {
+                $body = [
+                    'id_jenis' => 2,
+                    'no_bukti' => $validated['no_bku'],
+                    'tgl_bukti' => $rekeningKoran->tgl_rc,
+                    'dr_kas' => $padKasdari,
+                    'ke_kas' => $padKaske,
+                    'jml' => $rekeningKoran->kredit,
+                    'untuk' => $validated['ket_bku']
+                ];
+            }
+
+            // Send to PAD
+            $padResponse = \Illuminate\Support\Facades\Http::withHeaders($headers)
+                ->post($padUrl . '/transfer-kas', $body);
+
+            if ($padResponse->failed()) {
+                return [
+                    'success' => false,
+                    'message' => 'Failed to send to PAD',
+                    'error' => $padResponse->body()
+                ];
+            }
+
+            $padData = $padResponse->json();
+
+            return [
+                'success' => true,
+                'pad_id' => $padData['id'] ?? null,
+                'message' => $padData['message'] ?? 'Success'
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('Error sending BKU to PAD: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Error sending to PAD: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Generate BKU number (borrowed from BkuController)
+     */
+    private function generateNoBku(int $jenis, string $tglBKU)
+    {
+        // ambil tahun & bulan dari tgl_bku
+        $tahun = date('Y', strtotime($tglBKU));
+        $bulan = date('n', strtotime($tglBKU)); // 1 - 12
+
+        $romawi = [
+            '', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII',
+            'VIII', 'IX', 'X', 'XI', 'XII'
+        ];
+        $bulanRomawi = $romawi[$bulan];
+
+        // cari max nourut_bku dengan Eloquent
+        $maxNoUrut = \App\Models\DataBku::where('jenis', $jenis)
+            ->whereYear('tgl_bku', $tahun)
+            ->whereMonth('tgl_bku', $bulan)
+            ->max('nourut_bku');
+
+        $newNoUrut = $maxNoUrut ? $maxNoUrut + 1 : 1;
+
+        // format nomor bku -> contoh: BPN.2/0005/VII/2025
+        $noBKU = sprintf("BPN.%d/%04d/%s/%d", $jenis, $newNoUrut, $bulanRomawi, $tahun);
+
+        return [$noBKU, $newNoUrut];
     }
 }

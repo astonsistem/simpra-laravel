@@ -253,6 +253,7 @@ Route::group([
     Route::put('rekening_koran/pb_link/{id}', [RekeningKoranController::class, 'linkPb']);
     Route::put('rekening_koran/pb/{id}', [RekeningKoranController::class, 'updatePb']);
     Route::put('rekening_koran/pb_cancel/{id}', [RekeningKoranController::class, 'updatePbCancel']);
+    Route::post('rekening_koran/bku', [RekeningKoranController::class, 'createBku']);
 });
 
 Route::get('rekening_koran/statistik', [RekeningKoranController::class, 'statistik']);
