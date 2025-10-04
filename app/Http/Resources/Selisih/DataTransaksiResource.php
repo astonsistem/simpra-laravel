@@ -22,7 +22,7 @@ class DataTransaksiResource extends JsonResource
             'penyetor'          => (string) $this->penyetor,
             'jenis'             => (string) $this->jenis,
             'cara_pembayaran'   => (string) $this->cara_pembayaran,
-            'bank_tujuan'       => (string) $this->bank_tujuan,
+            'bank_tujuan'       => (string) strtoupper($this->bank_tujuan),
             'nilai'             => (int) $this->nilai,              // selisih kurang
             'jumlah'            => (int) $this->jumlah,
             'admin_kredit'      => (int) $this->admin_kredit ?? 0,

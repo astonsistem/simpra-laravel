@@ -17,7 +17,7 @@ class DataSelisihResource extends JsonResource
         return [
             'admin_debit'        => (int) $this->admin_debit ?? 0,          // 8. Admin QRIS
             'admin_kredit'       => (int) $this->admin_kredit ?? 0,         // 7. Admin EDC
-            'bank_tujuan'        => (string) $this->bank_tujuan,            // 5. Rekening Bank
+            'bank_tujuan'        => (string) strtoupper($this->bank_tujuan),            // 5. Rekening Bank
             'cara_pembayaran'    => (string) $this->cara_pembayaran,        // 4. Cara Pembayaran
             'id'                 => (string) $this->id,                     // 1. ID
             'jenis'              => (string) $this->jenis,                  // 3. Jenis
