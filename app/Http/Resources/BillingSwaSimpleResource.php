@@ -20,6 +20,7 @@ class BillingSwaSimpleResource extends JsonResource
             'admin_kredit'          => $this->admin_kredit,
             'akun_id'               => $this->akun_id,
             'bank_tujuan'           => $this->bank_tujuan,
+            'bank'                  => $this->bank_tujuan,
             'cara_pembayaran'       => $this->cara_pembayaran,
             'jumlah_netto'          => $this->jumlah_netto,
             'metode_pembayaran'     => $this->metode_pembayaran,

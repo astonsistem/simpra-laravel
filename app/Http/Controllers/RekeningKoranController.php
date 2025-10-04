@@ -245,7 +245,12 @@ class RekeningKoranController extends Controller
             });
             // FILTER TGL_RC
             $query->when($request->has('tgl_rc') && !empty($params['tgl_rc'] ), function ($q) use ($params) {
-                $tgl_rc = Carbon::createFromFormat('d/m/Y', str_replace('-', '/', $params['tgl_rc']));
+                // if date include / char
+                if (strpos($params['tgl_rc'], '/') !== false) {
+                    $tgl_rc = Carbon::createFromFormat('d/m/Y', str_replace('-', '/', $params['tgl_rc']));
+                } else {
+                    $tgl_rc = Carbon::createFromFormat('Y-m-d', $params['tgl_rc']);
+                }
                 $q->where('tgl_rc', '>=', $tgl_rc->format('Y-m-d'));
             });
 
