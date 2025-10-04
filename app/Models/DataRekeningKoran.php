@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -42,6 +43,11 @@ class DataRekeningKoran extends Model
         'is_web_change',
     ];
 
+    protected $appends = [
+        'terklarifikasi',
+        'belum_terklarifikasi',
+    ];
+
     // event booted
     protected static function booted()
     {
@@ -51,6 +57,20 @@ class DataRekeningKoran extends Model
                 $model->save();
             }
         });
+    }
+
+    public function terklarifikasi(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => (int) $this->klarif_layanan + (int)$this->klarif_lain,
+        );
+    }
+
+    public function belumTerklarifikasi(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => (int) $this->kredit - ((int) $this->klarif_layanan + (int)$this->klarif_lain),
+        );
     }
 
     public static function getTanggalRc(?int $rcId = null, ?string $tglRc = null, ?string $bankTujuan = null, int $skip = 0, int $limit = 1000)

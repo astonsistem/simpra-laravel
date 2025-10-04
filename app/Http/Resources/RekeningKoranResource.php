@@ -50,8 +50,8 @@ class RekeningKoranResource extends JsonResource
                     'akunls_nama' => $this->akunlsData->akun_nama
                 ];
             }),
-            'terklarifikasi' => (int) ($this->klarif_layanan + $this->klarif_lain),
-            'belum_terklarifikasi' => (int) (($this->debit > 0 ? $this->debit : $this->kredit) - ($this->klarif_layanan + $this->klarif_lain)),
+            'terklarifikasi' => $this->terklarifikasi,
+            'belum_terklarifikasi' => $this->belum_terklarifikasi,
             'rekening_dpa' => $this->whenLoaded('rekeningDpa', function () {
                 return [
                     'rek_id' => $this->rekeningDpa->rek_id ?? null,

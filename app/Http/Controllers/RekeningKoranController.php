@@ -129,7 +129,7 @@ class RekeningKoranController extends Controller
                 $query->whereRaw('(COALESCE(klarif_layanan, 0) + COALESCE(klarif_lain, 0)) = ?', [$terklarifikasi]);
             }
             if (!empty($belumTerklarifikasi)) {
-                $query->whereRaw('(COALESCE(kredit, 0) - COALESCE(klarif_layanan, 0) - COALESCE(klarif_lain, 0)) = ?', [$belumTerklarifikasi]);
+                $query->whereRaw('(COALESCE(kredit, 0) - (COALESCE(klarif_layanan, 0) + COALESCE(klarif_lain, 0))) = ?', [$belumTerklarifikasi]);
             }
             if (!empty($rekeningDpa)) {
                 $query->whereHas('rekeningDpa', function($q) use ($rekeningDpa) {
@@ -180,7 +180,7 @@ class RekeningKoranController extends Controller
                         $query->orderByRaw('(COALESCE(klarif_layanan, 0) + COALESCE(klarif_lain, 0)) ' . $sortOrder);
                         break;
                     case 'belum_terklarifikasi':
-                        $query->orderByRaw('(COALESCE(kredit, 0) - COALESCE(klarif_layanan, 0) - COALESCE(klarif_lain, 0)) ' . $sortOrder);
+                        $query->orderByRaw('(COALESCE(kredit, 0) - (COALESCE(klarif_layanan, 0) + COALESCE(klarif_lain, 0))) ' . $sortOrder);
                         break;
                     default:
                         $query->orderBy($sortField, $sortOrder);
