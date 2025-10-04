@@ -17,42 +17,54 @@ class StatistikController extends Controller
 
     public function index(): JsonResponse
     {
-        $sumPendapatan = $this->statistikService->getSumPendapatan();
-        $countPasien = $this->statistikService->getCountPasien();
-        $topInstalasi = $this->statistikService->getTopInstalasi();
-        $sumPotensiAll = $this->statistikService->getSumAllPotensi();
-        $sumPotensiPelayanan = $this->statistikService->getSumPotensiPelayanan();
-        $sumPotensiLain = $this->statistikService->getSumPotensiLain();
-        $countPotensi = $this->statistikService->countPotensiPelayanans();
-        $pendapatanChart = $this->statistikService->getSumPendapatanChart();
-        $anggaranChart = $this->statistikService->getTotalAnggaran();
-        $pendapatanPenjamin = $this->statistikService->getPendapatanPelayananPenjamin();
-        $sumPenerimaanLain = $this->statistikService->getSumPenerimaanLainTahunini();
-        $sumPotensiLayananLain = $sumPotensiPelayanan + $sumPotensiLain;
+        $saldoKas = $this->statistikService->getSaldoKas();
+        $penerimaan = $this->statistikService->getPenerimaan();
+        $potensiPenerimaan = $this->statistikService->getPotensiPenerimaan();
 
-        $sumPenerimaan = $this->statistikService->getSumTotalByPaymentMethod('LANGSUNG');
-        $countPenerimaan = $this->statistikService->getCountTotalByPaymentMethod('LANGSUNG');
+        $realisasiPendapatanNetto = $this->statistikService->getRealisasiPendapatanNetto();
+        $realisasiPendapatanJumlah = $this->statistikService->getRealisasiPendapatanJumlah();
 
-        $carabayar = $this->statistikService->getCountCarabayar();
-        $penjamin = $this->statistikService->getCountPenjamin();
-        $instalasi = $this->statistikService->getCountInstalasi();
+        $monevPenerimaanLainnya = $this->statistikService->getMonevPenerimaanLainnya();
+        $monevPenerimaanLainnyaAll = $this->statistikService->getMonevPenerimaanLainnyaAll();
+        $monevPenerimaanLayanan = $this->statistikService->getMonevPenerimaanLayanan();
+        $monevPenerimaanLayananAll = $this->statistikService->getMonevPenerimaanLayananAll();
+        $monevRekeningKoran = $this->statistikService->getMonevRekeningKoran();
+        $monevRekeningKoranAll = $this->statistikService->getMonevRekeningKoranAll();
+        
+        $komposisiTargetPendapatanLayanan = $this->statistikService->getKomposisiTargetPendapatanLayanan();
+        $komposisiTargetPendapatanNotLayanan = $this->statistikService->getKomposisiTargetPendapatanNotLayanan();
+        $komposisiTargetPendapatanAll = $komposisiTargetPendapatanLayanan + $komposisiTargetPendapatanNotLayanan;
+
+        $jumlahPersonil = $this->statistikService->getJumlahPersonil();
+        $jumlahPenjamin = $this->statistikService->getJumlahPenjamin();
+        $jumlahLoket = $this->statistikService->getJumlahLoket();
+        $jumlahInstalasi = $this->statistikService->getJumlahInstalasi();
+
+        $pendapatanSelainRetribusi = $this->statistikService->getPendapatanSelainRetribusi();
+
+        $pendapatanDokumenPenerimaan = $this->statistikService->getpendapatanDokumenPenerimaan();
 
         return response()->json([
-            'pendapatan' => $sumPendapatan,
-            'pasien' => $countPasien,
-            'top_instalasi' => $topInstalasi,
-            'sum_potensi' => $sumPotensiAll,
-            'sumpotensipelayanan' => $sumPotensiPelayanan,
-            'sum_penerimaan' => $sumPenerimaan,
-            'count_penerimaan' => $countPenerimaan,
-            'count_potensi' => $countPotensi,
-            'penjamin' => $penjamin,
-            'instalasi' => $instalasi,
-            'pendapatanchart' => $pendapatanChart,
-            'anggaranchart' => $anggaranChart,
-            'pendapatanpenjaminchart' => $pendapatanPenjamin,
-            'sumpenerimaanpotensi' => $sumPenerimaanLain,
-            'sumpotensilayananlain' => $sumPotensiLayananLain
+            'saldoKas' => $saldoKas,
+            'penerimaan' => $penerimaan,
+            'potensiPenerimaan' => $potensiPenerimaan,
+            'realisasiPendapatanNetto' => $realisasiPendapatanNetto,
+            'realisasiPendapatanJumlah' => $realisasiPendapatanJumlah,
+            'monevPenerimaanLainnya' => $monevPenerimaanLainnya,
+            'monevPenerimaanLainnyaAll' => $monevPenerimaanLainnyaAll,
+            'monevPenerimaanLayanan' => $monevPenerimaanLayanan,
+            'monevPenerimaanLayananAll' => $monevPenerimaanLayananAll,
+            'monevRekeningKoran' => $monevRekeningKoran,
+            'monevRekeningKoranAll' => $monevRekeningKoranAll,
+            'komposisiTargetPendapatanLayanan' => $komposisiTargetPendapatanLayanan,
+            'komposisiTargetPendapatanNotLayanan' => $komposisiTargetPendapatanNotLayanan,
+            'komposisiTargetPendapatanAll' => $komposisiTargetPendapatanAll,
+            'jumlahPersonil' => $jumlahPersonil,
+            'jumlahPenjamin' => $jumlahPenjamin,
+            'jumlahLoket' => $jumlahLoket,
+            'jumlahInstalasi' => $jumlahInstalasi,
+            'pendapatanSelainRetribusi' => $pendapatanSelainRetribusi,
+            'pendapatanDokumenPenerimaan' => $pendapatanDokumenPenerimaan,
         ]);
     }
 }

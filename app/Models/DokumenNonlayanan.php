@@ -39,6 +39,19 @@ class DokumenNonlayanan extends Model
         'induk_id',
     ];
 
+    protected $appends = [
+        'akun_nama',
+    ];
+
+    public function akun()
+    {
+        return $this->belongsTo(MasterAkun::class, 'akun_id', 'akun_id');
+    }
+    public function getAkunNamaAttribute()
+    {
+        return $this->akun->akun_nama;
+    }
+
     // Accessor for terbayar
     public function getTerbayarAttribute()
     {

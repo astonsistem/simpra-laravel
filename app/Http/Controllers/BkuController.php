@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\BKURequest;
+use App\Http\Requests\BkuRequest;
 use App\Http\Resources\BkuCollection;
 use App\Http\Resources\BkuResource;
 use App\Models\MasterJenisBku;
@@ -166,7 +166,7 @@ class BkuController extends Controller
         }
     }
 
-    public function store(BKURequest $request)
+    public function store(BkuRequest $request)
     {
         try {
             $data = $request->validated();
@@ -192,7 +192,7 @@ class BkuController extends Controller
         }
     }
 
-    public function update(BKURequest $request, $id)
+    public function update(BkuRequest $request, $id)
     {
         try {
             $data = $request->validated();
@@ -204,9 +204,9 @@ class BkuController extends Controller
                 ], 404);
             }
 
-            if ($BKU->tgl_valid) {
+            if ($BKU->pad_id || $BKU->pad_tgl) {
                 return response()->json([
-                    'message' => 'Data cannot be edited because its valid.'
+                    'message' => 'Data cannot be edited because its already do kirim PAD.'
                 ], 422);
             }
 

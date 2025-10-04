@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\RincianBKURequest;
+use App\Http\Requests\RincianBkuRequest;
 use App\Http\Resources\RincianBkuCollection;
 use App\Http\Resources\RincianBkuResource;
 use App\Models\MasterRekeningView;
@@ -127,7 +127,7 @@ class RincianBkuController extends Controller
         }
     }
 
-    public function store(RincianBKURequest $request)
+    public function store(RincianBkuRequest $request)
     {
         try {
             $data = $request->validated();
@@ -148,7 +148,7 @@ class RincianBkuController extends Controller
         }
     }
 
-    public function update(RincianBKURequest $request, $id)
+    public function update(RincianBkuRequest $request, $id)
     {
         try {
             $data = $request->validated();

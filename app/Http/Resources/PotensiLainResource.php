@@ -16,6 +16,7 @@ class PotensiLainResource extends JsonResource
             'no_dokumen' => (string) $this->no_dokumen,
             'tgl_dokumen' => (string) $this->tgl_dokumen,
             'akun_id' => (int) $this->akun_id,
+            'akun_nama' => (string) $this->akun_nama,
             'pihak3' => (string) $this->pihak3,
             'pihak3_alamat' => (string) $this->pihak3_alamat,
             'pihak3_telp' => (string) $this->pihak3_telp,

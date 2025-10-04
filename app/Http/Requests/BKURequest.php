@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class BKURequest extends FormRequest
+class BkuRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -17,6 +17,7 @@ class BKURequest extends FormRequest
     {
         return [
             'ket'     => 'nullable|string',
+            'no_bku'  => 'nullable|string',
             'tgl_bku' => 'required|string',
             'jenis'   => 'required|integer',
             'uraian'  => 'nullable|string',

@@ -26,6 +26,7 @@ class PotensiLainController extends Controller
                 'tgl_awal' => 'nullable|string',
                 'tgl_akhir' => 'nullable|string',
                 'no_dokumen' => 'nullable|string',
+                'akun_id' => 'nullable|integer',
                 'uraian' => 'nullable|string',
                 'pihak3' => 'nullable|string',
                 'is_buktitagihan' => 'nullable|string',
@@ -40,6 +41,7 @@ class PotensiLainController extends Controller
             $tglAwal = $request->input('tgl_awal');
             $tglAkhir = $request->input('tgl_akhir');
             $noDokumen = $request->input('no_dokumen');
+            $akun = $request->input('akun_nama');
             $uraian = $request->input('uraian');
             $pihak3 = $request->input('pihak3');
             $buktiTagihan = $request->input('is_buktitagihan');
@@ -57,6 +59,11 @@ class PotensiLainController extends Controller
             }
             if (!empty($noDokumen)) {
                 $query->where('no_dokumen', 'ILIKE', "%$noDokumen%");
+            }
+            if (!empty($akun)) {
+                $query->whereHas('akun', function ($q) use ($akun) {
+                    $q->where('akun_nama', 'ILIKE', "%{$akun}%");
+                });
             }
             if (!empty($uraian)) {
                 $query->where('uraian', 'ILIKE', "%$uraian%");
