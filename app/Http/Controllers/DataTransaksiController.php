@@ -93,11 +93,11 @@ class DataTransaksiController extends Controller
             }
 
             if ($request->filled('nilai')) {
-                $query->where('nilai', 'ILIKE', "%{$params['nilai']}%");
+                $query->where('nilai', $params['nilai']);
             }
 
             if ($request->filled('jumlah')) {
-                $query->where('jumlah', 'ILIKE', "%{$params['jumlah']}%");
+                $query->where('jumlah', $params['jumlah']);
             }
 
             if ($request->filled('sumber_transaksi')) {
