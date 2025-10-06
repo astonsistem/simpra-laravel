@@ -181,7 +181,7 @@ class RekeningKoranController extends Controller
                               ->select('data_rekening_koran.*');
                         break;
                     case 'rekening_dpa':
-                        $query->leftJoin('master_rekening_view as mrv', 'data_rekening_koran.rek_id', '=', 'mrv.rek_id')
+                        $query->leftJoin('master_rekening_v as mrv', 'data_rekening_koran.rek_id', '=', 'mrv.rek_id')
                               ->orderBy('mrv.rek_nama', $sortOrder)
                               ->select('data_rekening_koran.*');
                         break;
@@ -806,12 +806,13 @@ class RekeningKoranController extends Controller
                     'akunls_id' => $validated['akunls_id'],
                     'klarif_layanan' => $validated['klarif_layanan'],
                     'klarif_lain' => $validated['klarif_lain'],
+                    'rek_id' => $validated['rek_id'] ?? null,
                     'is_web_change' => true,
                 ]);
             });
 
             // Reload with relationships
-            $rekeningKoran->load(['akunData', 'akunlsData']);
+            $rekeningKoran->load(['akunData', 'akunlsData', 'rekeningDpa']);
 
             return response()->json([
                 'success' => true,

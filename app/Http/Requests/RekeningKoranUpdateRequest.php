@@ -34,6 +34,7 @@ class RekeningKoranUpdateRequest extends FormRequest
             'akunls_id' => 'required|integer|exists:master_akun,akun_id',
             'klarif_layanan' => 'required|numeric|min:0',
             'klarif_lain' => 'required|numeric|min:0',
+            'rek_id' => 'nullable|exists:master_rekening_v,rek_id',
         ];
     }
 
@@ -57,6 +58,7 @@ class RekeningKoranUpdateRequest extends FormRequest
             'klarif_lain.required' => 'Klarifikasi Lain harus diisi',
             'klarif_lain.numeric' => 'Klarifikasi Lain harus berupa angka',
             'klarif_lain.min' => 'Klarifikasi Lain minimal 0',
+            'rek_id.exists' => 'Rekening DPA tidak ditemukan',
         ];
     }
 }

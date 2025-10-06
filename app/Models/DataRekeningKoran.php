@@ -23,6 +23,7 @@ class DataRekeningKoran extends Model
         'nama_dari',
         'akun_id',
         'akunls_id',
+        'rek_id',
         'uraian',
         'bku_id',
         'no_bku',
