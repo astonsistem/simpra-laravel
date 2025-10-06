@@ -69,4 +69,79 @@ class DataPendapatanPelayanan extends Model
     protected $casts = [
         'id' => 'string',
     ];
+
+    public function syncFase2()
+    {
+        $penerimaanLayanan = DataPenerimaanLayanan::selectRaw("
+                pendaftaran_id,
+                SUM(CASE WHEN LOWER(klasifikasi) = 'pendapatan' THEN total ELSE 0 END) AS pendapatan,
+                SUM(CASE WHEN LOWER(klasifikasi) = 'pdd' THEN total ELSE 0 END) AS pdd,
+                SUM(CASE WHEN LOWER(klasifikasi) = 'piutang' THEN total ELSE 0 END) AS piutang,
+                SUM(admin_kredit) AS bea_admin,
+                SUM(total) AS total
+            ")
+            ->where('metode_bayar', 'ILIKE', '%langsung%')
+            ->where('pendaftaran_id', $this->pendaftaran_id)
+            ->groupBy('pendaftaran_id')
+            ->first();
+
+        if (!$penerimaanLayanan) {
+            return response()->json([
+                'message' => 'Data Penerimaan Layanan not found',
+            ], 404);
+        }
+
+        if ($this->pendapatan != $penerimaanLayanan->pendapatan || $this->pdd != $penerimaanLayanan->pdd) {
+            $this->status_fase2 = 'Koreksi Pendapatan';
+        } elseif ($this->piutang != $penerimaanLayanan->piutang) {
+            $this->status_fase2 = 'Koreksi Piutang';
+        } else {
+            $this->status_fase2 = 'Valid';
+        }
+
+        $this->biaya_admin = $penerimaanLayanan->bea_admin;
+        if ($penerimaanLayanan->total != 0) {
+            $this->status_fase2 = 'Bayar';
+        }
+
+        $this->save();
+
+        return true;
+    }
+
+    public static function syncFase2All($daysAgo = 5)
+    {
+        $date = now()->subDays($daysAgo)->toDateString();
+        $records = self::whereDate('tgl_pelayanan', $date)->get();
+
+        $success = 0;
+        $failed = 0;
+
+        foreach ($records as $record) {
+            try {
+                $result = $record->syncFase2();
+
+                if ($result === false) {
+                    $failed++;
+                } else {
+                    $success++;
+                }
+
+            } catch (\Throwable $e) {
+                $failed++;
+                \Log::error('syncFase2All failed for record', [
+                    'id' => $record->id ?? null,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return [
+            'success' => $failed === 0,
+            'processed' => $success + $failed,
+            'success_count' => $success,
+            'failed_count' => $failed,
+            'date' => $date,
+        ];
+    }
 }

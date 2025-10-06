@@ -12,7 +12,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->command('cron:per-day')->everyMinute();//CEK AKHIR - GANTI NANTI MENJADI TIAP HARI DAN PISAHKAN CRON YANG BEDA JADWAL, DIMANA INI SEMENTARA DIJADIKAN SATU CRON:PER-DAY
+        $schedule->command('cron:per-day')->dailyAt('01:00');
     }
 
     /**

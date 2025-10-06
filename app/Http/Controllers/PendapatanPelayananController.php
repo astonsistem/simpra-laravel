@@ -374,38 +374,11 @@ class PendapatanPelayananController extends Controller
                 ], 422);
             }
 
-            $penerimaanLayanan = DataPenerimaanLayanan::selectRaw("
-                    pendaftaran_id,
-                    SUM(CASE WHEN LOWER(klasifikasi) = 'pendapatan' THEN total ELSE 0 END) as pendapatan,
-                    SUM(CASE WHEN LOWER(klasifikasi) = 'pdd' THEN total ELSE 0 END) as pdd,
-                    SUM(CASE WHEN LOWER(klasifikasi) = 'piutang' THEN total ELSE 0 END) as piutang,
-                    SUM(admin_kredit) as bea_admin,
-                    SUM(total) as total
-                ")
-                ->where('metode_bayar', 'ILIKE', '%langsung%')
-                ->where('pendaftaran_id', $pendapatanPelayanan->pendaftaran_id)
-                ->groupBy('pendaftaran_id')
-                ->first();
-            if (!$penerimaanLayanan) {
-                return response()->json([
-                    'message' => 'Data Penerimaan Layanan not found'
-                ], 404);
-            }
+            $syncFase2 = $pendapatanPelayanan->syncFase2();
 
-            if ($pendapatanPelayanan->pendapatan != $penerimaanLayanan->pendapatan || $pendapatanPelayanan->pdd != $penerimaanLayanan->pdd) {
-                $pendapatanPelayanan->status_fase2 = 'Koreksi Pendapatan';
-            } elseif ($pendapatanPelayanan->piutang != $penerimaanLayanan->piutang) {
-                $pendapatanPelayanan->status_fase2 = 'Koreksi Piutang';
-            } else {
-                $pendapatanPelayanan->status_fase2 = 'Valid';
+            if ($syncFase2 instanceof \Illuminate\Http\JsonResponse) {
+                return $syncFase2;
             }
-
-            $pendapatanPelayanan->biaya_admin = $penerimaanLayanan->bea_admin;
-            if ($penerimaanLayanan->total != 0) {
-                $pendapatanPelayanan->status = 'bayar';
-            }
-
-            $pendapatanPelayanan->save();
 
             return response()->json([
                 'status' => 200,
