@@ -264,7 +264,7 @@ class CronPerDay extends Command
                     ->whereRaw('COALESCE(a.total_dijamin, 0) <> 0')
                     ->update([
                         'potensi_id' => DB::raw('(SELECT MAX(b.rincian_id) FROM rincian_potensi_pelayanan b WHERE b.pendaftaran_id = a.pendaftaran_id)'),
-                        'potensi_no' => DB::raw('(SELECT MAX(b.norm) FROM rincian_potensi_pelayanan b WHERE b.pendaftaran_id = a.pendaftaran_id)'),
+                        'potensi_no' => DB::raw('(SELECT MAX(b.no_dokumen) FROM rincian_potensi_pelayanan b WHERE b.pendaftaran_id = a.pendaftaran_id)'),
                         'potensi_nominal' => DB::raw('(SELECT SUM(b.total_klaim) FROM rincian_potensi_pelayanan b WHERE b.pendaftaran_id = a.pendaftaran_id)'),
                     ]);
                 // log updated data

@@ -27,5 +27,6 @@ class RincianPotensiPelayanan extends Model
         'norm',
         'nama',
         'tgl_mrs',
+        'no_dokumen',
     ];
 }

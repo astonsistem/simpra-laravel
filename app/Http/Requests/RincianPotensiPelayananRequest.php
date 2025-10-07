@@ -16,7 +16,7 @@ class RincianPotensiPelayananRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'piutang_id'     => 'nullable|string',
+            'piutang_id'     => 'required|string',
             'pendaftaran_id' => 'required|integer',
             'total_tagihan'  => 'required|numeric',
             'total_klaim'    => 'required|numeric',
@@ -31,6 +31,7 @@ class RincianPotensiPelayananRequest extends FormRequest
             'norm'           => 'required|string',
             'nama'           => 'required|string',
             'tgl_mrs'        => 'required|string',
+            'no_dokumen'     => 'required|string',
         ];
     }
 

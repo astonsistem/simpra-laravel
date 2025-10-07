@@ -34,10 +34,18 @@ class PelaporanController extends Controller
     public function list()
     {
         try {
-            $data = MasterPelaporan::orderBy('kode_laporan', 'asc')->get()->map(fn($item) => [
-                'label' => $item->label,
-                'to'    => $item->to,
-            ]);
+            $allowedPelaporanIds = json_decode(auth()->user()->pelaporan, true);
+
+            if (empty($allowedPelaporanIds)) {
+                $data = [];
+            } else {
+                $data = MasterPelaporan::whereIn('id', $allowedPelaporanIds)
+                    ->orderBy('kode_laporan', 'asc')
+                    ->get()->map(fn($item) => [
+                        'label' => $item->label,
+                        'to'    => $item->to,
+                    ]);
+            }
 
             return response()->json([
                 'status' => "200",
