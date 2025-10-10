@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Actions\BillingKasir\ValidasiBillingKasir;
 use App\Http\Requests\PenerimaanLainRequest;
 use App\Http\Requests\ValidasiPenerimaanLainRequest;
 use App\Http\Requests\ValidasiCancelPenerimaanLainRequest;
@@ -43,29 +42,26 @@ class PenerimaanLainController extends Controller
                 'bank_tujuan' => 'nullable|string',
                 'jumlahBrutoMin' => 'nullable|numeric',
                 'jumlahBrutoMax' => 'nullable|numeric',
-                'validated' => 'nullable|in:0,1',
+                'is_valid' => 'nullable',
                 'cara_pembayaran' => 'nullable|string',
             ]);
 
             $size = $params['size'] ?? 10;
-            $tahunPeriode = $request->input('tahunPeriode');
-            $tglAwal = $request->input('tglAwal');
-            $tglAkhir = $request->input('tglAkhir');
-            $periode = $request->input('periode');
+            $tahunPeriode = $params['tahunPeriode'] ?? null;
+            $tglAwal = $params['tglAwal'] ?? null;
+            $tglAkhir = $params['tglAkhir'] ?? null;
+            $periode = $params['periode'] ?? null;
             //
-            $noBayar = $request->input('no_bayar');
-            $tglBayar = $request->input('tgl_bayar');
-            $pihak3 = $request->input('pihak3');
-            $uraian = $request->input('uraian');
-            $noDokumen = $request->input('no_dokumen');
-            $tglDokumen = $request->input('tgl_dokumen');
-            $sumberTransaksi = $request->input('sumber_transaksi');
-            $instalasi = $request->input('instalasi');
-            $caraBayar = $request->input('cara_bayar');
-            $rekeningDpa = $request->input('rekening_dpa');
-            $bank = $request->input('bank');
-            $jumlahNetto = $request->input('jumlahNetto');
-            $jumlahBruto = $request->input('jumlahBruto');
+            $noBayar = $params['no_bayar'] ?? null;
+            $tglBayar = $params['tgl_bayar'] ?? null;
+            $pihak3 = $params['pihak3'] ?? null;
+            $uraian = $params['uraian'] ?? null;
+            $noDokumen = $params['no_dokumen'] ?? null;
+            $tglDokumen = $params['tgl_dokumen'] ?? null;
+            $instalasi = $params['instalasi'] ?? null;
+            $caraBayar = $params['cara_bayar'] ?? null;
+            $jumlahNetto = $params['jumlahNetto'] ?? null;
+            $sumberTransaksi = $params['sumber_transaksi'] ?? null;
 
             $query = DataPenerimaanLain::query();
 
@@ -127,6 +123,12 @@ class PenerimaanLainController extends Controller
                 $query->where('cara_pembayaran', 'ILIKE', $params['cara_pembayaran']."%");
             }
 
+            if (!empty($sumberTransaksi)) {
+                $query->whereHas('sumber', function($q) use ($sumberTransaksi) {
+                    $q->where('sumber_nama', 'ILIKE', "%$sumberTransaksi%");
+                });
+            }
+
             $query->when(!empty($params['rekening_dpa']), function ($q) use ($params) {
                 $q->whereHas('rekeningDpa', function ($q) use ($params) {
                     $q->where('rek_nama', 'ILIKE', '%' . $params['rekening_dpa'] . '%');
@@ -154,16 +156,16 @@ class PenerimaanLainController extends Controller
                 $q->where('jumlah_netto', $operator, $params['jumlahNettoMax']);
             });
 
-            if($request->has('validated')) {
-                $query->where(function($query) use ($params) {
-                    $validated = $params['validated'] ?? null;
-                    if($validated == '1') {
+            if ($request->has('is_valid')) {
+                $query->where(function ($query) use ($params) {
+                    $validated = $params['is_valid'] ?? null;
+                    if ($validated == true) {
                         $query->whereNotNull('rc_id')->where('rc_id', '>', 0);
-                    } elseif($validated == '0') {
+                    } elseif ($validated == '0') {
                         $query->whereNull('rc_id');
                     }
                 });
-            }
+            };
 
             $query->with('masterAkun')->orderBy('tgl_bayar', 'desc');
 

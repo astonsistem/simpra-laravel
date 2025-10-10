@@ -21,4 +21,22 @@ class MasterCaraPembayaran extends Model
     protected $casts = [
         'bayar_id' => 'string',
     ];
+
+    public static function getValueFromLabel($label)
+    {
+        if(!$label) return null;
+
+        $value = strtoupper($label);
+
+        switch ($value) {
+            case 'S-TAPAY':
+                $value = 'STPAY';
+                break;
+            case 'UE READER':
+                $value = 'READER';
+                break;
+        }
+
+        return $value;
+    }
 }
