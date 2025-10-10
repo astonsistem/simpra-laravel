@@ -47,20 +47,22 @@ class PenerimaanLainController extends Controller
             ]);
 
             $size = $params['size'] ?? 10;
-            $tahunPeriode = $request->input('tahunPeriode');
-            $tglAwal = $request->input('tglAwal');
-            $tglAkhir = $request->input('tglAkhir');
-            $periode = $request->input('periode');
+            $tahunPeriode = $params['tahunPeriode'] ?? null;
+            $tglAwal = $params['tglAwal'] ?? null;
+            $tglAkhir = $params['tglAkhir'] ?? null;
+            $periode = $params['periode'] ?? null;
             //
-            $noBayar = $request->input('no_bayar');
-            $tglBayar = $request->input('tgl_bayar');
-            $pihak3 = $request->input('pihak3');
-            $uraian = $request->input('uraian');
-            $noDokumen = $request->input('no_dokumen');
-            $tglDokumen = $request->input('tgl_dokumen');
-            $instalasi = $request->input('instalasi');
-            $caraBayar = $request->input('cara_bayar');
-            $jumlahNetto = $request->input('jumlahNetto');
+            $noBayar = $params['no_bayar'] ?? null;
+            $tglBayar = $params['tgl_bayar'] ?? null;
+            $pihak3 = $params['pihak3'] ?? null;
+            $uraian = $params['uraian'] ?? null;
+            $noDokumen = $params['no_dokumen'] ?? null;
+            $tglDokumen = $params['tgl_dokumen'] ?? null;
+            $instalasi = $params['instalasi'] ?? null;
+            $caraBayar = $params['cara_bayar'] ?? null;
+            $jumlahNetto = $params['jumlahNetto'] ?? null;
+            $sumberTransaksi = $params['sumber_transaksi'] ?? null;
+
             $query = DataPenerimaanLain::query();
 
             $query->whereIn('sumber_transaksi', function ($sub) {
@@ -119,6 +121,12 @@ class PenerimaanLainController extends Controller
 
             if(!empty($params['cara_pembayaran'])) {
                 $query->where('cara_pembayaran', 'ILIKE', $params['cara_pembayaran']."%");
+            }
+
+            if (!empty($sumberTransaksi)) {
+                $query->whereHas('sumber', function($q) use ($sumberTransaksi) {
+                    $q->where('sumber_nama', 'ILIKE', "%$sumberTransaksi%");
+                });
             }
 
             $query->when(!empty($params['rekening_dpa']), function ($q) use ($params) {
