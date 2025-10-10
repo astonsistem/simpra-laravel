@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Actions\BillingKasir\ValidasiBillingKasir;
 use App\Http\Requests\PenerimaanLainRequest;
 use App\Http\Requests\ValidasiPenerimaanLainRequest;
 use App\Http\Requests\ValidasiCancelPenerimaanLainRequest;
@@ -43,7 +42,7 @@ class PenerimaanLainController extends Controller
                 'bank_tujuan' => 'nullable|string',
                 'jumlahBrutoMin' => 'nullable|numeric',
                 'jumlahBrutoMax' => 'nullable|numeric',
-                'validated' => 'nullable|in:0,1',
+                'is_valid' => 'nullable',
                 'cara_pembayaran' => 'nullable|string',
             ]);
 
@@ -59,14 +58,9 @@ class PenerimaanLainController extends Controller
             $uraian = $request->input('uraian');
             $noDokumen = $request->input('no_dokumen');
             $tglDokumen = $request->input('tgl_dokumen');
-            $sumberTransaksi = $request->input('sumber_transaksi');
             $instalasi = $request->input('instalasi');
             $caraBayar = $request->input('cara_bayar');
-            $rekeningDpa = $request->input('rekening_dpa');
-            $bank = $request->input('bank');
             $jumlahNetto = $request->input('jumlahNetto');
-            $jumlahBruto = $request->input('jumlahBruto');
-
             $query = DataPenerimaanLain::query();
 
             $query->whereIn('sumber_transaksi', function ($sub) {
@@ -154,16 +148,16 @@ class PenerimaanLainController extends Controller
                 $q->where('jumlah_netto', $operator, $params['jumlahNettoMax']);
             });
 
-            if($request->has('validated')) {
-                $query->where(function($query) use ($params) {
-                    $validated = $params['validated'] ?? null;
-                    if($validated == '1') {
+            if ($request->has('is_valid')) {
+                $query->where(function ($query) use ($params) {
+                    $validated = $params['is_valid'] ?? null;
+                    if ($validated == true) {
                         $query->whereNotNull('rc_id')->where('rc_id', '>', 0);
-                    } elseif($validated == '0') {
+                    } elseif ($validated == '0') {
                         $query->whereNull('rc_id');
                     }
                 });
-            }
+            };
 
             $query->with('masterAkun')->orderBy('tgl_bayar', 'desc');
 
