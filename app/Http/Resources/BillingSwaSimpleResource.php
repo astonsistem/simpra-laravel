@@ -21,7 +21,7 @@ class BillingSwaSimpleResource extends JsonResource
             'akun_id'               => $this->akun_id,
             'bank_tujuan'           => $this->bank_tujuan,
             'bank'                  => $this->bank_tujuan,
-            'cara_pembayaran'       => $this->cara_pembayaran,
+            'cara_pembayaran'       => \App\Models\MasterCaraPembayaran::getValueFromLabel($this->cara_pembayaran),
             'jumlah_netto'          => $this->jumlah_netto,
             'metode_pembayaran'     => $this->metode_pembayaran,
             'no_bayar'              => $this->no_bayar,

@@ -17,7 +17,7 @@ class PenerimaanLainResource extends JsonResource
             'admin_debit'               => (int) $this->admin_debit,
             'admin_kredit'              => (int) $this->admin_kredit,
             'bank_tujuan'               => $this->bank_tujuan,
-            'cara_pembayaran'           => $this->cara_pembayaran,
+            'cara_pembayaran'           => \App\Models\MasterCaraPembayaran::getValueFromLabel($this->cara_pembayaran),
             'desc_piutang_lain'         => $this->desc_piutang_lain,
             'desc_piutang_pelayanan'    => $this->desc_piutang_pelayanan,
             'is_valid'                  => (bool) $this->is_valid,
