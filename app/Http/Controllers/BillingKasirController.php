@@ -49,6 +49,8 @@ class BillingKasirController extends Controller
                 'noClosingKasir' => 'nullable|string',
                 'jumlahBrutoMin' => 'nullable|numeric',
                 'jumlahBrutoMax' => 'nullable|numeric',
+                'jumlahNettoMin' => 'nullable|numeric',
+                'jumlahNettoMax' => 'nullable|numeric',
             ]);
 
             $page = $request->input('page', 1) ?? 1;

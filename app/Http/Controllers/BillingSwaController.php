@@ -41,29 +41,31 @@ class BillingSwaController extends Controller
                 'caraBayar' => 'nullable|string',
                 'rekeningDpa' => 'nullable|string',
                 'bank' => 'nullable|string',
-                'jumlahBruto' => 'nullable|string',
+                'jumlahBrutoMin' => 'nullable|numeric',
+                'jumlahBrutoMax' => 'nullable|numeric',
+                'jumlahNettoMin' => 'nullable|numeric',
+                'jumlahNettoMax' => 'nullable|numeric',
                 'is_valid'          => 'nullable',
             ]);
 
             $page = $request->input('page', 1) ?? 1;
-            $size = $request->input('size', 10) ?? 10;
-            $tahunPeriode = $request->input('tahunPeriode');
-            $tglAwal = $request->input('tglAwal');
-            $tglAkhir = $request->input('tglAkhir');
-            $periode = $request->input('periode');
-            $noBayar = $request->input('noBayar');
-            $tglBayar = $request->input('tglBayar');
-            $pasien = $request->input('pasien');
-            $uraian = $request->input('uraian');
-            $noDokumen = $request->input('noDokumen');
-            $tglDokumen = $request->input('tglDokumen');
-            $sumberTransaksi = $request->input('sumberTransaksi');
-            $instalasi = $request->input('instalasi');
-            $metodeBayar = $request->input('metodeBayar');
-            $caraBayar = $request->input('caraBayar');
-            $rekeningDpa = $request->input('rekeningDpa');
-            $bank = $request->input('bank');
-            $jumlahNetto = $request->input('jumlahNetto');
+            $size = $params['size'] ?? 10;
+            $tahunPeriode = $params['tahunPeriode'] ?? null;
+            $tglAwal = $params['tglAwal'] ?? null;
+            $tglAkhir = $params['tglAkhir'] ?? null;
+            $periode = $params['periode'] ?? null;
+            $noBayar = $params['noBayar'] ?? null;
+            $tglBayar = $params['tglBayar'] ?? null;
+            $pasien = $params['pasien'] ?? null;
+            $uraian = $params['uraian'] ?? null;
+            $noDokumen = $params['noDokumen'] ?? null;
+            $tglDokumen = $params['tglDokumen'] ?? null;
+            $sumberTransaksi = $params['sumberTransaksi'] ?? null;
+            $instalasi = $params['instalasi'] ?? null;
+            $metodeBayar = $params['metodeBayar'] ?? null;
+            $caraBayar = $params['caraBayar'] ?? null;
+            $rekeningDpa = $params['rekeningDpa'] ?? null;
+            $bank = $params['bank'] ?? null;
 
             $query = DataPenerimaanLain::query();
             $query->whereIn('sumber_transaksi', function ($sub) {

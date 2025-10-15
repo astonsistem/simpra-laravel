@@ -35,6 +35,7 @@ class PenerimaanLainController extends Controller
                 'no_dokumen' => 'nullable|string',
                 'tgl_dokumen' => 'nullable|string',
                 'sumber_transaksi' => 'nullable|string',
+                'akun_nama' => 'nullable|string',
                 'instalasi' => 'nullable|string',
                 'metode_bayar' => 'nullable|string',
                 'cara_bayar' => 'nullable|string',
@@ -62,6 +63,7 @@ class PenerimaanLainController extends Controller
             $caraBayar = $params['cara_bayar'] ?? null;
             $jumlahNetto = $params['jumlahNetto'] ?? null;
             $sumberTransaksi = $params['sumber_transaksi'] ?? null;
+            $akunNama = $params['akun_nama'] ?? null;
 
             $query = DataPenerimaanLain::query();
 
@@ -123,9 +125,9 @@ class PenerimaanLainController extends Controller
                 $query->where('cara_pembayaran', 'ILIKE', $params['cara_pembayaran']."%");
             }
 
-            if (!empty($sumberTransaksi)) {
-                $query->whereHas('sumber', function($q) use ($sumberTransaksi) {
-                    $q->where('sumber_nama', 'ILIKE', "%$sumberTransaksi%");
+            if (!empty($akunNama)) {
+                $query->whereHas('masterAkun', function($q) use ($akunNama) {
+                    $q->where('akun_nama', 'ILIKE', "%$akunNama%");
                 });
             }
 

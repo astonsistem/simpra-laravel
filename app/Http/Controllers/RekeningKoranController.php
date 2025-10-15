@@ -606,7 +606,7 @@ class RekeningKoranController extends Controller
             ]);
 
             $query = DataRekeningKoran::whereNull('pb')
-                ->where('bank', '!=', 'JATIM');
+                ->whereNotIn('bank', ['JATIM', 'jatim']);
 
             // Filter by tgl_rc if provided
             if ($request->has('tgl_rc') && !empty($request->input('tgl_rc'))) {
