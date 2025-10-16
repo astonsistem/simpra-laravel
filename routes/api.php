@@ -39,7 +39,6 @@ use App\Http\Controllers\DataRekeningKoranController;
 use App\Http\Controllers\PendapatanPenjamin1Controller;
 use App\Http\Controllers\RincianPotensiPelayananController;
 use App\Http\Controllers\RincianBkuController;
-use App\Http\Controllers\PenerimaanLainSetorController;
 use App\Http\Controllers\DataTransaksiController;
 use App\Http\Controllers\MasterAkunController;
 
@@ -214,7 +213,6 @@ Route::group(['middleware' => 'jwt.auth'], function () {
     Route::post('penerimaan_lain/validasi/penerimaan_lain', [PenerimaanLainController::class, 'updateValidasi']);
     Route::post('penerimaan_lain/cancel_validasi/penerimaan_lain', [PenerimaanLainController::class, 'cancelValidasi']);
     Route::delete('penerimaan_lain/{id}', [PenerimaanLainController::class, 'destroy']);
-    Route::get('penerimaan_lain/setor/{rc_id}', [PenerimaanLainSetorController::class, 'show']);
 });
 
 Route::get('penerimaan_lain/getdata', [PenerimaanLainController::class, 'getdata']);
