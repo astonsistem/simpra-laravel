@@ -385,50 +385,10 @@ class BkuController extends Controller
 
             // If token is not set or its expired so get new token
             if (!$token || !$expiresAt || now()->gte($expiresAt)) {
-                // Get pad credentials
-                $settings = Setting::whereIn('key', [
-                        'sync_pad_url',
-                        'sync_pad_user',
-                        'sync_pad_password',
-                        'sync_tahun'
-                    ])
-                    ->pluck('value', 'key');
-                $padUrl      = rtrim($settings['sync_pad_url'], '/');
-                $padUser     = $settings['sync_pad_user'];
-                $padPassword = $settings['sync_pad_password'];
-                $padTahun    = $settings['sync_tahun'];
-
-                // Build request body
-                $body = [
-                    "username"  => $padUser,
-                    "password"  => $padPassword,
-                    "aplikasi"  => "pad",
-                    "tahun"     => $padTahun,
-                ];
-
-                // Make request for get login token
-                $url = $padUrl .'/login';
-                $response = Http::withHeaders([
-                    'Content-Type' => 'application/json',
-                ])->post($url, $body);
-
-                if ($response->failed()) {
-                    return response()->json([
-                        'message' => 'PAD login failed',
-                        'status'  => $response->status(),
-                        'error'   => $response->json() ?? $response->body(),
-                    ], $response->status());
+                $token = $this->loginPAD();
+                if (!$token) {
+                    return response()->json(['error' => 'PAD login failed'], 500);
                 }
-
-                // Get token and set in session
-                $data  = $response->json();
-                $token = $data['token'];
-
-                session([
-                    'pad_url' => $padUrl,
-                    'pad_token' => $token,
-                    'pad_token_expires' => now()->addSeconds($data['expires_in']),
-                ]);
             }
 
             // Set header
@@ -555,6 +515,102 @@ class BkuController extends Controller
         }
     }
 
+    public function batalPAD($id)
+    {
+        try {
+            DB::beginTransaction();
+
+            $BKU = DataBku::with('jenisBku')->where('bku_id', $id)->first();
+            if (!$BKU) {
+                return response()->json([
+                    'message' => 'Not found'
+                ], 404);
+            }
+
+            if (!$BKU->pad_id) {
+                return response()->json([
+                    'message' => 'Data cannot be edited because its not send PAD.'
+                ], 422);
+            }
+
+            // Check pad token
+            $padUrl = session('pad_url');
+            $token = session('pad_token');
+            $expiresAt = session('pad_token_expires');
+
+            // If token is not set or its expired so get new token
+            if (!$token || !$expiresAt || now()->gte($expiresAt)) {
+                $token = $this->loginPAD();
+                if (!$token) {
+                    return response()->json(['error' => 'PAD login failed'], 500);
+                }
+            }
+
+            // Set header
+            $headers = [
+                'Content-Type'  => 'application/json',
+                'Authorization' => 'Bearer ' . $token,
+            ];
+
+            // Begin Delete PAD
+            $padId = $BKU->pad_id;
+            if ($BKU->jenis == 2 || $BKU->jenis == 3) {
+                // Send request
+                $response = Http::withHeaders($headers)->delete($padUrl .'/terima/'. $padId);
+
+                if ($response->failed()) {
+                    return response()->json([
+                        'message' => 'Failed Delete PAD',
+                        'detail'  => $response->json(),
+                    ], $response->status());
+                }
+
+                // Update data BKU
+                $BKU->update([
+                    'pad_id' => null,
+                    'pad_tgl' => null,
+                ]);
+                // Update rincian BKU
+                foreach ($BKU->rincian as $index => $rinci) {
+                    $rinci->update([
+                        'pad_rinci' => null,
+                    ]);
+                }
+            }
+            if ($BKU->jenis == 1 || $BKU->jenis == 9) {
+                // Send request
+                $response = Http::withHeaders($headers)->delete($padUrl .'/transfer-kas/'. $padId);
+
+                if ($response->failed()) {
+                    return response()->json([
+                        'message' => 'Failed Delete PAD',
+                        'detail'  => $response->json(),
+                    ], $response->status());
+                }
+
+                // Update data BKU
+                $BKU->update([
+                    'pad_id' => null,
+                    'pad_tgl' => null,
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Berhasil batal PAD data BKU'
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status'  => 500,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+                'data'    => null
+            ], 500);
+        }
+    }
+
     public function destroy($id)
     {
         try {
@@ -611,5 +667,61 @@ class BkuController extends Controller
         $noBKU = sprintf("BPN.%d/%04d/%s/%d", $jenis, $newNoUrut, $bulanRomawi, $tahun);
 
         return [$noBKU, $newNoUrut];
+    }
+
+    function loginPAD()
+    {
+        // Get pad credentials
+        $settings = Setting::whereIn('key', [
+                'sync_pad_url',
+                'sync_pad_user',
+                'sync_pad_password',
+                'sync_tahun'
+            ])
+            ->pluck('value', 'key');
+        $padUrl      = rtrim($settings['sync_pad_url'], '/');
+        $padUser     = $settings['sync_pad_user'];
+        $padPassword = $settings['sync_pad_password'];
+        $padTahun    = $settings['sync_tahun'];
+
+        // Build request body
+        $body = [
+            "username"  => $padUser,
+            "password"  => $padPassword,
+            "aplikasi"  => "pad",
+            "tahun"     => $padTahun,
+        ];
+
+        // Make request for get login token
+        $url = $padUrl .'/login';
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+        ])->post($url, $body);
+
+        if ($response->failed()) {
+            \Log::error('PAD login failed', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+            return null;
+        }
+
+        // Get token and set in session
+        $data  = $response->json();
+        // If token is not exist in response
+        if (!isset($data['token'])) {
+            \Log::error('PAD login returned no token', ['response' => $data]);
+            return null;
+        }
+        // Set token if exist
+        $token = $data['token'];
+
+        session([
+            'pad_url' => $padUrl,
+            'pad_token' => $token,
+            'pad_token_expires' => now()->addSeconds($data['expires_in']),
+        ]);
+
+        return $token;
     }
 }

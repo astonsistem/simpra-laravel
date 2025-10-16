@@ -152,6 +152,7 @@ Route::get('bku', [BkuController::class, 'index']);
 Route::get('bku/validasi/{id}', [BkuController::class, 'validasi']);
 Route::get('bku/batal_validasi/{id}', [BkuController::class, 'batalValidasi']);
 Route::get('bku/kirim_pad/{id}', [BkuController::class, 'kirimPAD']);
+Route::get('bku/batal_pad/{id}', [BkuController::class, 'batalPAD']);
 Route::get('bku/{id}', [BkuController::class, 'show']);
 Route::post('bku', [BkuController::class, 'store']);
 Route::put('bku/{id}', [BkuController::class, 'update']);
