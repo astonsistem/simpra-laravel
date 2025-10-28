@@ -606,6 +606,7 @@ class RekeningKoranController extends Controller
         try {
             $request->validate([
                 'tgl_rc' => 'nullable|date',
+                'pb_dari' => 'nullable|string',
                 'page' => 'nullable|integer|min:1',
                 'per_page' => 'nullable|integer|min:1|max:100',
             ]);
@@ -617,6 +618,12 @@ class RekeningKoranController extends Controller
             if ($request->has('tgl_rc') && !empty($request->input('tgl_rc'))) {
                 $tglRc = $request->input('tgl_rc');
                 $query->where('tgl_rc', '<=', $tglRc);
+            }
+
+            // Filter by pb_dari (bank name) if provided
+            if ($request->has('pb_dari') && !empty($request->input('pb_dari'))) {
+                $pbDari = $request->input('pb_dari');
+                $query->where('bank', 'ILIKE', $pbDari);
             }
 
             $query->orderBy('tgl_rc', 'desc')
