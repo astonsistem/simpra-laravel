@@ -35,6 +35,7 @@ class RekeningKoranUpdateRequest extends FormRequest
             'klarif_layanan' => 'required|numeric|min:0',
             'klarif_lain' => 'required|numeric|min:0',
             'rek_id' => 'nullable|exists:master_rekening_v,rek_id',
+            'pb_dari' => 'nullable|string|max:255',
         ];
     }
 
