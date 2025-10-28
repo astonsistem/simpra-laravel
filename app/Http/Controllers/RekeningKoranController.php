@@ -40,6 +40,7 @@ class RekeningKoranController extends Controller
                 'akunls_data' => 'nullable|string',
                 'bank' => 'nullable|string',
                 'pb' => 'nullable|string',
+                'pb_dari' => 'nullable|string',
                 'debit' => 'nullable|numeric',
                 'kredit' => 'nullable|numeric',
                 'terklarifikasi' => 'nullable|numeric',
@@ -67,6 +68,7 @@ class RekeningKoranController extends Controller
             $akunlsData = $request->input('akunls_data');
             $bank = $request->input('bank');
             $pb = $request->input('pb');
+            $pbDari = $request->input('pb_dari');
             $debit = $request->input('debit');
             $kredit = $request->input('kredit');
             $terklarifikasi = $request->input('terklarifikasi');
@@ -120,6 +122,9 @@ class RekeningKoranController extends Controller
             }
             if (!empty($pb)) {
                 $query->where('pb', 'ILIKE', "%$pb%");
+            }
+            if (!empty($pbDari)) {
+                $query->where('pb_dari', 'ILIKE', "%$pbDari%");
             }
             if (!empty($debit)) {
                 $query->where('debit', $debit);
