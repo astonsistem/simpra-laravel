@@ -13,6 +13,7 @@ class PenjaminResource extends JsonResource
             'id' => (string) $this->id,
             'penjamin_id' => (string) $this->penjamin_id,
             'penjamin_nama' => (string) $this->penjamin_nama,
+            'carabayar_id' => (string) $this->carabayar_id,
         ];
     }
 }

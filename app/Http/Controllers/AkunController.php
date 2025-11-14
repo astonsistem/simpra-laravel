@@ -20,12 +20,55 @@ class AkunController extends Controller
             $request->validate([
                 'page' => 'nullable|integer|min:1',
                 'size' => 'nullable|integer|min:1',
+                'global' => 'nullable|string',
+                'akun_id' => 'nullable|string',
+                'akun_kode' => 'nullable|string',
+                'akun_nama' => 'nullable|string',
+                'rek_id' => 'nullable|string',
+                'rek_nama' => 'nullable|string',
+                'akun_kelompok' => 'nullable|string',
             ]);
 
             $page = $request->input('page', 1);
             $size = $request->input('size', 10);
+            $global = $request->input('global');
+            $akunId = $request->input('akun_id');
+            $akunKode = $request->input('akun_kode');
+            $akunNama = $request->input('akun_nama');
+            $rekId = $request->input('rek_id');
+            $rekNama = $request->input('rek_nama');
+            $akunKelompok = $request->input('akun_kelompok');
 
             $query = MasterAkun::query();
+
+            if (!empty($global)) {
+                $query->where(function($q) use ($global) {
+                    $q->where('akun_id',     'ILIKE', "%$global%")
+                    ->orWhere('akun_kode',   'ILIKE', "%$global%")
+                    ->orWhere('akun_nama',   'ILIKE', "%$global%")
+                    ->orWhere('rek_id',      'ILIKE', "%$global%")
+                    ->orWhere('rek_nama',    'ILIKE', "%$global%")
+                    ->orWhere('akun_kelompok','ILIKE', "%$global%");
+                });
+            }
+            if (!empty($akunId)) {
+                $query->where('akun_id', 'ILIKE', "%$akunId%");
+            }
+            if (!empty($akunKode)) {
+                $query->where('akun_kode', 'ILIKE', "%$akunKode%");
+            }
+            if (!empty($akunNama)) {
+                $query->where('akun_nama', 'ILIKE', "%$akunNama%");
+            }
+            if (!empty($rekId)) {
+                $query->where('rek_id', 'ILIKE', "%$rekId%");
+            }
+            if (!empty($rekNama)) {
+                $query->where('rek_nama', 'ILIKE', "%$rekNama%");
+            }
+            if (!empty($akunKelompok)) {
+                $query->where('akun_kelompok', 'ILIKE', "%$akunKelompok%");
+            }
 
             $totalItems = $query->count();
             $items = $query->skip(($page - 1) * $size)->take($size)->get();
@@ -101,7 +144,7 @@ class AkunController extends Controller
         return response()->json([
             'status' => 200,
             'message' => 'Data berhasil ditambahkan',
-            'data' => $akun,
+            'data' => new AkunResource($akun),
         ], 200);
     }
 
@@ -118,7 +161,10 @@ class AkunController extends Controller
             }
             $akun->update($data);
 
-            return response()->json(new AkunResource($akun), 200);
+            return response()->json([
+                'message' => 'Berhasil memperbarui data Akun Pendapatan',
+                'data' => new AkunResource($akun),
+            ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'status'  => 500,
@@ -131,20 +177,7 @@ class AkunController extends Controller
     public function destroy($id)
     {
         try {
-            if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $id)) {
-                return response()->json([
-                    'detail' => [
-                        [
-                            'loc' => ['path', 'id'],
-                            'msg' => 'ID must be a valid UUID format.',
-                            'type' => 'validation'
-                        ]
-                    ]
-                ], 422);
-            }
-
             $akun = MasterAkun::find($id);
-
             if (!$akun) {
                 return response()->json([
                     'message' => 'Not found'
@@ -155,7 +188,7 @@ class AkunController extends Controller
 
             return response()->json([
                 'status'  => 200,
-                'message' => 'Akun berhasil dihapus'
+                'message' => 'Berhasil menghapus data Akun Pendapatan'
             ], 200);
         } catch (\Exception $e) {
             return response()->json([

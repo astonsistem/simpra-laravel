@@ -16,12 +16,31 @@ class CaraBayarController extends Controller
             $request->validate([
                 'page' => 'nullable|integer|min:1',
                 'size' => 'nullable|integer|min:1',
+                'global' => 'nullable|string',
+                'carabayar_id' => 'nullable|string',
+                'carabayar_nama' => 'nullable|string',
             ]);
 
             $page = $request->input('page', 1);
             $size = $request->input('size', 100);
+            $global = $request->input('global');
+            $carabayarId = $request->input('carabayar_id');
+            $carabayarNama = $request->input('carabayar_nama');
 
             $query = CaraBayar::query();
+
+            if (!empty($global)) {
+                $query->where(function($q) use ($global) {
+                    $q->where('carabayar_id',     'ILIKE', "%$global%")
+                    ->orWhere('carabayar_nama',   'ILIKE', "%$global%");
+                });
+            }
+            if (!empty($carabayarId)) {
+                $query->where('carabayar_id', 'ILIKE', "%$carabayarId%");
+            }
+            if (!empty($carabayarNama)) {
+                $query->where('carabayar_nama', 'ILIKE', "%$carabayarNama%");
+            }
 
             $totalItems = $query->count();
             $items = $query->skip(($page - 1) * $size)->take($size)->get();

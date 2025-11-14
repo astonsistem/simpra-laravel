@@ -23,9 +23,13 @@ class AuthController extends Controller
         $data['hashed_password'] = Hash::make($data['password']);
         $data['is_active'] = 't';
 
-        User::query()->create($data);
+        $user = User::query()->create($data);
 
-        return response()->json(['message' => 'Berhasil menambah data user'], 201);
+        return response()->json([
+            'status' => 200,
+            'message' => 'Data berhasil ditambahkan',
+            'data' => new UserResource($user),
+        ], 200);
     }
 
     public function login(LoginUserRequest $request)
@@ -122,20 +126,7 @@ class AuthController extends Controller
     public function destroy($id)
     {
         try {
-            if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $id)) {
-                return response()->json([
-                    'detail' => [
-                        [
-                            'loc' => ['path', 'id'],
-                            'msg' => 'ID must be a valid UUID format.',
-                            'type' => 'validation'
-                        ]
-                    ]
-                ], 422);
-            }
-
             $user = User::find($id);
-
             if (!$user) {
                 return response()->json([
                     'message' => 'Not found'
@@ -162,15 +153,34 @@ class AuthController extends Controller
             $request->validate([
                 'page' => 'nullable|integer|min:1',
                 'size' => 'nullable|integer|min:1',
+                'global' => 'nullable|string',
             ]);
 
             $page = $request->input('page', 1);
             $size = $request->input('size', 10);
+            $global = $request->input('global');
 
             $query = User::query();
 
+            $query->whereNot('id', auth()->user()->id);
+
+            if (!empty($global)) {
+                $query->where(function($q) use ($global) {
+                    $q->where('nama',     'ILIKE', "%$global%")
+                    ->orWhere('nip',   'ILIKE', "%$global%")
+                    ->orWhere('username',   'ILIKE', "%$global%")
+                    ->orWhere('email',   'ILIKE', "%$global%")
+                    ->orWhere('no_telp',   'ILIKE', "%$global%")
+                    ->orWhere('jabatan',   'ILIKE', "%$global%")
+                    ->orWhere('role','ILIKE', "%$global%");
+                });
+            }
+
+            $sortField = $request->input('sortField', 'nama');
+            $sortOrder = $request->input('sortOrder', 'asc');
+
             $totalItems = $query->count();
-            $items = $query->skip(($page - 1) * $size)->take($size)->orderBy('nama')->get();
+            $items = $query->skip(($page - 1) * $size)->take($size)->orderBy($sortField, $sortOrder)->get();
 
             $totalPages = ceil($totalItems / $size);
 
