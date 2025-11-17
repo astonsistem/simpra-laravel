@@ -37,6 +37,7 @@ class TerimaPotensiRequest extends FormRequest
             'desc_piutang_lain'     => 'nullable|string',
             'piutang_id'            => 'nullable|string',
             'piutanglain_id'        => 'nullable|integer',
+            'sumber_transaksi'      => 'nullable|string',
         ];
     }
 
