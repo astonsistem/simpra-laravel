@@ -49,7 +49,7 @@ class SyncPendapatanPelayanan extends Model
         'no_pendaftaran',
         'no_rekam_medik',
         'pasien_nama',
-        'sync_at ',
+        'sync_at',
         'is_web_change ',
     ];
 

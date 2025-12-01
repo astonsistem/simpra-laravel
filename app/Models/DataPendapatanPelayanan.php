@@ -48,7 +48,7 @@ class DataPendapatanPelayanan extends Model
         'no_pendaftaran',
         'no_rekam_medik',
         'pasien_nama',
-        'sync_at ',
+        'sync_at',
         'is_web_change ',
         'koreksi_sharing',
         'is_valid',
@@ -63,7 +63,6 @@ class DataPendapatanPelayanan extends Model
         'total_sharing',
         'obat_dijamin',
         'piutang_perorangan',
-
     ];
 
     protected $casts = [
@@ -85,6 +84,16 @@ class DataPendapatanPelayanan extends Model
             ->groupBy('pendaftaran_id')
             ->first();
 
+        $piutangUmumGl = DataPotensiPelayanan::whereIn('carabayar_id', [1, 15])
+        ->where('pendaftaran_id', $this->pendaftaran_id)
+        ->sum('total')?? 0;
+
+        $piutangJaminan = RincianPotensiPelayanan::whereNotNull('piutang_id')
+        ->where('pendaftaran_id', $this->pendaftaran_id)
+        ->sum('total_klaim')?? 0;
+
+        $piutangAll = $piutangUmumGl + $piutangJaminan; 
+        
         if (!$penerimaanLayanan) {
             return response()->json([
                 'message' => 'Data Penerimaan Layanan not found',
@@ -93,17 +102,15 @@ class DataPendapatanPelayanan extends Model
 
         if ($this->pendapatan != $penerimaanLayanan->pendapatan || $this->pdd != $penerimaanLayanan->pdd) {
             $this->status_fase2 = 'Koreksi Pendapatan';
-        } elseif ($this->piutang != $penerimaanLayanan->piutang) {
+        } elseif ($this->piutang != $piutangAll) {
             $this->status_fase2 = 'Koreksi Piutang';
+        } elseif ($penerimaanLayanan->total != 0) {
+            $this->status_fase2 = 'Bayar';
         } else {
             $this->status_fase2 = 'Valid';
         }
 
-        $this->biaya_admin = $penerimaanLayanan->bea_admin;
-        if ($penerimaanLayanan->total != 0) {
-            $this->status_fase2 = 'Bayar';
-        }
-
+        $this->biaya_admin = $penerimaanLayanan->bea_admin;       
         $this->save();
 
         return true;
@@ -111,8 +118,12 @@ class DataPendapatanPelayanan extends Model
 
     public static function syncFase2All($daysAgo = 5)
     {
-        $date = now()->subDays($daysAgo)->toDateString();
-        $records = self::whereDate('tgl_pelayanan', $date)->get();
+        //$date = now()->subDays($daysAgo)->toDateString();
+        //$records = self::whereDate('tgl_pelayanan', $date)->get();
+        
+        $records = self::whereNotIn('status_fase2', ['Valid', 'Bayar'])->orWhereNull('status_fase2')->get();
+        $count = $records->count();
+        $date = $records->max('tgl_pelayanan');
 
         $success = 0;
         $failed = 0;

@@ -820,6 +820,7 @@ class RekeningKoranController extends Controller
                     'klarif_lain' => $validated['klarif_lain'],
                     'rek_id' => $validated['rek_id'] ?? null,
                     'pb_dari' => $validated['pb_dari'] ?? null,
+                    'mutasi' => $validated['mutasi'] ?? null,
                     'is_web_change' => true,
                 ]);
             });

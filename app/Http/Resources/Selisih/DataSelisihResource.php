@@ -33,6 +33,7 @@ class DataSelisihResource extends JsonResource
             'no_buktibayar'      => (string) $this->no_bukti,               // 15. No. Bukti
             'penyetor'           => (string) $this->penyetor,               // 10. Penyetor
             'rc_id'              => (string) $this->rc_id,
+            'rek_id'            => $this->rek_id,
             'rekening_dpa'       => $this->rekeningDpa ? [                  // 11. Rekening DPA
                 'rek_id'   => (string) $this->rekeningDpa->rek_id,
                 'rek_nama' => (string) $this->rekeningDpa->rek_nama,

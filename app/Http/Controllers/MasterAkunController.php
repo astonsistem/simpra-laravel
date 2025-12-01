@@ -27,10 +27,11 @@ class MasterAkunController extends Controller
             // Filter based on type (kredit or debit)
             if ($type === 'kredit') {
                 // Jika Kredit > 0: akun_kode LIKE '1%'
-                $query->where('akun_kode', 'LIKE', '1%');
+                $query->where('akun_kode', 'LIKE', '1%')->whereNotNull('rek_id');
             } else {
                 // Jika Debit > 0: NOT akun_kode LIKE '1%' OR akun_kode LIKE '103%'
-                $query->where(function ($q) {
+                $query->whereNotNull('rek_id')
+                    ->where(function ($q) {
                     $q->where('akun_kode', 'NOT LIKE', '1%')
                       ->orWhere('akun_kode', 'LIKE', '103%');
                 });
@@ -38,7 +39,8 @@ class MasterAkunController extends Controller
 
             // Search functionality
             if (!empty($search)) {
-                $query->where(function ($q) use ($search) {
+                $query->whereNotNull('rek_id')
+                    ->where(function ($q) use ($search) {
                     $q->where('akun_kode', 'ILIKE', "%$search%")
                       ->orWhere('akun_nama', 'ILIKE', "%$search%");
                 });
