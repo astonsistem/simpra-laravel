@@ -9,7 +9,7 @@ class MasterPelaporan extends Model
 {
     protected $table = 'master_pelaporan';
 
-    protected $appends = ['slug', 'label', 'to'];
+    protected $appends = ['slug', 'group', 'label', 'to'];
 
     protected $casts = [
         'params' => 'array',
@@ -18,6 +18,13 @@ class MasterPelaporan extends Model
     public function getSlugAttribute()
     {
         return \Str::slug($this->nama_laporan, '_');
+    }
+
+    public function getGroupAttribute()
+    {
+        return collect(explode(' ', $this->nama_laporan))
+            ->take(3)
+            ->implode(' ');
     }
 
     public function getLabelAttribute()

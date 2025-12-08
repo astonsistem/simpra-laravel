@@ -42,6 +42,7 @@ class PelaporanController extends Controller
                 $data = MasterPelaporan::whereIn('id', $allowedPelaporanIds)
                     ->orderBy('kode_laporan', 'asc')
                     ->get()->map(fn($item) => [
+                        'group' => $item->group,
                         'label' => $item->label,
                         'to'    => $item->to,
                     ]);
@@ -141,7 +142,7 @@ class PelaporanController extends Controller
                 'success'  => true,
                 'filetype' => $fileType,
                 'filename' => $fileName,
-                'url'      => url("/exports/{$fileName}"),
+                'url'      => url("/backend/exports/{$fileName}"),
             ], 200);     
         } catch (\Exception $e) {
             return response()->json([
