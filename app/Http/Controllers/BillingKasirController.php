@@ -71,6 +71,7 @@ class BillingKasirController extends Controller
             $caraBayar = $request->input('caraBayar');
             $rekeningDpa = $request->input('rekeningDpa');
             $caraPembayaran = $request->input('caraPembayaran');
+            $kasir = $request->input('kasir');
             $bank = $request->input('bank');
             $jumlahNetto = $request->input('jumlahNetto');
 
@@ -108,7 +109,7 @@ class BillingKasirController extends Controller
                 $query->where('tgl_pelayanan', $tglDokumen);
             }
             if (!empty($sumberTransaksi)) {
-                $query->where('jenis_tagihan', $sumberTransaksi);
+                $query->where('jenis_tagihan', 'ILIKE', "%$sumberTransaksi%");
             }
             if (!empty($instalasi)) {
                 $query->where('instalasi_nama', 'ILIKE', "%$instalasi%");
@@ -119,17 +120,17 @@ class BillingKasirController extends Controller
             if (!empty($caraPembayaran)) {
                 $query->where('cara_pembayaran', 'ILIKE', "%$caraPembayaran%");
             }
-            if ($request->has('caraBayar') && !empty($params['caraBayar'])) {
-                $query->where('carabayar_nama', 'ILIKE', "%$params[caraBayar]%");
-            }
             if (!empty($rekeningDpa)) {
-                $query->where('rek_dpa', 'ILIKE', "%$rekeningDpa%");
+                $query->where('rek_id', $rekeningDpa);
+            }
+            if (!empty($caraBayar)) {
+                $query->where('carabayar_id', $caraBayar);
+            }
+            if (!empty($kasir)) {
+                $query->where('kasir_nama', 'ILIKE', "%$kasir%");
             }
             if (!empty($bank)) {
                 $query->where('bank_tujuan', 'ILIKE', "%$bank%");
-            }
-            if ($request->has('kasir') && !empty( $params['kasir'] )) {
-                $query->where('kasir_nama', 'ILIKE', "%$params[kasir]%");
             }
             if (!empty($jumlahNetto)) {
                 $query->where('jumlah_netto', 'LIKE', "%$jumlahNetto%");

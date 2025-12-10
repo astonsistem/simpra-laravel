@@ -30,6 +30,7 @@ class DataTransaksiResource extends JsonResource
             'jumlah_netto'      => (int) $this->jumlah_netto,
             'sumber_transaksi'  => (string) $this->sumber_transaksi,
             'klasifikasi'       => (string) $this->klasifikasi,
+            'keterangan'        => (string) $this->keterangan,
             'rek_id'            => $this->rek_id,
             'rekening_dpa'      => $this->rekeningDpa ? [
                 'rek_id'     => (string) $this->rekeningDpa->rek_id,

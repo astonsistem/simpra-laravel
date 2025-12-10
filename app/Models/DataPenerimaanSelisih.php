@@ -28,6 +28,7 @@ class DataPenerimaanSelisih extends Model
         'kasir_id',
         'kasir_nama',
         'klasifikasi',
+        'keterangan',
         'loket_id',
         'loket_nama',
         'nilai',

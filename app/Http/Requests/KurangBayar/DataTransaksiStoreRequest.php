@@ -53,6 +53,7 @@ class DataTransaksiStoreRequest extends FormRequest
             'kasir_id'              => 'nullable',
             'kasir_nama'            => 'nullable',
             'klasifikasi'           => 'nullable',
+            'keterangan'            => 'nullable|string|max:250',
             'loket_id'              => 'nullable',
             'loket_nama'            => 'nullable',
             'nilai'                 => 'nullable|numeric',

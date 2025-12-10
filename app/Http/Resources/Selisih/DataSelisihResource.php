@@ -26,6 +26,7 @@ class DataSelisihResource extends JsonResource
             'kasir_id'           => (int) $this->kasir_id,
             'kasir_nama'         => (string) $this->kasir_nama,             // 17. Nama Kasir
             'klasifikasi'        => (string) $this->klasifikasi,            // 13. Klasifikasi
+            'keterangan'         => (string) $this->keterangan,
             'loket_id'           => (int) $this->loket_id,
             'loket_nama'         => (string) $this->loket_nama,             // 18. Loket Kasir
             'nilai'              => (int) $this->nilai,                     // 16. Selisih Kurang

@@ -121,7 +121,13 @@ class DataPendapatanPelayanan extends Model
         //$date = now()->subDays($daysAgo)->toDateString();
         //$records = self::whereDate('tgl_pelayanan', $date)->get();
         
-        $records = self::whereNotIn('status_fase2', ['Valid', 'Bayar'])->orWhereNull('status_fase2')->get();
+        $records = self::where(function ($q) {
+            $q->whereNotIn('status_fase2', ['Valid', 'Bayar'])
+              ->orWhereNull('status_fase2');
+        })
+        ->whereRaw("COALESCE(is_penjaminlebih1, false) <> true")
+        ->get();
+
         $count = $records->count();
         $date = $records->max('tgl_pelayanan');
 
@@ -149,7 +155,7 @@ class DataPendapatanPelayanan extends Model
 
         return [
             'success' => $failed === 0,
-            'processed' => $success + $failed,
+            'processed' => $count,
             'success_count' => $success,
             'failed_count' => $failed,
             'date' => $date,

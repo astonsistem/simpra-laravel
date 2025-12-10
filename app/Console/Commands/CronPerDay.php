@@ -12,6 +12,7 @@ use App\Models\DataPotensiPelayanan;
 use App\Models\DokumenNonlayanan;
 use App\Models\DataRekapHarianCaraBayar;
 use App\Models\RincianPotensiPelayanan;
+use App\Models\DataPendapatanPenjamin1;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -46,6 +47,8 @@ class CronPerDay extends Command
             $thirty_days_ago = Carbon::now()->subDays(30)->toDateString();
             $tahun = Carbon::now()->year;
             $tenDaysAgo = Carbon::now()->subDays(11);
+            $bulan = Carbon::now()->month;
+            $bulansebelum = $bulan === 1?1:$bulan -1;
             // HELPER TO RUN EACH STEP SAFELY 
             $errors = [];
             $run = function (string $step, callable $fn) use (&$errors) {
@@ -139,7 +142,7 @@ class CronPerDay extends Command
                 $inserted = 0;
                 foreach ($penerimaanlayananSiesta as $pl) {
                     // Check if data already exist in table data_penerimaan_layanan (based on pendaftaran_id)
-                    $exist = DataPenerimaanLayanan::where('pendaftaran_id', $pl->pendaftaran_id)->exists();
+                    $exist = DataPenerimaanLayanan::where('no_buktibayar', $pl->no_buktibayar)->exists();
                     // Insert if data not exist yet
                     if (!$exist) {
                         DataPenerimaanLayanan::create($pl->toArray());
@@ -169,8 +172,8 @@ class CronPerDay extends Command
             });
 
             // 6. INSERT DATA POTENSI PELAYANAN PASIEN UMUM (Berdasarkan Tanggal Dokumen (tgl_dokumen = yesterday))
-            $run('6. Insert Data Potensi Pelayanan Pasien Umum', function () use ($yesterday) {
-                // Get data potensi pelayanan (pasien umum) yesterday
+            $run('6. Insert Data Potensi Pelayanan', function () use ($yesterday) {
+                // Get data potensi pelayanan yesterday
                 $potensiPelayananSiesta = (new DataPotensiPelayanan)->setTable('simpra_potensipelayanan_ft')->whereDate('tgl_dokumen', $yesterday)->where('akun_id', 1010201)->get();
                 $inserted = 0;
                 foreach ($potensiPelayananSiesta as $pp) {
@@ -186,17 +189,17 @@ class CronPerDay extends Command
                 \Log::info("Cronjob no 6 berhasil insert {$inserted} data piutang pasien umum ke table data_potensi_pelayanan.");
             });
 
-            // 7. INSERT DATA POTENSI PELAYANAN PASIEN GL (Berdasarkan Tanggal Dokumen (tgl_dokumen = this year))
-            $run('7. Insert Data Potensi Pelayanan Pasien GL', function () use ($tahun) {
-                // Get data potensi pelayanan (pasien gl) this year
-                $potensiPelayananGLSiesta = (new DataPotensiPelayanan)->setTable('simpra_potensipelayanan_ft')->whereYear('tgl_dokumen', $tahun)->where('akun_id', 1010208)->get();
+            // 7. INSERT DATA POTENSI PELAYANAN PASIEN GL (Berdasarkan Tanggal Dokumen (tgl_dokumen = yesterday))
+            $run('7. Insert Data Potensi Pelayanan', function () use ($tahun) {
+                // Get data potensi pelayanan yesterday
+                $potensiPelayananSiesta = (new DataPotensiPelayanan)->setTable('simpra_potensipelayanan_ft')->whereYear('tgl_dokumen', $tahun)->whereIn('akun_id', [1010208])->get();
                 $inserted = 0;
-                foreach ($potensiPelayananGLSiesta as $ppgl) {
+                foreach ($potensiPelayananSiesta as $pp) {
                     // Check if data already exist in table data_potensi_pelayanan (based on pendaftaran_id)
-                    $exist = DataPotensiPelayanan::where('pendaftaran_id', $ppgl->pendaftaran_id)->exists();
+                    $exist = DataPotensiPelayanan::where('pendaftaran_id', $pp->pendaftaran_id)->exists();
                     // Insert if data not exist yet
                     if (!$exist) {
-                        DataPotensiPelayanan::create($ppgl->toArray());
+                        DataPotensiPelayanan::create($pp->toArray());
                         $inserted++;
                     }
                 }
@@ -204,9 +207,9 @@ class CronPerDay extends Command
                 \Log::info("Cronjob no 7 berhasil insert {$inserted} data pasien GL ke table data_potensi_pelayanan.");
             });
 
-            // 8. INSERT DATA POTENSI PELAYANAN SELAIN PASIEN UMUM DAN GL (Berdasarkan tahun Tanggal Dokumen (tgl_dokumen = this year))
+            // 8. INSERT DATA POTENSI PELAYANAN SELAIN PASIEN UMUM DAN GL (Berdasarkan tahun Tanggal Dokumen (tgl_dokumen = tahun))
              $run('8. Insert Data Potensi Pelayanan selain Pasien UMUM & GL', function () use ($tahun) {
-                // Get data potensi pelayanan (except pasien umum and gl) this year
+                // Get data potensi pelayanan (except pasien umum and gl) tahun
                 // perubahan diambil dari 10 hari yang lalu = 20251119
                 $potensiPelayananNonUmumGLSiesta = (new DataPotensiPelayanan)->setTable('ft_potensipelayanan_nonumumgl_v')->whereYear('tgl_dokumen', $tahun)->get();
                 $inserted = 0;
@@ -220,7 +223,7 @@ class CronPerDay extends Command
                     }
                 }
                 // log inserted data
-                \Log::info("Cronjob no 8 berhasil insert {$inserted} data selain pasien umum & GL ke table data_potensi_pelayanan.");
+                \Log::info("Cronjob no 8 berhasil insert {$inserted} data ke table data_potensi_pelayanan.");
             });
 
             // 9. INSERT DATA RINCIAN POTENSI PELAYANAN SELAIN PASIEN UMUM DAN GL (Berdasarkan Tanggal Dokumen (tgl_dokumen = yesterday))
@@ -228,23 +231,23 @@ class CronPerDay extends Command
                 // Get data rincian potensi pelayanan (except pasien umum and gl) yesterday
                 $rincianPotensiPelayananSiesta = (new RincianPotensiPelayanan)->setTable('ft_rincianpotensipelayanan_nonumumgl_v')->whereYear('tgl_dokumen', $tahun)->get();
                 $inserted = 0;                
-                foreach ($rincianPotensiPelayananSiesta as $rpp) {                   
-                    $exist = RincianPotensiPelayanan::where('no_dokumen', $rpp->no_dokumen)->where('pendaftaran_id', $rpp->pendaftaran_id)->exists();
+                foreach ($rincianPotensiPelayananSiesta as $pp) {                   
+                    $exist = RincianPotensiPelayanan::where('no_dokumen', $pp->no_dokumen)->where('pendaftaran_id', $pp->pendaftaran_id)->exists();
                     if (!$exist) {
-                        RincianPotensiPelayanan::create($rpp->toArray());
+                        RincianPotensiPelayanan::create($pp->toArray());
                         $inserted++;      
                     }              
                 }
                 // log inserted data
-                \Log::info("Cronjob no 9 berhasil insert {$inserted} data rincian sleian pasien umum & GL ke table rincian_potensi_pelayanan.");
+                \Log::info("Cronjob no 9 berhasil insert {$inserted} data ke table rincian_potensi_pelayanan.");
             });
 
             // 10. UPDATE PIUTANG ID PADA RINCIAN POTENSI LAYANAN            
             $run('10. Update piutang_id On Rincian Potensi Pelayanan', function () use ($tahun) {
                 $updated = DataPendapatanPelayanan::query()
-                    ->from('rincian_potensi_pelayanan as a')
-                    ->whereNull('piutang_id')
-                    ->update([
+                ->from('rincian_potensi_pelayanan as a')
+                ->whereNull('piutang_id')
+                ->update([
                         'piutang_id' => DB::raw("(select max(id) from data_potensi_pelayanan b where b.no_dokumen = a.no_dokumen)"),
                     ]);
                 // log updated data
@@ -288,10 +291,76 @@ class CronPerDay extends Command
                 \Log::info("Cronjob no 12 berhasil insert {$inserted} data ke table data_rekap_harian_carabayar.");
             });
 
-            // 13. SYNC STATUS FASE 1 ON DATA PENDAPATAN PELAYANAN (Sinkronisasi data tagihan (H+4) berdasarkan tanggal pelayanan)
+            
+            // 13. INSERT DATA PENJAMIN LEBIH DARI 1 (berdasarkan tahun dan bulan ini dan bulan sebelumnya)
+            $run('13. Insert Data penjamin lebih dari 1', function () use ($tahun, $bulan, $bulansebelum) {
+                // Get data penjamin lebih dari 1
+                $DataPenjamin1Siesta = (new DataPendapatanPenjamin1)->setTable('simpra_pendapatanpenjaminlebihdarisatu_ft')->whereYear('tgl_pelayanan', $tahun)->whereRaw("EXTRACT(MONTH FROM tgl_pelayanan) BETWEEN ? AND ?", [$bulansebelum, $bulan])->get();
+                $inserted = 0;
+                foreach ($DataPenjamin1Siesta as $dps) {
+                    // Check if data already exist in table data_pendapatan_penjamin1 berdasarkan pendaftaran_id
+                    $exist = DataPendapatanPenjamin1::where('pendaftaran_id', $dps->pendaftaran_id)->where('penjamin_id', $dps->penjamin_id)->exists();
+                    // Insert if data not exist yet
+                    if (!$exist) {
+                        DataPendapatanPenjamin1::create($dps->toArray());
+                        $inserted++;
+                    }
+                }
+                // log inserted data
+                \Log::info("Cronjob no 13 berhasil insert {$inserted} data ke table data_pendapatan_penjamin1.");
+            });            
+
+            // 14. PENTAUTAN PENJAMIN 1 KE PENDAPATAN            
+            $run('14. Mentautkan data penjamin lebih dari 1 On Data Pendapatan Pelayanan', function () use ($tahun) {
+                $updated = DataPendapatanPenjamin1::query()
+                ->from('data_pendapatan_penjamin1 as a')
+                ->whereYear('a.tgl_pelayanan',$tahun)
+                ->whereNull('a.pelayanan_id')
+                    ->update([
+                        'pelayanan_id' => DB::raw("(select max(b.id) from data_pendapatan_pelayanan b where b.pendaftaran_id = a.pendaftaran_id)")
+                    ]);
+                // log updated data
+                \Log::info("Cronjob no 14 berhasil update {$updated} data pada table data_pendapatan_penjamin1");
+            });
+
+            // 15. SYNC STATUS IS PENJAMIN LEBIH DARI 1 ON DATA PENDAPATAN PELAYANAN             
+            $run('15. Sync Status Is Penjamin Lebih 1 On Data Pendapatan Pelayanan', function () use ($tahun) {
+                $updated = DataPendapatanPelayanan::whereYear('tgl_pelayanan',$tahun)
+                ->whereNull('is_penjaminlebih1')
+                ->whereIn('id', function ($query) {
+                    $query->select('pelayanan_id')
+                          ->from('data_pendapatan_penjamin1'); // tabel sumber
+                })
+                    ->update([
+                        'is_penjaminlebih1' => true                      
+                    ]);
+                // log updated data
+                \Log::info("Cronjob no 15 berhasil update {$updated} data pada table data_pendapatan_pelayanan.");
+            });
+
+            // 16. UPDATE TOTAL DIJAMIN PENJAMIN JKN PADA TABEL data_pendapatan_penjamin1
+            $run('16. Mengisi baris JKN = 0 data penjamin lebih dari 1 On Tabel SIESTA simpra_plafonprosedurbpjsinasis_ft', function () use ($tahun) {
+                $updated = DataPendapatanPenjamin1::query()
+                ->from('data_pendapatan_penjamin1 as a')
+                ->where(function ($q) {
+                    $q->where('a.total_dijamin', '=', 0)
+                      ->orWhereNull('a.total_dijamin');
+                })
+                ->where('a.penjamin_id', '=', 2)
+                    ->update([
+                        'total_dijamin' => DB::raw("(select max(b.plafonprosedur) from simpra_plafonprosedurbpjsinasis_ft b where b.pendaftaran_id = a.pendaftaran_id)")
+                    ]);
+                // log updated data
+                \Log::info("Cronjob no 16 berhasil update {$updated} data total dijamin pada table data_pendapatan_penjamin1");
+            });
+
+            // 17. SYNC STATUS FASE 1 ON DATA PENDAPATAN PELAYANAN (Sinkronisasi data tagihan (H+4) berdasarkan tanggal pelayanan)
             // merubah criteria tanggal yang akan di update datanya berdasarkan tanggal sync_at 20251119
-            $run('13. Sync Status Fase 1 On Data Pendapatan Pelayanan', function () use ($yesterday) {
-                $updated = DataPendapatanPelayanan::where('status_fase1', '!=', 'Valid')->orWhereNull('status_fase1')
+            $run('17. Sync Status Fase 1 On Data Pendapatan Pelayanan', function () use ($tahun) {
+                $updated = DataPendapatanPelayanan::where(function ($q) {
+                    $q->where('status_fase1', '!=', 'Valid')->orWhereNull('status_fase1');
+                })
+                ->whereYear('tgl_pelayanan',$tahun)
                     ->update([
                         'status_fase1' => DB::raw("
                             CASE 
@@ -304,22 +373,22 @@ class CronPerDay extends Command
                         "),
                     ]);
                 // log updated data
-                \Log::info("Cronjob no 13 berhasil update {$updated} data pada table data_pendapatan_pelayanan.");
+                \Log::info("Cronjob no 17 berhasil update {$updated} data pada table data_pendapatan_pelayanan.");
             });
 
-            // 14. SYNC STATUS FASE 2 ON DATA PENDAPATAN PELAYAAN (PAKAI DARI MODEL DATA PENDAPATAN PELAYANAN)
+            // 17. SYNC STATUS FASE 2 ON DATA PENDAPATAN PELAYAAN (PAKAI DARI MODEL DATA PENDAPATAN PELAYANAN)
             //  (1) Sinkronisasi klarifikasi pendapatan pada data tagihan (H+5) berdasarkan tanggal pelayanan
             //  (2) Sinkronisasi klarifikasi pdd pada data tagihan (H+5) berdasarkan tanggal pelayanan
             //  (3) Sinkronisasi status klarifikasi piutang perorangan pada data tagihan (H+6) berdasarkan tanggal pelayanan
             //  (4) Sinkronisasi status klarifikasi piutang penjaminan pada data tagihan (H+31) berdasarkan tanggal pelayanan
-            $run('14. Sync Status Fase 2 On Data Pendapatan Pelayanan', function () {
+            $run('18. Sync Status Fase 2 On Data Pendapatan Pelayanan', function () {
                 $syncFase2All = DataPendapatanPelayanan::syncFase2All();
                 // log data
-                \Log::info('Cronjob no 14 berhasil dijalankan', $syncFase2All);
+                \Log::info('Cronjob no 18 berhasil dijalankan', $syncFase2All);
             });
 
-            // 15. SYNC NON UMUM / GL POTENSI ID, POTENSI NO AND POTENSI NOMINAL ON DATA PENDAPATAN PELAYANAN (Sinkronisasi klarifikasi piutang penjaminan pada data tagihan (H+30) berdasarkan tanggal pelayanan)
-            $run('15. Sync Potensi Id, Potensi No and Potensi Nominal on Data Pendapatan Pelayanan Cara Bayar Non UMUM / GL', function () use ($thirty_days_ago) {
+            // 19. SYNC NON UMUM / GL POTENSI ID, POTENSI NO AND POTENSI NOMINAL ON DATA PENDAPATAN PELAYANAN (Sinkronisasi klarifikasi piutang penjaminan pada data tagihan (H+30) berdasarkan tanggal pelayanan)
+            $run('19. Sync Potensi Id, Potensi No and Potensi Nominal on Data Pendapatan Pelayanan Cara Bayar Non UMUM / GL', function () use ($thirty_days_ago) {
                 $updated = DataPendapatanPelayanan::query()
                     ->from('data_pendapatan_pelayanan as a')
                     ->whereDate('a.tgl_pelayanan', $thirty_days_ago)
@@ -331,11 +400,11 @@ class CronPerDay extends Command
                         'potensi_nominal' => DB::raw('(SELECT SUM(b.total_klaim) FROM rincian_potensi_pelayanan b WHERE b.pendaftaran_id = a.pendaftaran_id)'),
                     ]);
                 // log updated data
-                \Log::info("Cronjob no 15 berhasil update {$updated} data pada table data_pendapatan_pelayanan cara bayar selain UMUM / GL.");
+                \Log::info("Cronjob no 19 berhasil update {$updated} data pada table data_pendapatan_pelayanan cara bayar selain UMUM / GL.");
             });
 
-            // 16. SYNC UMUM / GL POTENSI ID, POTENSI NO AND POTENSI NOMINAL ON DATA PENDAPATAN PELAYANAN (Sinkronisasi klarifikasi piutang penjaminan pada data tagihan (H+30) berdasarkan tanggal pelayanan)
-            $run('16. Sync Potensi Id, Potensi No and Potensi Nominal on Data Pendapatan Pelayanan Cara Bayar UMUM / GL', function () use ($thirty_days_ago) {
+            // 20. SYNC UMUM / GL POTENSI ID, POTENSI NO AND POTENSI NOMINAL ON DATA PENDAPATAN PELAYANAN (Sinkronisasi klarifikasi piutang penjaminan pada data tagihan (H+30) berdasarkan tanggal pelayanan)
+            $run('20. Sync Potensi Id, Potensi No and Potensi Nominal on Data Pendapatan Pelayanan Cara Bayar UMUM / GL', function () use ($thirty_days_ago) {
                 $updated = DataPendapatanPelayanan::query()
                     ->from('data_pendapatan_pelayanan as a')
                     ->whereDate('a.tgl_pelayanan', $thirty_days_ago)
@@ -347,7 +416,7 @@ class CronPerDay extends Command
                         'potensi_nominal' => DB::raw('(SELECT MAX(b.total) FROM data_potensi_pelayanan b WHERE b.pendaftaran_id = a.pendaftaran_id)'),
                     ]);
                 // log updated data
-                \Log::info("Cronjob no 16 berhasil update {$updated} data pada table data_pendapatan_pelayanan cara bayar UMUM / GL.");
+                \Log::info("Cronjob no 20 berhasil update {$updated} data pada table data_pendapatan_pelayanan cara bayar UMUM / GL.");
             });
 
             // THROW IF THERS ANY ERRORS

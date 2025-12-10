@@ -31,7 +31,7 @@ class RekeningKoranUpdateRequest extends FormRequest
         return [
             'tgl_rc' => 'required|date',
             'no_rc' => 'required|string|max:255',
-            'akunls_id' => 'required|integer|exists:master_akun,akun_id',
+            'akunls_id' => 'nullable|integer|exists:master_akun,akun_id',
             'klarif_layanan' => 'required|numeric|min:0',
             'klarif_lain' => 'required|numeric|min:0',
             'rek_id' => 'nullable|exists:master_rekening_v,rek_id',

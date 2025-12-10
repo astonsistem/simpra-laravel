@@ -177,8 +177,6 @@ class DataSelisihController extends Controller
                 throw new \Exception('Sumber ID tidak boleh kosong.');
             }
 
-
-
             if(isset($validatedData['id'])) {
                 unset($validatedData['id']);
             }
